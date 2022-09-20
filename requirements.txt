@@ -1,0 +1,2 @@
+# Install FEniCS through conda: https://fenicsproject.org/download/archive/, then
+cuqipy
