@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "versioneer[toml]==0.26"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "CUQIpy-FEniCS"
+description = "CUQIpy plugin for FEniCS"
+maintainers = [
+    {name = "Nicolai A. B. Riis", email = "nabr@dtu.dk"},
+    {name = "Jakob S. Jørgensen", email = "jakj@dtu.dk"},
+    {name = "Amal M. Alghamdi", email = "amaal@dtu.dk"}
+]
+readme = "README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE"}
+dynamic = ["dependencies", "version"]
+
+[project.urls]
+Source = "https://github.com/CUQI-DTU/CUQIpy-FEniCS"
+Download = "https://github.com/CUQI-DTU/CUQIpy-FEniCS/releases"
+
+[tool.setuptools.packages.find]
+include = ["cuqipy_fenics*"]  # package names should match these glob patterns (["*"] by default)
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440-pre" # This style is compliant with PyPI
+versionfile_source = "cuqipy_fenics/_version.py"
+versionfile_build = "cuqipy_fenics/_version.py"
+tag_prefix = "v" # Tag is prefixed with "v" (e.g. v1.0.0)
+parentdir_prefix = "cuqipy_fenics-"

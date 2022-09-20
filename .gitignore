@@ -1,0 +1,30 @@
+# ignore compiled python 2 files
+*.pyc
+
+# ignore other files
+*.out
+
+# ignore compiled python 3 files and vscode stuff
+__pycache__
+.vscode/
+
+# ignore generated pdf files
+*.pdf
+
+# ignore notebook checkpoints
+.ipynb_checkpoints/
+
+#Windows related
+desktop.ini
+
+# Ignore build docs
+/docs/_build
+
+# auto-generated doc files
+_auto*
+
+# ignore distribution files
+dist/
+
+# ignore egg files
+*.egg-info
