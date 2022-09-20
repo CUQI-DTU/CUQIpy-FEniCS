@@ -27,7 +27,7 @@ class FEniCSContinuous(Geometry):
         return self.function_space.mesh()
 
     @property
-    def shape(self):
+    def par_shape(self):
         return (self.function_space.dim(),)
 
     def par2fun(self,par):
@@ -176,7 +176,7 @@ class MaternExpansion(_WrappedGeometry):
         self._eig_vec = None
 
     @property
-    def shape(self):
+    def par_shape(self):
         return (self.num_terms,)
 
     @property
@@ -219,7 +219,7 @@ class MaternExpansion(_WrappedGeometry):
 	   
         p = self._process_values(p)
         Ns = p.shape[-1]
-        field_list = np.empty((self.geometry.dim,Ns))
+        field_list = np.empty((self.geometry.par_dim,Ns))
 
         for idx in range(Ns):
             field_list[:,idx] = self.eig_vec@( np.sqrt(self.eig_val)*p[...,idx] )
