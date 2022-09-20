@@ -1,0 +1,3 @@
+pytest
+flake8
+versioneer==0.26
