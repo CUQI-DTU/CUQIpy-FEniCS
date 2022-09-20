@@ -1,7 +1,8 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append("../../")
+sys.path.append("../")
+import cuqipy_fenics
 import dolfin as dl
 import warnings
 import cuqi
@@ -85,10 +86,10 @@ class FEniCSDiffusion1D(BayesianProblem):
         dirichlet_bc_expression = dl.Expression("left_bc*(x[0]<eps)+right_bc*(x[0]>endpoint-eps)", eps=dl.DOLFIN_EPS, endpoint=endpoint, left_bc=left_bc, right_bc=right_bc, degree=1)
         dirichlet_bc = dl.DirichletBC(solution_function_space, dirichlet_bc_expression, u_boundary)
 
-        PDE = cuqi.fenics.pde.SteadyStateLinearFEniCSPDE( form, mesh, solution_function_space, parameter_function_space, dirichlet_bc,observation_operator=observation_operator)
+        PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( form, mesh, solution_function_space, parameter_function_space, dirichlet_bc,observation_operator=observation_operator)
         
         # Create PDE model
-        domain_geometry = cuqi.fenics.geometry.FEniCSContinuous(parameter_function_space)
+        domain_geometry = cuqipy_fenics.geometry.FEniCSContinuous(parameter_function_space)
         if mapping is not None:
             if mapping == 'exponential':
                 mapping = lambda x : ufl.exp(x)
@@ -96,15 +97,15 @@ class FEniCSDiffusion1D(BayesianProblem):
                 mapping = mapping
             else:
                 raise ValueError('mapping can be a function or one of the expected keywords.')
-            domain_geometry =  cuqi.fenics.geometry.FEniCSMappedGeometry(geometry=domain_geometry, map = mapping)
+            domain_geometry =  cuqipy_fenics.geometry.FEniCSMappedGeometry(geometry=domain_geometry, map = mapping)
 
-        range_geometry = cuqi.fenics.geometry.FEniCSContinuous(solution_function_space)
+        range_geometry = cuqipy_fenics.geometry.FEniCSContinuous(solution_function_space)
         
         model = cuqi.model.PDEModel(PDE,range_geometry,domain_geometry)
 
         # Create prior
-        pr_mean = np.zeros(domain_geometry.dim)
-        prior = cuqi.distribution.GMRF(pr_mean,25,1,'zero') 
+        pr_mean = np.zeros(domain_geometry.par_dim)
+        x = cuqi.distribution.GMRF(pr_mean,25,1,'zero') 
         
         # Set up exact solution
         if exactSolution is None:
@@ -125,10 +126,10 @@ class FEniCSDiffusion1D(BayesianProblem):
         data = b_exact + np.random.normal( 0, sigma, b_exact.shape )
         
         # Create likelihood
-        likelihood = cuqi.distribution.GaussianCov(model, sigma2*np.eye(range_geometry.dim)).to_likelihood(data)
+        y = cuqi.distribution.GaussianCov(model(x), sigma2*np.eye(range_geometry.par_dim))
 
         # Initialize FEniCSDiffusion1D as BayesianProblem problem
-        super().__init__(likelihood, prior)
+        super().__init__(y, x, y=data)
 
         # Store exact values and information
         self.exactSolution = exactSolution

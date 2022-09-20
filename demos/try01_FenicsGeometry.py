@@ -1,8 +1,8 @@
 
 #%%
 import sys
-sys.path.append("../../")
-import cuqi
+sys.path.append("../")
+import cuqipy_fenics
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
@@ -16,7 +16,7 @@ except Exception as error:
 # Define FenicsContinuous2D object 
 mesh1 = dl.UnitIntervalMesh(30)
 Vh1 = dl.FunctionSpace(mesh1, 'CG', 1)
-geom1 = cuqi.fenics.geometry.FEniCSContinuous(Vh1)
+geom1 = cuqipy_fenics.geometry.FEniCSContinuous(Vh1)
 
 # Define function
 f1= dl.Function(Vh1)
@@ -33,7 +33,7 @@ geom1.plot(np.stack((f1.vector().get_local(), f1.vector().get_local()), axis = -
 # Define FenicsContinuous2D object 
 mesh = dl.UnitSquareMesh(10,10)
 Vh = dl.FunctionSpace(mesh, 'CG', 1)
-geom = cuqi.fenics.geometry.FEniCSContinuous(Vh)
+geom = cuqipy_fenics.geometry.FEniCSContinuous(Vh)
 
 # Define function
 f1= dl.Function(Vh)

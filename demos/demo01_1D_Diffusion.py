@@ -3,8 +3,9 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-sys.path.append("../../")
 import cuqi
+sys.path.append('../')
+import cuqipy_fenics
 
 np.random.seed(0)
 mapping =  'exponential'
@@ -16,7 +17,7 @@ myExactSolution= 'smooth_step'
 #%%
 observation_operator=None
 SNR = 1000
-model, data, problemInfo = cuqi.fenics.testproblem.FEniCSDiffusion1D.get_components(dim = dim, exactSolution = myExactSolution, observation_operator=observation_operator , SNR = SNR, mapping = mapping, left_bc = 1, right_bc = 8, endpoint=L)
+model, data, problemInfo = cuqipy_fenics.testproblem.FEniCSDiffusion1D.get_components(dim = dim, exactSolution = myExactSolution, observation_operator=observation_operator , SNR = SNR, mapping = mapping, left_bc = 1, right_bc = 8, endpoint=L)
 
 model.range_geometry.plot(data)
 plt.title('Data')

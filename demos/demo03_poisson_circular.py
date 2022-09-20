@@ -2,7 +2,8 @@
 import dolfin as dl
 import sys
 import numpy as np
-sys.path.append("../../")
+sys.path.append("../")
+import cuqipy_fenics
 import cuqi
 import mshr
 import matplotlib.pyplot as plt
@@ -58,11 +59,11 @@ obs_func = None
 #%% 2.1 Create the domain geometry 
 
 # 2.1.1 The space on which the Bayesian parameters are defined
-fenics_continuous_geo = cuqi.fenics.geometry.FEniCSContinuous(parameter_space)
+fenics_continuous_geo = cuqipy_fenics.geometry.FEniCSContinuous(parameter_space)
 
 # 2.1.2 The Matern fieled (maps i.i.d normal random vector of dimension `num_terms`
 # to Matern field realization on `fenics_continuous_geo`)
-matern_geo = cuqi.fenics.geometry.MaternExpansion(fenics_continuous_geo, length_scale = .8, num_terms=128)
+matern_geo = cuqipy_fenics.geometry.MaternExpansion(fenics_continuous_geo, length_scale = .8, num_terms=128)
 
 # 2.1.3 We create a map `heavy_map` to map the Matern field realization to two levels
 # c_minus and c_plus 
@@ -76,21 +77,21 @@ def heavy_map(func):
 
 # 2.1.4 Finally, we create the domain geometry which applies the
 # map `heavy_map` on Matern realizations.
-domain_geometry = cuqi.fenics.geometry.FEniCSMappedGeometry(matern_geo, map = heavy_map)
+domain_geometry = cuqipy_fenics.geometry.FEniCSMappedGeometry(matern_geo, map = heavy_map)
 
 #%% 2.2 Create the range geomtry 
-range_geometry = cuqi.fenics.geometry.FEniCSContinuous(solution_space) 
+range_geometry = cuqipy_fenics.geometry.FEniCSContinuous(solution_space) 
 
 #%% 2.3 Create CUQI PDE (which encapsulates the FEniCS formulation
 # of the PDE)
-PDE = cuqi.fenics.pde.SteadyStateLinearFEniCSPDE( form, mesh, solution_space, parameter_space,dirichlet_bc, observation_operator=obs_func)
+PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( form, mesh, solution_space, parameter_space,dirichlet_bc, observation_operator=obs_func)
 
 #%% 2.4 Create CUQI model
 model = cuqi.model.PDEModel(PDE,range_geometry,domain_geometry)
 
 #%% 2.5 Create a prior
-pr_mean = np.zeros(domain_geometry.dim)
-prior = cuqi.distribution.GaussianCov(pr_mean, cov=np.eye(domain_geometry.dim), geometry= domain_geometry)
+pr_mean = np.zeros(domain_geometry.par_dim)
+prior = cuqi.distribution.GaussianCov(pr_mean, cov=np.eye(domain_geometry.par_dim), geometry= domain_geometry)
 
 #%% 2.6 Define the exact solution
 exactSolution = prior.sample()
@@ -102,7 +103,7 @@ b_exact = model(exactSolution)
 SNR = 100
 sigma = np.linalg.norm(b_exact)/SNR
 sigma2 = sigma*sigma # variance of the observation Gaussian noise
-data_distribution = cuqi.distribution.GaussianCov(model, sigma2*np.ones(range_geometry.dim), geometry=range_geometry)
+data_distribution = cuqi.distribution.GaussianCov(model, sigma2*np.ones(range_geometry.par_dim), geometry=range_geometry)
 
 #%% 2.9 Generate noisy data
 data = data_distribution(x=exactSolution).sample()
