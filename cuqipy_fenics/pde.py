@@ -66,14 +66,26 @@ class FEniCSPDE(PDE,ABC):
         raise NotImplementedError
 
 class SteadyStateLinearFEniCSPDE(FEniCSPDE):
-    def __init__(self, PDE_form, mesh, solution_function_space, 
-                 parameter_function_space, 
-                 dirichlet_bc, adjoint_dirichlet_bc=None,
-                observation_operator=None):
-        super().__init__(PDE_form, mesh, solution_function_space,
-                         parameter_function_space, 
-                         dirichlet_bc, adjoint_dirichlet_bc,
-                         observation_operator=observation_operator)
+def __init__(
+    self,
+    PDE_form,
+    mesh,
+    solution_function_space,
+    parameter_function_space,
+    dirichlet_bc,
+    adjoint_dirichlet_bc=None,
+    observation_operator=None,
+):
+    super().__init__(
+        PDE_form,
+        mesh,
+        solution_function_space,
+        parameter_function_space,
+        dirichlet_bc,
+        adjoint_dirichlet_bc,
+        observation_operator=observation_operator,
+    )
+
 
 
     def assemble(self, parameter=None):
@@ -118,12 +130,14 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         test_solution = dl.TestFunction(self.solution_function_space)
         
         J = self.PDE_form(wrt, self.forward_solution, trial_adjoint)
-        dJdu = dl.derivative(
-            J, self.forward_solution, test_solution)
+        dJdu = dl.derivative(J, self.forward_solution, test_solution)
         
-        dJdu_matrix, _ = dl.assemble_system(dJdu,
-                                      ufl.inner(
-                                          self.forward_solution, test_solution)*ufl.dx, self.adjoint_dirichlet_bc)
+dJdu_matrix, _ = dl.assemble_system(
+    dJdu,
+    ufl.inner(self.forward_solution, test_solution) * ufl.dx,
+    self.adjoint_dirichlet_bc,
+)
+
         #TODO: account for observation operator
         if self.observation_operator is not None:
             raise NotImplementedError("Gradient wrt parameter for PDE with observation operator not implemented")

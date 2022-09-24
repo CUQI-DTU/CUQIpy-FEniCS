@@ -50,8 +50,7 @@ class FEniCSContinuous(Geometry):
         """ Map the function values (FEniCS object) to the corresponding parameters (ndarray)."""
         return fun.vector().get_local()
 
-    def gradient(self, direction, wrt=None, is_direction_par=False,
-                 is_wrt_par=True):
+def gradient(self, direction, wrt=None, is_direction_par=False, is_wrt_par=True):
         """ Computes the gradient of the par2fun map with respect to the parameters in the direction `direction` evaluated at the point `wrt`"""
         if is_direction_par:
             return direction
@@ -214,7 +213,7 @@ class MaternExpansion(_WrappedGeometry):
     def par2fun(self,p):
         return self.geometry.par2fun(self.par2field(p))
 
-    def gradient(self, direction,wrt):
+    def gradient(self, direction, wrt):
         direction = self.geometry.gradient(direction, wrt)
         return np.diag( np.sqrt(self.eig_val)).T@self.eig_vec.T@direction
         
