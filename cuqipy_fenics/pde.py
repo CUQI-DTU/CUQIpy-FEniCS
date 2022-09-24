@@ -130,7 +130,6 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         else:
             return self._apply_obs_op(self.PDE_parameter_fun, PDE_solution_fun)
 
- 
     def gradient_wrt_parameter(self, direction, wrt, **kwargs):
         """ Compute the gradient of the PDE with respect to the parameter
 
@@ -141,7 +140,8 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         """
         # Raise an error if the adjoint boundary conditions are not provided
         if self.adjoint_dirichlet_bc is None:
-            raise ValueError("The adjoint Dirichlet boundary conditions are not defined.")
+            raise ValueError(
+                "The adjoint Dirichlet boundary conditions are not defined.")
 
         # Create needed functions
         trial_adjoint = dl.TrialFunction(self.solution_function_space)
@@ -149,16 +149,18 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
 
         # Compute forward solution
         # TODO: Use stored forward solution if available and wrt == self.parameter
-        self.parameter = wrt 
-        self.forward_solution,_ = self.solve() 
+        self.parameter = wrt
+        self.forward_solution, _ = self.solve()
 
         # Compute adjoint solution
         test_parameter = dl.TestFunction(self.parameter_function_space)
         test_solution = dl.TestFunction(self.solution_function_space)
-        
-        temp_form = self.PDE_form(wrt, self.forward_solution, trial_adjoint) # weak form used for building the adjoint operator
-        adjoint_form = dl.derivative(temp_form, self.forward_solution, test_solution)
-        
+
+        # note: temp_form is a weak form used for building the adjoint operator
+        temp_form = self.PDE_form(wrt, self.forward_solution, trial_adjoint)
+        adjoint_form = dl.derivative(
+            temp_form, self.forward_solution, test_solution)
+
         adjoint_matrix, _ = dl.assemble_system(
             adjoint_form,
             ufl.inner(self.forward_solution, test_solution) * ufl.dx,
@@ -167,13 +169,15 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
 
         #TODO: account for observation operator
         if self.observation_operator is not None:
-            raise NotImplementedError("Gradient wrt parameter for PDE with observation operator not implemented")
-            
-        adjoint_rhs = -direction.vector() 
+            raise NotImplementedError(
+                "Gradient wrt parameter for PDE with observation operator not implemented")
+
+        adjoint_rhs = -direction.vector()
         dl.solve(adjoint_matrix, adjoint.vector(), adjoint_rhs)
 
         # Compute gradient
-        temp_form = self.PDE_form(wrt, self.forward_solution, adjoint) # weak form used for building the gradient
+        # note: temp_form is a weak form used for building the gradient
+        temp_form = self.PDE_form(wrt, self.forward_solution, adjoint)
         gradient_form = dl.derivative(temp_form, wrt, test_parameter)
         gradient = dl.Function(self.parameter_function_space)
         dl.assemble(gradient_form, tensor=gradient.vector())
