@@ -44,3 +44,4 @@ samples.burnthin(1000).plot_ci(95, plot_par=True,
 ```
 
 For more examples, see the [demos](demos) folder.
+ 
