@@ -50,6 +50,13 @@ class FEniCSContinuous(Geometry):
         """ Map the function values (FEniCS object) to the corresponding parameters (ndarray)."""
         return fun.vector().get_local()
 
+    def gradient(self, direction, wrt=None, is_direction_par=False, is_wrt_par=True):
+        """ Computes the gradient of the par2fun map with respect to the parameters in the direction `direction` evaluated at the point `wrt`"""
+        if is_direction_par:
+            return direction
+        else:
+            return self.fun2par(direction)
+
     def _plot(self,values,subplots=True,**kwargs):
         """
         Overrides :meth:`cuqi.geometry.Geometry.plot`. See :meth:`cuqi.geometry.Geometry.plot` for description  and definition of the parameter `values`.
@@ -199,8 +206,6 @@ class MaternExpansion(_WrappedGeometry):
     def eig_vec(self):
         return self._eig_vec
 
-    def __call__(self, p):
-        return self.par2field(p)
 
     def __repr__(self) -> str:
         return "{} on {}".format(self.__class__.__name__,self.geometry.__repr__())
@@ -208,6 +213,10 @@ class MaternExpansion(_WrappedGeometry):
     def par2fun(self,p):
         return self.geometry.par2fun(self.par2field(p))
 
+    def gradient(self, direction, wrt):
+        direction = self.geometry.gradient(direction, wrt)
+        return np.diag( np.sqrt(self.eig_val)).T@self.eig_vec.T@direction
+        
     def par2field(self, p):
         """Applies linear transformation of the parameters p to
         generate a realization of the Matern field (given that p is a
