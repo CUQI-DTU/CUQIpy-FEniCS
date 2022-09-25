@@ -85,8 +85,11 @@ class FEniCSDiffusion1D(BayesianProblem):
 
         dirichlet_bc_expression = dl.Expression("left_bc*(x[0]<eps)+right_bc*(x[0]>endpoint-eps)", eps=dl.DOLFIN_EPS, endpoint=endpoint, left_bc=left_bc, right_bc=right_bc, degree=1)
         dirichlet_bc = dl.DirichletBC(solution_function_space, dirichlet_bc_expression, u_boundary)
+        adjoint_dirichlet_bc = dl.DirichletBC(
+            solution_function_space, dl.Constant(0), u_boundary)
 
-        PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( form, mesh, solution_function_space, parameter_function_space, dirichlet_bc,observation_operator=observation_operator)
+        PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+            form, mesh, solution_function_space, parameter_function_space, dirichlet_bc, adjoint_dirichlet_bc, observation_operator=observation_operator)
         
         # Create PDE model
         domain_geometry = cuqipy_fenics.geometry.FEniCSContinuous(parameter_function_space)
@@ -115,18 +118,26 @@ class FEniCSDiffusion1D(BayesianProblem):
             fun = lambda grid:  0.8*np.exp( -( (grid -endpoint/2.0 )**2 ) / 0.02)
             grid = np.linspace(0,endpoint,N)
             exactSolution = np.ones(N)*.8
-            exactSolution[np.where(grid>endpoint/2.0)] = fun(grid[np.where(grid>endpoint/2.0)]) 
+            exactSolution[np.where(grid > endpoint/2.0)
+                          ] = fun(grid[np.where(grid > endpoint/2.0)])
+            exactSolution = cuqi.samples.CUQIarray(
+                exactSolution, geometry=domain_geometry)
 
         # Generate exact data
         b_exact = model.forward(domain_geometry.par2fun(exactSolution),is_par=False)
 
         # Add noise to data
-        sigma = np.linalg.norm(b_exact)/SNR
-        sigma2 = sigma*sigma # variance of the observation Gaussian noise
-        data = b_exact + np.random.normal( 0, sigma, b_exact.shape )
-        
+        # Reference: Adding noise with a desired signal-to-noise ratio
+        # https://sites.ualberta.ca/~msacchi/SNR_Def.pdf
+        noise = np.random.normal(0, 1, b_exact.shape)
+        alpha = np.linalg.norm(b_exact)/(np.sqrt(SNR)*np.linalg.norm(noise))
+
+        data = cuqi.samples.CUQIarray(
+            b_exact + alpha*noise, geometry=range_geometry)
+
         # Create likelihood
-        y = cuqi.distribution.GaussianCov(model(x), sigma2*np.eye(range_geometry.par_dim))
+        y = cuqi.distribution.GaussianCov(
+            model(x), alpha*np.eye(range_geometry.par_dim))
 
         # Initialize FEniCSDiffusion1D as BayesianProblem problem
         super().__init__(y, x, y=data)
