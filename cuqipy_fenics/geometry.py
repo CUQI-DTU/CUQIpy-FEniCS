@@ -247,6 +247,21 @@ class MaternExpansion(_WrappedGeometry):
         tau2 = 1/self.length_scale/self.length_scale
         a = tau2*u*v*dl.dx + dl.inner(dl.grad(u), dl.grad(v))*dl.dx
 
+#        boundary = lambda x, on_boundary: on_boundary
+
+#        u0 = Constant('0.0')
+#        bc = DirichletBC(V, u0, boundary)
+
+#        L = u*v*dx
+#        K = dl.PETScMatrix()
+#        dl.assemble_system(a, L,self.bc, A_tensor=K)
+#        eigen_solver = dl.SLEPcEigenSolver(K)
+#        eigen_solver.parameters['spectrum'] = 'smallest magnitude'
+
+#        eigen_solver.solve(self.num_terms)
+#        eigvals = np.zeros(self.num_terms)
+#        eigvecs = np.zeros( [ u.vector().get_local().shape[0], self.num_terms ] )
+
         A = dl.assemble(a)
         mat = A.array()
 
