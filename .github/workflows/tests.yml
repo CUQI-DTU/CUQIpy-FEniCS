@@ -54,7 +54,7 @@ jobs:
 
       - name: Install pre-release of CUQIpy # We install latest pre-release version of CUQIpy to catch upstream bugs early
         run: |
-          python -m pip install -i https://test.pypi.org/simple/ cuqipy --pre --upgrade
+          python -m pip install cuqipy
           
       - name: Lint with flake8
         run: |
