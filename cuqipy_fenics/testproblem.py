@@ -112,7 +112,7 @@ class FEniCSDiffusion1D(BayesianProblem):
         
         # Set up exact solution
         if exactSolution is None:
-            exactSolution = prior.sample()
+            exactSolution = x.sample()
         elif exactSolution == 'smooth_step':
             N = dim + 1
             fun = lambda grid:  0.8*np.exp( -( (grid -endpoint/2.0 )**2 ) / 0.02)
