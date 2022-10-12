@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - sprint13_add_test_pipeline
   pull_request:
   workflow_dispatch:
   repository_dispatch: # Triggered when CUQIpy updates via PyPI (runs only on main branch).
@@ -53,11 +52,13 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Install pre-release of CUQIpy # We install latest pre-release version of CUQIpy to catch upstream bugs early
+        shell: bash -l {0}
         run: |
           conda activate fenicsproject
           python -m pip install -i https://test.pypi.org/simple/ cuqipy --pre --upgrade
           
       - name: Lint with flake8
+        shell: bash -l {0}
         run: |
           conda activate fenicsproject
           # stop the build if there are Python syntax errors or undefined names
