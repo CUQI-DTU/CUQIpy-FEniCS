@@ -255,13 +255,16 @@ class MaternExpansion(_WrappedGeometry):
 
     def _build_basis(self):
         """Builds the basis of expansion of the Matern covariance operator"""
+        # Define function space, test and trial functions
         V = self._build_space()
         u = dl.TrialFunction(V)
         v = dl.TestFunction(V)
 
+        # Define the weak form a of the differential operator used in building the Matern field basis
         tau2 = 1/self.length_scale/self.length_scale
         a = tau2*u*v*dl.dx + dl.inner(dl.grad(u), dl.grad(v))*dl.dx
         
+        # Set up the boundary conditions of the SPDE
         if self.boundary_conditions == 'Neumann':
             boundary = lambda x, on_boundary: False
         elif self.boundary_conditions == 'zero':
@@ -272,10 +275,14 @@ class MaternExpansion(_WrappedGeometry):
         u0 = dl.Constant('0.0')
         bc = dl.DirichletBC(V, u0, boundary)
         
+        # Assemble the differential operator
         u_fun = dl.Function(V)
         L = u_fun*v*dl.dx
         K = dl.PETScMatrix()
         dl.assemble_system(a, L, bc, A_tensor=K)
+
+        # Compute the first self.num_terms eigenvalues and eigenvectors of the 
+        # (inverse) of the differential operator
         eigen_solver = dl.SLEPcEigenSolver(K)
         eigen_solver.parameters['spectrum'] = 'smallest magnitude'
 
@@ -289,9 +296,10 @@ class MaternExpansion(_WrappedGeometry):
             self._eig_vec[:,i] = vec.get_local()
 
         self._eig_val = np.reciprocal( self._eig_val )
+
+        # Normalize the eigenvectors if required
         if self.normalize:
             self._eig_vec /= np.linalg.norm( self._eig_vec )
-        print("new basis building method")
 
 
     def _build_space(self):
