@@ -145,6 +145,11 @@ class MaternExpansion(_WrappedGeometry):
     num_terms: int
         Number of expantion terms to represent the Matern field realization
 
+    boundary_conditions : str
+        Boundary conditions for the SPDE. Currently 'Neumann' for zero flux, and 'zero' for zero Dirichlet boundary conditions are supported.
+
+    normalize : bool, default True
+        If True, the Matern field expansion modes are normalized to have a unit norm.
 
     Example
     -------
@@ -172,7 +177,7 @@ class MaternExpansion(_WrappedGeometry):
 
     """
 
-    def __init__(self, geometry, length_scale, num_terms): 
+    def __init__(self, geometry, length_scale, num_terms, boundary_conditions='Neumann', normalize=True): 
         super().__init__(geometry)
         if not hasattr(geometry, 'mesh'):
             raise NotImplementedError
@@ -181,6 +186,8 @@ class MaternExpansion(_WrappedGeometry):
         self._num_terms = num_terms
         self._eig_val = None
         self._eig_vec = None
+        self._boundary_conditions = boundary_conditions
+        self._normalize = normalize
 
     @property
     def par_shape(self):
@@ -205,6 +212,14 @@ class MaternExpansion(_WrappedGeometry):
     @property
     def eig_vec(self):
         return self._eig_vec
+
+    @property
+    def boundary_conditions(self):
+        return self._boundary_conditions
+
+    @property
+    def normalize(self):
+        return self._normalize
 
 
     def __repr__(self) -> str:
@@ -246,8 +261,14 @@ class MaternExpansion(_WrappedGeometry):
 
         tau2 = 1/self.length_scale/self.length_scale
         a = tau2*u*v*dl.dx + dl.inner(dl.grad(u), dl.grad(v))*dl.dx
+        
+        if self.boundary_conditions == 'Neumann':
+            boundary = lambda x, on_boundary: False
+        elif self.boundary_conditions == 'zero':
+            boundary = lambda x, on_boundary: on_boundary
+        else:
+            raise ValueError(f"Boundary conditions {self.boundary_conditions}, is not supported")
 
-        boundary = lambda x, on_boundary: on_boundary
         u0 = dl.Constant('0.0')
         bc = dl.DirichletBC(V, u0, boundary)
         
@@ -268,7 +289,8 @@ class MaternExpansion(_WrappedGeometry):
             self._eig_vec[:,i] = vec.get_local()
 
         self._eig_val = np.reciprocal( self._eig_val )
-        self._eig_vec /= np.linalg.norm( self._eig_vec )
+        if self.normalize:
+            self._eig_vec /= np.linalg.norm( self._eig_vec )
         print("new basis building method")
 
 
