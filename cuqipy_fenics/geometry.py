@@ -247,32 +247,30 @@ class MaternExpansion(_WrappedGeometry):
         tau2 = 1/self.length_scale/self.length_scale
         a = tau2*u*v*dl.dx + dl.inner(dl.grad(u), dl.grad(v))*dl.dx
 
-#        boundary = lambda x, on_boundary: on_boundary
+        boundary = lambda x, on_boundary: on_boundary
+        u0 = dl.Constant('0.0')
+        bc = dl.DirichletBC(V, u0, boundary)
+        
+        u_fun = dl.Function(V)
+        L = u_fun*v*dl.dx
+        K = dl.PETScMatrix()
+        dl.assemble_system(a, L, bc, A_tensor=K)
+        eigen_solver = dl.SLEPcEigenSolver(K)
+        eigen_solver.parameters['spectrum'] = 'smallest magnitude'
 
-#        u0 = Constant('0.0')
-#        bc = DirichletBC(V, u0, boundary)
+        eigen_solver.solve(self.num_terms)
+        self._eig_val = np.zeros(self.num_terms)
+        self._eig_vec = np.zeros( [ u_fun.vector().get_local().shape[0], self.num_terms ] )
 
-#        L = u*v*dx
-#        K = dl.PETScMatrix()
-#        dl.assemble_system(a, L,self.bc, A_tensor=K)
-#        eigen_solver = dl.SLEPcEigenSolver(K)
-#        eigen_solver.parameters['spectrum'] = 'smallest magnitude'
+        for i in range( self.num_terms ):
+            val, c, vec, cx = eigen_solver.get_eigenpair(i)
+            self._eig_val[i] = val
+            self._eig_vec[:,i] = vec.get_local()
 
-#        eigen_solver.solve(self.num_terms)
-#        eigvals = np.zeros(self.num_terms)
-#        eigvecs = np.zeros( [ u.vector().get_local().shape[0], self.num_terms ] )
+        self._eig_val = np.reciprocal( self._eig_val )
+        self._eig_vec /= np.linalg.norm( self._eig_vec )
+        print("new basis building method")
 
-        A = dl.assemble(a)
-        mat = A.array()
-
-        eig_val, eig_vec = np.linalg.eig(mat)
-        eig_val = np.reciprocal(np.real(eig_val))
-        eig_vec = np.real(eig_vec)
-        indices = np.argsort(eig_val)[::-1]
-        eig_val = eig_val[indices]
-        eig_vec = eig_vec[:,indices]
-        self._eig_val = eig_val[:self.num_terms]
-        self._eig_vec = eig_vec[:,:self.num_terms]
 
     def _build_space(self):
         """Create the function space on which the Matern covariance is discretized"""
