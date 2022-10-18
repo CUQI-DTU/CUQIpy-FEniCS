@@ -128,7 +128,7 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         if self.observation_operator is None: 
             return PDE_solution_fun
         else:
-            return self._apply_obs_op(self.PDE_parameter_fun, PDE_solution_fun)
+            return self._apply_obs_op(self.parameter, PDE_solution_fun)
 
     def gradient_wrt_parameter(self, direction, wrt, **kwargs):
         """ Compute the gradient of the PDE with respect to the parameter
