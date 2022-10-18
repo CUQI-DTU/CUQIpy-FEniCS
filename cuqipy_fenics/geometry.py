@@ -265,9 +265,9 @@ class MaternExpansion(_WrappedGeometry):
         a = tau2*u*v*dl.dx + dl.inner(dl.grad(u), dl.grad(v))*dl.dx
         
         # Set up the boundary conditions of the SPDE
-        if self.boundary_conditions == 'Neumann':
+        if self.boundary_conditions.lower() == 'neumann':
             boundary = lambda x, on_boundary: False
-        elif self.boundary_conditions == 'zero':
+        elif self.boundary_conditions.lower() == 'zero':
             boundary = lambda x, on_boundary: on_boundary
         else:
             raise ValueError(f"Boundary conditions {self.boundary_conditions}, is not supported")
