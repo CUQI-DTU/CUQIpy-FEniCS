@@ -23,7 +23,8 @@ def test_MaternExpansion_basis(copy_reference):
     geometry = cuqipy_fenics.geometry.FEniCSContinuous(V)
     MaternGeometry = cuqipy_fenics.geometry.MaternExpansion(geometry,
                                                             length_scale=.2,
-                                                            num_terms=128)
+                                                            num_terms=128,
+                                                            normalize=False)
 
     # Build the basis
     MaternGeometry._build_basis()
