@@ -55,7 +55,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate fenicsproject
-          python -m pip install -i https://test.pypi.org/simple/ cuqipy --pre --upgrade
+          python -m pip install cuqipy --pre --upgrade
           
       - name: Lint with flake8
         shell: bash -l {0}
