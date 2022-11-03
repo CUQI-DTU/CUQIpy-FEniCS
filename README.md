@@ -30,7 +30,7 @@ model, y_data, info = cuqipy_fenics.testproblem.FEniCSDiffusion1D.get_components
 x = cuqi.distribution.GMRF(np.zeros(model.domain_dim),
                            25, 1, 'zero', geometry=model.domain_geometry)
 # y ~ N(model(x), 0.01^2)
-y = cuqi.distribution.GaussianCov(model(x), 0.05**2)
+y = cuqi.distribution.Gaussian(mean=model(x), cov=0.05**2)
 
 # Set up Bayesian Problem object
 BP = cuqi.problem.BayesianProblem(y, x).set_data(y=y_data)

@@ -136,8 +136,8 @@ class FEniCSDiffusion1D(BayesianProblem):
             b_exact + alpha*noise, geometry=range_geometry)
 
         # Create likelihood
-        y = cuqi.distribution.GaussianCov(
-            model(x), alpha*np.eye(range_geometry.par_dim))
+        y = cuqi.distribution.Gaussian(
+            mean=model(x), cov=alpha*np.eye(range_geometry.par_dim))
 
         # Initialize FEniCSDiffusion1D as BayesianProblem problem
         super().__init__(y, x, y=data)
