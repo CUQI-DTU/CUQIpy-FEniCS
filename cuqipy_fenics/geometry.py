@@ -158,7 +158,7 @@ class MaternExpansion(_WrappedGeometry):
         import numpy as np
         import matplotlib.pyplot as plt
         from cuqi.fenics.geometry import MaternExpansion, FEniCSContinuous
-        from cuqi.distribution import GaussianCov
+        from cuqi.distribution import Gaussian
         import dolfin as dl
         
         mesh = dl.UnitSquareMesh(20,20)
@@ -168,7 +168,7 @@ class MaternExpansion(_WrappedGeometry):
                                         length_scale = .2,
                                         num_terms=128)
         
-        MaternField = GaussianCov(np.zeros(MaternGeometry.dim),
+        MaternField = Gaussian(mean=np.zeros(MaternGeometry.dim),
                         cov=np.eye(MaternGeometry.dim),
                         geometry= MaternGeometry)
         

@@ -91,7 +91,9 @@ model = cuqi.model.PDEModel(PDE,range_geometry,domain_geometry)
 
 #%% 2.5 Create a prior
 pr_mean = np.zeros(domain_geometry.par_dim)
-prior = cuqi.distribution.GaussianCov(pr_mean, cov=np.eye(domain_geometry.par_dim), geometry= domain_geometry)
+prior = cuqi.distribution.Gaussian(mean=pr_mean,
+                                   cov=np.eye(domain_geometry.par_dim),
+                                   geometry=domain_geometry)
 
 #%% 2.6 Define the exact solution
 exactSolution = prior.sample()
@@ -103,7 +105,9 @@ b_exact = model(exactSolution)
 SNR = 100
 sigma = np.linalg.norm(b_exact)/SNR
 sigma2 = sigma*sigma # variance of the observation Gaussian noise
-data_distribution = cuqi.distribution.GaussianCov(model, sigma2*np.ones(range_geometry.par_dim), geometry=range_geometry)
+data_distribution = cuqi.distribution.Gaussian(mean=model,
+                                               cov=sigma2*np.ones(range_geometry.par_dim),
+                                               geometry=range_geometry)
 
 #%% 2.9 Generate noisy data
 data = data_distribution(x=exactSolution).sample()

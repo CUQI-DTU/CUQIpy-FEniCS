@@ -28,7 +28,7 @@ prior = cuqi.distribution.GMRF(np.zeros(model.domain_dim),25,1,'zero', geometry=
 
 
 sigma = np.linalg.norm(problemInfo.exactData)/SNR 
-likelihood = cuqi.distribution.GaussianCov(model, sigma**2*np.eye(model.range_dim)).to_likelihood(data)
+likelihood = cuqi.distribution.Gaussian(mean=model, cov=sigma**2*np.eye(model.range_dim)).to_likelihood(data)
 posterior = cuqi.distribution.Posterior(likelihood, prior)
 # %%
 sampler = cuqi.sampler.pCN(posterior)
