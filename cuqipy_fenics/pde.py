@@ -52,14 +52,26 @@ class FEniCSPDE(PDE,ABC):
 
     """
 
-    def __init__(self, PDE_form, mesh, solution_function_space, parameter_function_space, dirichlet_bc, adjoint_dirichlet_bc=None, observation_operator=None):
+    def __init__(self, PDE_form, mesh, solution_function_space, parameter_function_space, dirichlet_bc, adjoint_dirichlet_bc=None, observation_operator=None, lhs_form=None, rhs_form=None, reuse_assemble_lhs=False, reuse_assemble_rhs=False, companion_model=None):
+
+        if (PDE_form is not None) == (lhs_form is not None and rhs_form is not None):
+            raise ValueError('Either PDE_form or lhs_form and rhs_form should be provided, but not both.')
+
         self.PDE_form = PDE_form # function of PDE_solution, PDE_parameter, test_function
+        self.lhs_form = lhs_form
+        self.rhs_form = rhs_form
+        
+        self.reuse_assemble_lhs = reuse_assemble_lhs
+        self.reuse_assemble_rhs = reuse_assemble_rhs
+
         self.mesh = mesh 
         self.solution_function_space  = solution_function_space
         self.parameter_function_space = parameter_function_space
         self.dirichlet_bc  = dirichlet_bc
         self.adjoint_dirichlet_bc = adjoint_dirichlet_bc
         self.observation_operator = self._create_observation_operator(observation_operator)
+
+        self.companion_model = companion_model
 
     @property
     def parameter(self):
@@ -110,18 +122,59 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
     """ Class representation of steady state linear PDEs defined in FEniCS. It accepts the same arguments as the base class `cuqipy_fenics.pde.FEniCSPDE`."""
 
     def assemble(self, parameter=None):
+        self._solution_trial_function = dl.TrialFunction(self.solution_function_space)
+        self._solution_test_function = dl.TestFunction(self.solution_function_space)
+
         if parameter is not None:
             self.parameter = parameter
 
-        solution_trial_function = dl.TrialFunction(self.solution_function_space)
-        solution_test_function = dl.TestFunction(self.solution_function_space)
-        self.diff_op, self.rhs  = \
-            dl.lhs(self.PDE_form(self.parameter, solution_trial_function,solution_test_function)),\
-            dl.rhs(self.PDE_form(self.parameter, solution_trial_function, solution_test_function))
+        if self.PDE_form is not None:
+            self._assemble_full()
+
+        else:
+            self._assemble_lhs()
+            self._assemble_rhs()
+
+    def _assemble_full(self):
+        self.diff_op, self.rhs = \
+            dl.lhs(self.PDE_form(self.parameter,
+                                 self._solution_trial_function,
+                                 self._solution_test_function)),\
+            dl.rhs(self.PDE_form(self.parameter,
+                                 self._solution_trial_function,
+                                 self._solution_test_function))
+
+    def _assemble_lhs(self):
+        if self.reuse_assemble_lhs:
+            self.diff_op = self.companion_model.diff_op
+            self._solver = self.companion_model._solver
+        else:
+            self.diff_op = dl.assemble(self.lhs_form(self.parameter,
+                                                self._solution_trial_function,
+                                                self._solution_test_function))
+            self.dirichlet_bc.apply(self.diff_op)
+            self._solver = dl.LUSolver(self.diff_op)
+
+    def _assemble_rhs(self):
+        if self.reuse_assemble_rhs:
+            self.rhs = self.companion_model.rhs
+        else:
+            self.rhs = dl.assemble(self.rhs_form(self.parameter,
+                                            self._solution_test_function))
+
 
     def solve(self):
         self.forward_solution = dl.Function(self.solution_function_space)
-        dl.solve(self.diff_op ==  self.rhs, self.forward_solution, self.dirichlet_bc)
+        
+        #self._solver.parameters["reuse_factorization"] = True
+
+        self.dirichlet_bc.apply(self.rhs)
+        self._solver.solve(self.forward_solution.vector(), self.rhs)
+
+
+        #dl.solve(self.diff_op ==  self.rhs, self.forward_solution, self.dirichlet_bc)
+
+
         return self.forward_solution, None
 
     def observe(self,PDE_solution_fun):
