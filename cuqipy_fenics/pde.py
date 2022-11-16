@@ -195,13 +195,18 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
                 self.rhs is not None:
             return
 
-        diff_op, self.rhs = \
-            dl.lhs(self.PDE_form(self.parameter,
-                                 self._solution_trial_function,
-                                 self._solution_test_function)),\
-            dl.rhs(self.PDE_form(self.parameter,
+        diff_op = dl.lhs(self.PDE_form(self.parameter,
                                  self._solution_trial_function,
                                  self._solution_test_function))
+        self.rhs = dl.rhs(self.PDE_form(self.parameter,
+                                 self._solution_trial_function,
+                                 self._solution_test_function))
+        
+        if self.rhs.empty():
+            self.rhs = dl.Constant(0)*self._solution_test_function*dl.dx
+
+        diff_op = dl.assemble(diff_op)
+        self.rhs = dl.assemble(self.rhs)
         
         self.dirichlet_bc.apply(diff_op)
         self.dirichlet_bc.apply(self.rhs)
