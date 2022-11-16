@@ -10,9 +10,7 @@ import ufl
 from scipy import optimize
 np.random.seed(seed=1)
 dl.set_log_level(40)
-
 import cProfile
-
 
 
 #%% 1. Set up FEniCS PDE
@@ -91,7 +89,8 @@ PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( None, mesh,
         adjoint_dirichlet_bc=adjoint_dirichlet_bc,
         observation_operator=observation_operator,
         lhs_form=lhs_form,
-        rhs_form=rhs_form1)
+        rhs_form=rhs_form1,
+        reuse_assembled=False)
 
 PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( None, mesh, 
         parameter_function_space=parameter_function_space,
@@ -101,8 +100,7 @@ PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( None, mesh,
         observation_operator=observation_operator,
         lhs_form=lhs_form,
         rhs_form=rhs_form2,
-        reuse_assemble_lhs=True,
-        companion_model=PDE1)
+        reuse_assembled=False)
 
 
 #%% 2.2. Create domain geometry 
@@ -132,7 +130,7 @@ data1 = cuqi_model1(exact_solution)
 data2 = cuqi_model2(exact_solution)
 
 #%% plot exact solution
-im = exact_solution.plot(vmin=-2, vmax=1)
+im = exact_solution.plot()
 plt.colorbar(im[0])
 
 
@@ -162,24 +160,30 @@ cuqi_posterior = cuqi.distribution.JointDistribution( y1, y2, x)._as_stacked()
 #%% 2.10. Sample posterior
 Ns = 100
 #sampler = cuqi.sampler.MALA(cuqi_posterior, scale = 2/solution_function_space.dim(),x0=np.zeros(domain_geometry.dim))
+
+np.random.seed(0)
 sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
+cProfile.run('samples1 = sampler.sample_adapt(Ns,Nb=10)', filename='profile_no_reuse.out')
+samples1.geometry = domain_geometry
 
+#%% 2.11 Sample reusing lhs
+PDE1.reuse_assembled = True
+PDE2 = PDE1.with_updated_rhs(rhs_form2)
+cuqi_model2.pde = PDE2
 
-cProfile.run('samples = sampler.sample_adapt(Ns,Nb=10)', filename='profile.out')
-samples.geometry = domain_geometry
-
-#%% 2.11 Sample without reusing lhs
-PDE2.reuse_assemble_lhs = False
-PDE2.companion_model = None
-cProfile.run('samples = sampler.sample_adapt(Ns,Nb=10)', filename='profile_no_reuse.out')
-samples.geometry = domain_geometry
+np.random.seed(0)
+sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
+cProfile.run('samples2 = sampler.sample_adapt(Ns,Nb=10)', filename='profile_reuse.out')
+samples2.geometry = domain_geometry
 
 #%% 2.11. Plot samples mean
-im =samples.plot_mean()
+im =samples1.plot_mean()
 plt.colorbar(im[0])
 
 #%% 2.12. Plot credible interval
-samples.plot_ci(plot_par=True,exact=exact_solution)
+samples1.plot_ci(plot_par=True,exact=exact_solution)
 
 # %% 2.13. Plot trace
-samples.plot_trace()
+samples1.plot_trace()
+
+print(np.allclose(samples1.samples, samples2.samples))
