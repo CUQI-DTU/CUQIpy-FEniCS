@@ -163,7 +163,8 @@ Ns = 100
 
 np.random.seed(0)
 sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
-cProfile.run('samples1 = sampler.sample_adapt(Ns,Nb=10)', filename='profile_no_reuse.out')
+#cProfile.run('samples1 = sampler.sample_adapt(Ns,Nb=10)', filename='profile_no_reuse.out')
+samples1 = sampler.sample_adapt(Ns,Nb=10)
 samples1.geometry = domain_geometry
 
 #%% 2.11 Sample reusing lhs
@@ -173,7 +174,8 @@ cuqi_model2.pde = PDE2
 
 np.random.seed(0)
 sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
-cProfile.run('samples2 = sampler.sample_adapt(Ns,Nb=10)', filename='profile_reuse.out')
+#cProfile.run('samples2 = sampler.sample_adapt(Ns,Nb=10)', filename='profile_reuse.out')
+samples2 = sampler.sample_adapt(Ns,Nb=10)
 samples2.geometry = domain_geometry
 
 #%% 2.11. Plot samples mean
