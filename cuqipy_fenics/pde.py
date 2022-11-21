@@ -82,10 +82,10 @@ class FEniCSPDE(PDE,ABC):
             linalg_solve_kwargs = {}
  
         self._solver = linalg_solve
-
-        # Hack: use dolfin's solver label property to store status 
-        # (whether the solver has correct operator)
-        self._solver.rename("","invalid")
+ 
+        # Flag to store whether the solver has correct operator
+        # initially is set to False
+        self._flags = {"is_operator_valid": False}
         self._linalg_solve_kwargs = linalg_solve_kwargs
         self.parameter = dl.Function(self.parameter_function_space)
 
@@ -109,7 +109,7 @@ class FEniCSPDE(PDE,ABC):
         elif self._is_parameter_updated(value):
             self._parameter.vector().set_local(value.vector().get_local())
             # The operator in the solver is no longer valid
-            self._solver.rename("","invalid")
+            self._flags["is_operator_valid"] = False
 
         # Clear the solution and the rhs
         self._forward_solution = None
@@ -191,7 +191,7 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
 
     def _assemble_full(self):
         if self.reuse_assembled\
-                and self._solver.label() == "valid" and\
+                and self._flags["is_operator_valid"] and\
                 self.rhs is not None:
             return
 
@@ -211,12 +211,12 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         self.dirichlet_bc.apply(diff_op)
         self.dirichlet_bc.apply(self.rhs)
         self._solver.set_operator(diff_op)
-        self._solver.rename("","valid")
+        self._flags["is_operator_valid"] = True
 
 
     def _assemble_lhs(self):
         if self.reuse_assembled\
-                and self._solver.label() == "valid":
+                and self._flags["is_operator_valid"]:
             return
 
         diff_op = dl.assemble(self.lhs_form(self.parameter,
@@ -225,7 +225,7 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
 
         self.dirichlet_bc.apply(diff_op)
         self._solver.set_operator(diff_op)
-        self._solver.rename("","valid")
+        self._flags["is_operator_valid"] = True
 
 
     def _assemble_rhs(self):
