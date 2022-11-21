@@ -19,10 +19,22 @@ class FEniCSPDE(PDE,ABC):
 
     Parameters
     ----------
-    PDE_form : python function handle
-        Function handle of a python function that returns the FEniCS weak form of the PDE.
+    PDE_form : python function handle or a tuple of two python function handles
+        Function handle of a python function that returns the FEniCS weak form
+        of the PDE. Alternatively, a tuple of function handles can be provided
+        to specify the left hand side (first element in the tuple) and the right 
+        hand side (second element of the tuple) of the PDE separately.
 
-        This python function takes as input, in this given order, the Bayesian parameter (input of the forward model), the state variable (solution variable), the adjoint variable (which is also the test variable in the weak formulation) as FEniCS functions (or FEniCS trail or test functions). See, for example, `demos/demo03_poisson_circular.py` for an example of how to define this function.
+        The python function representing the full form or the left hand side
+        takes as input, in this given order, the Bayesian parameter (input of
+        the forward model), the state variable (solution variable), the adjoint
+        variable (which is also the test variable in the weak formulation) as
+        FEniCS functions (or FEniCS trail or test functions). See, for example,
+        `demos/demo03_poisson_circular.py` for an example of how to define the
+        full form.
+        
+        The python function representing the right hand side takes 
+        as input the Bayesian parameter and the adjoint variable.
 
     mesh : FEniCS mesh
         FEniCS mesh object that defines the discretization of the domain.
@@ -53,20 +65,12 @@ class FEniCSPDE(PDE,ABC):
 
     """
 
-    def __init__(self, PDE_form, mesh, solution_function_space, parameter_function_space, dirichlet_bc, adjoint_dirichlet_bc=None, observation_operator=None, lhs_form=None, rhs_form=None, reuse_assembled=False, linalg_solve=None, linalg_solve_kwargs=None):
+    def __init__(self, PDE_form, mesh, solution_function_space, parameter_function_space, dirichlet_bc, adjoint_dirichlet_bc=None, observation_operator=None, reuse_assembled=False, linalg_solve=None, linalg_solve_kwargs=None):
 
-        if (PDE_form is not None) == (lhs_form is not None and rhs_form is not None):
-            raise ValueError('Either PDE_form or lhs_form and rhs_form should be provided, but not both.')
-
-        # Construct the PDE weak form for printing
         if PDE_form is None:
-            PDE_form = lambda m, u, p: lhs_form(m, u, p) - rhs_form(m, u, p)
+            raise ValueError('PDE_form should be provided and cannot be None.')
 
-        self.PDE_form = PDE_form # function of PDE_solution, PDE_parameter, test_function
-        self.lhs_form = lhs_form
-        self.rhs_form = rhs_form
-
-        self.reuse_assembled = reuse_assembled
+        self._form = PDE_form # function of PDE_solution, PDE_parameter, test_function
 
         self.mesh = mesh 
         self.solution_function_space  = solution_function_space
@@ -74,6 +78,7 @@ class FEniCSPDE(PDE,ABC):
         self.dirichlet_bc  = dirichlet_bc
         self.adjoint_dirichlet_bc = adjoint_dirichlet_bc
         self.observation_operator = self._create_observation_operator(observation_operator)
+        self.reuse_assembled = reuse_assembled
 
         #TODO: apply kwargs
         if linalg_solve is None:
@@ -122,6 +127,38 @@ class FEniCSPDE(PDE,ABC):
     def forward_solution(self):
         """ Get the forward solution of the PDE """
         return self._forward_solution
+
+    @property
+    def PDE_form(self):
+        """ Get the PDE form """
+        if isinstance(self._form, tuple):
+            return lambda m, u, p: self._form[0](m, u, p) - self._form[1](m, p)
+        else:
+            return self._form
+
+    @property
+    def lhs_form(self):
+        """ Get the lhs form """
+        if isinstance(self._form, tuple):
+            return self._form[0]
+        else:
+            return None
+
+    @property
+    def rhs_form(self):
+        """ Get the rhs form """
+        if isinstance(self._form, tuple):
+            return self._form[1]
+        else:
+            return None
+
+    @rhs_form.setter
+    def rhs_form(self, value):
+        """ Set the rhs form """
+        if isinstance(self._form, tuple):
+            self._form = (self._form[0], value)
+        else:
+            raise ValueError('Cannot set rhs_form if PDE_form is not a tuple.')
 
     @forward_solution.setter
     def forward_solution(self, value):
