@@ -316,7 +316,7 @@ class Poisson:
     @property
     def form(self):
         return lambda m, u, v: dl.exp(m)*dl.inner(dl.grad(u), dl.grad(v))*dl.dx\
-            - self.f*v*dl.dx
+            + self.f*v*dl.dx
 
     @property
     def lhs_form(self):
@@ -324,7 +324,7 @@ class Poisson:
 
     @property
     def rhs_form(self):
-        return lambda m, v: self.f*v*dl.dx
+        return lambda m, v: -self.f*v*dl.dx
 
     @property
     def solution_function_space(self):
