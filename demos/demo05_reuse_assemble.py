@@ -7,7 +7,6 @@ import cuqipy_fenics
 import cuqi
 import matplotlib.pyplot as plt
 import ufl
-np.random.seed(seed=1)
 dl.set_log_level(40)
 import time
 
@@ -64,16 +63,20 @@ PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( (lhs_form, rhs_form2), mesh
         reuse_assembled=False)
 
 #%% 2.2. Create domain geometry 
-fenics_continuous_geo = cuqipy_fenics.geometry.FEniCSContinuous(parameter_function_space)
-domain_geometry = cuqipy_fenics.geometry.MaternExpansion(fenics_continuous_geo, length_scale = .1, num_terms=32)
+fenics_continuous_geo = cuqipy_fenics.geometry.FEniCSContinuous(
+    parameter_function_space)
+domain_geometry = cuqipy_fenics.geometry.MaternExpansion(
+    fenics_continuous_geo, length_scale = .1, num_terms=32)
 
 #%% 2.3. Create range geometry
 range_geometry= cuqipy_fenics.geometry.FEniCSContinuous(solution_function_space)
 
 #%% 2.4. Create cuqi forward model (two models corresponding to two PDE objects)
-cuqi_model1 = cuqi.model.PDEModel(PDE1, domain_geometry =domain_geometry,range_geometry=range_geometry)
+cuqi_model1 = cuqi.model.PDEModel(
+    PDE1, domain_geometry =domain_geometry,range_geometry=range_geometry)
 
-cuqi_model2 = cuqi.model.PDEModel(PDE2, domain_geometry =domain_geometry,range_geometry=range_geometry)
+cuqi_model2 = cuqi.model.PDEModel(
+    PDE2, domain_geometry =domain_geometry,range_geometry=range_geometry)
 
 #%% 2.5. Create the prior
 x = cuqi.distribution.Gaussian(mean=np.zeros(cuqi_model1.domain_dim),
@@ -81,7 +84,9 @@ x = cuqi.distribution.Gaussian(mean=np.zeros(cuqi_model1.domain_dim),
 
 
 #%% 2.6. Create exact solution and data
-exact_solution =cuqi.samples.CUQIarray( np.random.randn(domain_geometry.par_dim),is_par=True,geometry= domain_geometry )
+exact_solution =cuqi.samples.CUQIarray( 
+    np.random.randn(domain_geometry.par_dim),
+    is_par=True,geometry= domain_geometry )
 
 data1 = cuqi_model1(exact_solution)
 data2 = cuqi_model2(exact_solution)
@@ -114,11 +119,12 @@ cuqi_posterior = cuqi.distribution.JointDistribution( y1, y2, x)._as_stacked()
 #%% 3 Solve the Bayesian problem
 #%% 3.1. Sample the posterior (Case 1: no reuse of assembled operators)
 Ns = 100
-np.random.seed(0) # fix seed for reproducibility when setting reuse_assembled=True
+np.random.seed(0) # fix seed for reproducibility 
 sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
 t0 = time.time()
 samples1 = sampler.sample_adapt(Ns,Nb=10)
-t1 = time.time(); print('Time elapsed: (Case 1: no reuse of assembled operators)', t1-t0, 's')
+t1 = time.time()
+print('Time elapsed: (Case 1: no reuse of assembled operators)', t1-t0, 's')
 samples1.geometry = domain_geometry
 
 #%% 3.2. Set PDE2 to be a shallow copy of PDE1 but with different rhs
@@ -131,7 +137,8 @@ np.random.seed(0)
 sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
 t0 = time.time()
 samples2 = sampler.sample_adapt(Ns,Nb=10)
-t1 = time.time(); print('Time elapsed (Case 2: reuse of assembled operators): ', t1-t0, 's')
+t1 = time.time()
+print('Time elapsed (Case 2: reuse of assembled operators): ', t1-t0, 's')
 samples2.geometry = domain_geometry
 
 #%% 3.4. Plot samples mean
