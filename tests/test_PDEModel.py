@@ -4,7 +4,7 @@ import cuqipy_fenics
 import numpy as np
 import pytest
 import time
-
+import ufl
 
 def test_model_input():
     """Test passing different data structures for PDEModel input"""
@@ -218,7 +218,7 @@ def test_with_updated_rhs(copy_reference):
     fenics_continuous_geo = cuqipy_fenics.geometry.FEniCSContinuous(
         poisson1.parameter_function_space)
     domain_geometry = cuqipy_fenics.geometry.MaternExpansion(
-        fenics_continuous_geo, length_scale=.1, num_terms=32)
+        fenics_continuous_geo, length_scale=.1, num_terms=5)
 
     # Create range geometry
     range_geometry = cuqipy_fenics.geometry.FEniCSContinuous(
@@ -260,7 +260,7 @@ def test_with_updated_rhs(copy_reference):
 
     # Solve the Bayesian problem
     # Sample the posterior (Case 1: no reuse of assembled operators)
-    Ns = 10
+    Ns = 20
     np.random.seed(0)
     sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
     t0 = time.time()
@@ -287,11 +287,10 @@ def test_with_updated_rhs(copy_reference):
 
     # Check that the samples matches the ones generated
     # before updating the library code to add the reuse_assembled functionality
-    samples_orig_file =\
-        copy_reference(
-            "data/samples_before_adding_reuse_assembled_feature.npz")
-    assert np.allclose(samples1.samples, np.load(
-        samples_orig_file)["samples_orig"][:, :Ns])
+    samples_orig = np.load(
+        copy_reference('data/samples_test_with_rhs_write_from_pytests"+\
+        "_0+untagged.69.ge349834.dirty.npz'))["samples1"]
+    assert np.allclose(samples1.samples[1, :], samples_orig[1, :])
 
     # Check that reusing factorization and with_updated_rhs is faster
     assert t_reuse < 0.7*t_no_reuse
@@ -315,24 +314,26 @@ class Poisson:
 
     @property
     def form(self):
-        return lambda m, u, v: dl.exp(m)*dl.inner(dl.grad(u), dl.grad(v))*dl.dx\
-            + self.f*v*dl.dx
+        return lambda m, u, v:\
+            ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(v))*ufl.dx\
+            + self.f*v*ufl.dx
 
     @property
     def lhs_form(self):
-        return lambda m, u, v: dl.exp(m)*dl.inner(dl.grad(u), dl.grad(v))*dl.dx
+        return lambda m, u, v:\
+            ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(v))*ufl.dx
 
     @property
     def rhs_form(self):
-        return lambda m, v: -self.f*v*dl.dx
+        return lambda m, v: -self.f*v*ufl.dx
 
     @property
     def solution_function_space(self):
-        return dl.FunctionSpace(self.mesh, "CG", 2)
+        return dl.FunctionSpace(self.mesh, "Lagrange", 2)
 
     @property
     def parameter_function_space(self):
-        return dl.FunctionSpace(self.mesh, "CG", 1)
+        return dl.FunctionSpace(self.mesh, "Lagrange", 1)
 
     @property
     def bc(self):
