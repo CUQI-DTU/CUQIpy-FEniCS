@@ -276,7 +276,7 @@ def test_shallow_copy(copy_reference):
     # before updating the library code to add the reuse_assembled functionality
     samples_orig_file =\
     copy_reference("data/samples_before_adding_reuse_assembled_feature.npz")
-    assert np.allclose(samples1.samples, np.load(samples_orig_file)["arr_0"][:,:Ns])
+    assert np.allclose(samples1.samples, np.load(samples_orig_file)["samples_orig"][:,:Ns])
     #%% 3.6. Check that the time is reduced
     assert t_reuse < 0.7*t_no_reuse
 
