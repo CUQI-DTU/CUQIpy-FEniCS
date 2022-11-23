@@ -61,7 +61,7 @@ class FEniCSPDE(PDE,ABC):
         Examples of `observation_operator` are `lambda m, u: m*u` and `lambda m, u: m*dl.sqrt(dl.inner(dl.grad(u),dl.grad(u)))`
 
     reuse_assembled : bool, optional
-        Flag to indicate whether the assembled (and possibly refactored) 
+        Flag to indicate whether the assembled (and possibly factored) 
         differential operator should be reused (when the parameter is not 
         changed).
         If True, the assembled matrices are reused. If False, the assembled 
