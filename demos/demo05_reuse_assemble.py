@@ -36,7 +36,7 @@ dirichlet_bc = dl.DirichletBC(solution_function_space,
 f1 = dl.Constant(1.0)
 f2 = dl.Expression("sin(2*x[0]*pi)*sin(2*x[1]*pi)", degree=1)
 
-#%% 1.5. Set up PDE variational form
+#%% 1.5. Set up PDE variational forms
 def lhs_form(m,u,p):
     return ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(p))*ufl.dx 
 
