@@ -80,7 +80,6 @@ class FEniCSPDE(PDE,ABC):
         self.observation_operator = self._create_observation_operator(observation_operator)
         self.reuse_assembled = reuse_assembled
 
-        #TODO: apply kwargs
         if linalg_solve is None:
             linalg_solve = dl.LUSolver()
         if linalg_solve_kwargs is None:
@@ -91,7 +90,11 @@ class FEniCSPDE(PDE,ABC):
         # Flag to store whether the solver has correct operator
         # initially is set to False
         self._flags = {"is_operator_valid": False}
+
+        # Set the solver parameters
         self._linalg_solve_kwargs = linalg_solve_kwargs
+        for key, value in linalg_solve_kwargs.items():
+            self._solver.parameter[key]= value
         self.parameter = dl.Function(self.parameter_function_space)
 
 
@@ -151,6 +154,19 @@ class FEniCSPDE(PDE,ABC):
             return self._form[1]
         else:
             return None
+
+    @property
+    def reuse_assembled(self):
+        """ Get the reuse_assembled flag """
+        return self._reuse_assembled
+
+    @reuse_assembled.setter
+    def reuse_assembled(self, value):
+        """ Set the reuse_assembled flag """
+        if not isinstance(self._form, tuple) and value:
+            raise ValueError('PDE_form should be a tuple of the lhs and rhs"+\
+            "forms to be able to set the reuse_assembled flag to True.')
+        self._reuse_assembled = value
 
     @rhs_form.setter
     def rhs_form(self, value):
