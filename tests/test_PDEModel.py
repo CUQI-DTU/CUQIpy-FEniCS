@@ -78,7 +78,7 @@ def test_solver_choice():
 
 
 def test_reuse_assembled():
-    """Test that reusing the assembled and refactored lhs gives the same solution
+    """Test that reusing the assembled and factored lhs gives the same solution
      and a better performance"""
     # Create the variational problem
     poisson = Poisson()
@@ -126,13 +126,13 @@ def test_reuse_assembled():
     PDE.assemble(m)
     u2, info = PDE.solve()
     t1 = time.time()
-    t_refactor = t1 - t0
+    t_reuse_factors = t1 - t0
 
     # Check that the solutions are the same
     assert np.allclose(u1.vector().get_local(), u2.vector().get_local())
 
     # Check that using the reuse_assembled option is faster
-    assert t_refactor < 0.25*t_first
+    assert t_reuse_factors < 0.25*t_first
 
 
 def test_form():
@@ -174,7 +174,7 @@ def test_form():
 
 def test_with_updated_rhs(copy_reference):
     """ Regression test for using the method with_updated_rhs and sharing the
-    refactored lhs matrix"""
+    factored lhs matrix"""
 
     # Set up first poisson problem
     poisson1 = Poisson()
