@@ -22,8 +22,9 @@ class FEniCSPDE(PDE,ABC):
     PDE_form : python function handle or a tuple of two python function handles
         Function handle of a python function that returns the FEniCS weak form
         of the PDE. Alternatively, a tuple of function handles can be provided
-        to specify the left hand side (first element in the tuple) and the right 
-        hand side (second element of the tuple) of the PDE separately.
+        to specify the PDE weak form left hand side as the first element of the 
+        tuple, and the weak form right hand side as the second element of the
+        tuple.
 
         The python function representing the full form or the left hand side
         takes as input, in this given order, the Bayesian parameter (input of
@@ -33,8 +34,8 @@ class FEniCSPDE(PDE,ABC):
         `demos/demo03_poisson_circular.py` for an example of how to define the
         full form.
         
-        The python function representing the right hand side takes 
-        as input the Bayesian parameter and the adjoint variable.
+        The python function representing the right hand side takes as input the
+        Bayesian parameter and the adjoint variable.
 
     mesh : FEniCS mesh
         FEniCS mesh object that defines the discretization of the domain.
@@ -60,10 +61,11 @@ class FEniCSPDE(PDE,ABC):
         Examples of `observation_operator` are `lambda m, u: m*u` and `lambda m, u: m*dl.sqrt(dl.inner(dl.grad(u),dl.grad(u)))`
 
     reuse_assembled : bool, optional
-        Flag to indicate whether the assembled differential operator should be 
-        reused (when parameter is not changed).
-        If True, the assembled matrices are reused. If False, the assembled matrices 
-        are not reused. Default is False.
+        Flag to indicate whether the assembled (and possibly refactored) 
+        differential operator should be reused (when the parameter is not 
+        changed).
+        If True, the assembled matrices are reused. If False, the assembled 
+        matrices are not reused. Default is False.
 
     linalg_solve : FEniCS linear solver object, optional
 
@@ -230,7 +232,8 @@ class FEniCSPDE(PDE,ABC):
 
         if hasattr(self, '_parameter') \
             and np.allclose(self._parameter.vector().get_local(),
-                            value.vector().get_local(), atol=1e-16, rtol=1e-16):
+                            value.vector().get_local(),
+                            atol=dl.DOLFIN_EPS, rtol=dl.DOLFIN_EPS):
             return False
         else:
             return True
