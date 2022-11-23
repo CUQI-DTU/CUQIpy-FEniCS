@@ -94,7 +94,7 @@ class FEniCSPDE(PDE,ABC):
         # Set the solver parameters
         self._linalg_solve_kwargs = linalg_solve_kwargs
         for key, value in linalg_solve_kwargs.items():
-            self._solver.parameter[key]= value
+            self._solver.parameters[key]= value
         self.parameter = dl.Function(self.parameter_function_space)
 
 
