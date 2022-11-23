@@ -288,8 +288,8 @@ def test_with_updated_rhs(copy_reference):
     # Check that the samples matches the ones generated
     # before updating the library code to add the reuse_assembled functionality
     samples_orig = np.load(
-        copy_reference('data/samples_test_with_rhs_write_from_pytests"+\
-        "_0+untagged.69.ge349834.dirty.npz'))["samples1"]
+        copy_reference('data/samples_test_with_rhs_write_from_pytests'+\
+        '_0+untagged.69.ge349834.dirty.npz'))["samples1"]
     assert np.allclose(samples1.samples[1, :], samples_orig[1, :])
 
     # Check that reusing factorization and with_updated_rhs is faster
