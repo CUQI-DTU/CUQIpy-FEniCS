@@ -171,116 +171,132 @@ def test_form():
     # Check that the solutions are the same
     assert np.allclose(u1.vector().get_local(), u2.vector().get_local())
 
-def test_shallow_copy(copy_reference):
 
+def test_with_updated_rhs(copy_reference):
+    """ Regression test for using the method with_updated_rhs and sharing the
+    refactored lhs matrix"""
+
+    # Set up first poisson problem
     poisson1 = Poisson()
     poisson1.mesh = dl.UnitSquareMesh(40, 40)
     poisson1.f = dl.Constant(1.0)
 
+    # Set up second poisson problem
     poisson2 = Poisson()
     poisson2.mesh = poisson1.mesh
     poisson2.f = dl.Expression("sin(2*x[0]*pi)*sin(2*x[1]*pi)", degree=1)
 
+    # Set up boundary function (where the Dirichlet boundary conditions are applied)
     def u_boundary(x, on_boundary):
-        return on_boundary and ( x[0] < dl.DOLFIN_EPS or x[0] > 1.0 - dl.DOLFIN_EPS)
+        return on_boundary and\
+            (x[0] < dl.DOLFIN_EPS or x[0] > 1.0 - dl.DOLFIN_EPS)
 
-    poisson1.bc = dl.DirichletBC(poisson1.solution_function_space, dl.Constant(0.0), u_boundary)
+    poisson1.bc = dl.DirichletBC(poisson1.solution_function_space,
+                                 dl.Constant(0.0), u_boundary)
     poisson2.bc = poisson1.bc
 
-  
-    #%% 2. Set up CUQI PDE Bayesian problem  
-    #%% 2.1. Create two PDE objects with different source terms 
-    PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( 
+    # Create two PDE objects with different rhs terms
+    PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
         (poisson1.lhs_form, poisson1.rhs_form),
-        poisson1.mesh, 
+        poisson1.mesh,
         parameter_function_space=poisson1.parameter_function_space,
         solution_function_space=poisson1.solution_function_space,
         dirichlet_bc=poisson1.bc,
         observation_operator=None,
         reuse_assembled=False)
 
-    PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( 
+    PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
         (poisson2.lhs_form, poisson2.rhs_form),
-        poisson2.mesh, 
+        poisson2.mesh,
         parameter_function_space=poisson2.parameter_function_space,
         solution_function_space=poisson2.solution_function_space,
         dirichlet_bc=poisson2.bc,
         observation_operator=None,
-        reuse_assembled=False)    
+        reuse_assembled=False)
 
-    
-    #%% 2.2. Create domain geometry 
-    fenics_continuous_geo = cuqipy_fenics.geometry.FEniCSContinuous(poisson1.parameter_function_space)
-    domain_geometry = cuqipy_fenics.geometry.MaternExpansion(fenics_continuous_geo, length_scale = .1, num_terms=32)
-    
-    #%% 2.3. Create range geometry
-    range_geometry= cuqipy_fenics.geometry.FEniCSContinuous(poisson1.solution_function_space)
-    
-    #%% 2.4. Create cuqi forward model (two models corresponding to two PDE objects)
-    cuqi_model1 = cuqi.model.PDEModel(PDE1, domain_geometry =domain_geometry,range_geometry=range_geometry)
-    
-    cuqi_model2 = cuqi.model.PDEModel(PDE2, domain_geometry =domain_geometry,range_geometry=range_geometry)
-    
-    #%% 2.5. Create the prior
+    # Create domain geometry
+    fenics_continuous_geo = cuqipy_fenics.geometry.FEniCSContinuous(
+        poisson1.parameter_function_space)
+    domain_geometry = cuqipy_fenics.geometry.MaternExpansion(
+        fenics_continuous_geo, length_scale=.1, num_terms=32)
+
+    # Create range geometry
+    range_geometry = cuqipy_fenics.geometry.FEniCSContinuous(
+        poisson1.solution_function_space)
+
+    # Create cuqi forward model (two models corresponding to two PDE objects)
+    cuqi_model1 = cuqi.model.PDEModel(
+        PDE1, domain_geometry=domain_geometry, range_geometry=range_geometry)
+
+    cuqi_model2 = cuqi.model.PDEModel(
+        PDE2, domain_geometry=domain_geometry, range_geometry=range_geometry)
+
+    # Create the prior
     x = cuqi.distribution.Gaussian(mean=np.zeros(cuqi_model1.domain_dim),
                                    cov=1, geometry=domain_geometry)
-    
-    
-    #%% 2.6. Create exact solution and data
+
+    # Create exact solution and data
     np.random.seed(0)
-    exact_solution =cuqi.samples.CUQIarray( np.random.randn(domain_geometry.par_dim),is_par=True,geometry= domain_geometry )
-    
+    exact_solution = cuqi.samples.CUQIarray(
+        np.random.randn(domain_geometry.par_dim),
+        is_par=True, geometry=domain_geometry)
+
     data1 = cuqi_model1(exact_solution)
     data2 = cuqi_model2(exact_solution)
-    
-    #%% 2.7. Create likelihood 1
+
+    # Create likelihood 1
     y1 = cuqi.distribution.Gaussian(mean=cuqi_model1(x),
-                                   cov=np.ones(cuqi_model1.range_dim)*.01**2)
-    y1 = y1(y1= data1)
-    
-    #%% 2.9. Create likelihood 2
+                                    cov=np.ones(cuqi_model1.range_dim)*.01**2)
+    y1 = y1(y1=data1)
+
+    # Create likelihood 2
     y2 = cuqi.distribution.Gaussian(mean=cuqi_model2(x),
-                                     cov=np.ones(cuqi_model2.range_dim)*.01**2) 
-    y2 = y2(y2= data2)
-    
-    #%% 2.10. Create posterior
-    cuqi_posterior = cuqi.distribution.JointDistribution( y1, y2, x)._as_stacked()
-    
-    
-    #%% 3 Solve the Bayesian problem
-    #%% 3.1. Sample the posterior (Case 1: no reuse of assembled operators)
+                                    cov=np.ones(cuqi_model2.range_dim)*.01**2)
+    y2 = y2(y2=data2)
+
+    # Create posterior
+    cuqi_posterior = cuqi.distribution.JointDistribution(
+        y1, y2, x)._as_stacked()
+
+    # Solve the Bayesian problem
+    # Sample the posterior (Case 1: no reuse of assembled operators)
     Ns = 10
-    np.random.seed(0) # fix seed for reproducibility when setting reuse_assembled=True
+    np.random.seed(0)
     sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
     t0 = time.time()
-    samples1 = sampler.sample_adapt(Ns,Nb=10)
-    t1 = time.time(); t_no_reuse = t1-t0
+    samples1 = sampler.sample_adapt(Ns, Nb=10)
+    t1 = time.time()
+    t_no_reuse = t1-t0
     samples1.geometry = domain_geometry
-    
-    #%% 3.2. Set PDE2 to be a shallow copy of PDE1 but with different rhs
+
+    # Set PDE2 to be a shallow copy of PDE1 but with different rhs
     PDE1.reuse_assembled = True
     PDE2 = PDE1.with_updated_rhs(poisson2.rhs_form)
     cuqi_model2.pde = PDE2
-    
-    #%% 3.3. Sample the posterior again (Case 2: reuse of assembled operators)
+
+    # Sample the posterior again (Case 2: reuse of assembled operators)
     np.random.seed(0)
     sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
     t0 = time.time()
-    samples2 = sampler.sample_adapt(Ns,Nb=10)
-    t1 = time.time(); t_reuse = t1-t0
+    samples2 = sampler.sample_adapt(Ns, Nb=10)
+    t1 = time.time()
+    t_reuse = t1-t0
 
-    #%% 3.4. Check that the samples are the same
+    # Check that the samples are the same
     assert np.allclose(samples1.samples, samples2.samples)
 
-    #%% 3.5. Check that the samples matches the ones generated 
+    # Check that the samples matches the ones generated
     # before updating the library code to add the reuse_assembled functionality
     samples_orig_file =\
-    copy_reference("data/samples_before_adding_reuse_assembled_feature.npz")
-    assert np.allclose(samples1.samples, np.load(samples_orig_file)["samples_orig"][:,:Ns])
-    #%% 3.6. Check that the time is reduced
+        copy_reference(
+            "data/samples_before_adding_reuse_assembled_feature.npz")
+    assert np.allclose(samples1.samples, np.load(
+        samples_orig_file)["samples_orig"][:, :Ns])
+
+    # Check that reusing factorization and with_updated_rhs is faster
     assert t_reuse < 0.7*t_no_reuse
 
-      
+
 class Poisson:
     """Define the variational PDE problem for the Poisson equation in two
     ways: as a full form, and as lhs and rhs forms"""
@@ -324,7 +340,7 @@ class Poisson:
             self._bc = dl.DirichletBC(self.solution_function_space,
                                       self.bc_value, "on_boundary")
         return self._bc
-    
+
     @bc.setter
     def bc(self, bc):
         self._bc = bc
