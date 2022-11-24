@@ -176,6 +176,9 @@ def test_with_updated_rhs(copy_reference):
     """ Regression test for using the method with_updated_rhs and sharing the
     factored lhs matrix"""
 
+    if  not sys.platform.startswith('darwin'):
+        pytest.skip("Test on MAC OS only")
+
     # Set up first poisson problem
     poisson1 = Poisson()
     poisson1.mesh = dl.UnitSquareMesh(40, 40)
