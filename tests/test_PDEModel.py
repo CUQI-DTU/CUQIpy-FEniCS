@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 import time
 import ufl
+import sys
 
 def test_model_input():
     """Test passing different data structures for PDEModel input"""
