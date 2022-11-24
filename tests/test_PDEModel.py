@@ -172,12 +172,15 @@ def test_form():
     # Check that the solutions are the same
     assert np.allclose(u1.vector().get_local(), u2.vector().get_local())
 
+@pytest.mark.parametrize("case", [1, 2])
+def test_with_updated_rhs(copy_reference, case):
+    """Regression test for using the method with_updated_rhs and sharing the
+    factored lhs matrix. Case 1: compare the solution reusing the factorization
+    and without reusing the factorization. Case 2: compare the solution with
+    results from the previous version of the code."""
 
-def test_with_updated_rhs(copy_reference):
-    """ Regression test for using the method with_updated_rhs and sharing the
-    factored lhs matrix"""
-
-    if  not sys.platform.startswith('darwin'):
+    # Skip case 2 test if the operating system is not Mac OS X
+    if  case == 2 and not sys.platform.startswith('darwin'):
         pytest.skip("Test on MAC OS only")
 
     # Set up first poisson problem
@@ -273,31 +276,33 @@ def test_with_updated_rhs(copy_reference):
     t_no_reuse = t1-t0
     samples1.geometry = domain_geometry
 
-    # Set PDE2 to be a shallow copy of PDE1 but with different rhs
-    PDE1.reuse_assembled = True
-    PDE2 = PDE1.with_updated_rhs(poisson2.rhs_form)
-    cuqi_model2.pde = PDE2
+    if case == 1:
+        # Set PDE2 to be a shallow copy of PDE1 but with different rhs
+        PDE1.reuse_assembled = True
+        PDE2 = PDE1.with_updated_rhs(poisson2.rhs_form)
+        cuqi_model2.pde = PDE2
 
-    # Sample the posterior again (Case 2: reuse of assembled operators)
-    np.random.seed(0)
-    sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
-    t0 = time.time()
-    samples2 = sampler.sample_adapt(Ns, Nb=10)
-    t1 = time.time()
-    t_reuse = t1-t0
+        # Sample the posterior again (Case 2: reuse of assembled operators)
+        np.random.seed(0)
+        sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
+        t0 = time.time()
+        samples2 = sampler.sample_adapt(Ns, Nb=10)
+        t1 = time.time()
+        t_reuse = t1-t0
 
-    # Check that the samples are the same
-    assert np.allclose(samples1.samples, samples2.samples)
+        # Check that the samples are the same
+        assert np.allclose(samples1.samples, samples2.samples)
+        
+        # Check that reusing factorization and with_updated_rhs is faster
+        assert t_reuse < 0.7*t_no_reuse
 
-    # Check that the samples matches the ones generated
-    # before updating the library code to add the reuse_assembled functionality
-    samples_orig = np.load(
-        copy_reference('data/samples_test_with_rhs_write_from_pytests'+\
-        '_0+untagged.69.ge349834.dirty.npz'))["samples1"]
-    assert np.allclose(samples1.samples[1, :], samples_orig[1, :])
-
-    # Check that reusing factorization and with_updated_rhs is faster
-    assert t_reuse < 0.7*t_no_reuse
+    elif case == 2:
+        # Check that the samples matches the ones generated
+        # before updating the library code to add the reuse_assembled functionality
+        samples_orig = np.load(
+            copy_reference('data/samples_test_with_rhs_write_from_pytests'+\
+            '_0+untagged.69.ge349834.dirty.npz'))["samples1"]
+        assert np.allclose(samples1.samples[1, :], samples_orig[1, :])
 
 
 class Poisson:
