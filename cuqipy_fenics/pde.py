@@ -5,6 +5,7 @@ from cuqi.samples import CUQIarray
 import dolfin as dl
 import ufl
 from copy import copy
+import warnings
 
 __all__ = [
     'FEniCSPDE',
@@ -19,23 +20,19 @@ class FEniCSPDE(PDE,ABC):
 
     Parameters
     ----------
-    PDE_form : python function handle or a tuple of two python function handles
-        Function handle of a python function that returns the FEniCS weak form
-        of the PDE. Alternatively, a tuple of function handles can be provided
-        to specify the PDE weak form left hand side as the first element of the 
-        tuple, and the weak form right hand side as the second element of the
-        tuple.
+    PDE_form : callable or tuple of two callables
+        If passed as a callable: the callable returns the weak form of the PDE.
+        The callable should take three arguments, the first argument is the 
+        parameter (input of the forward model), the second argument is the state
+        variable (solution variable), and the third argument is the adjoint
+        variable (the test variable in the weak formulation).
 
-        The python function representing the full form or the left hand side
-        takes as input, in this given order, the Bayesian parameter (input of
-        the forward model), the state variable (solution variable), the adjoint
-        variable (which is also the test variable in the weak formulation) as
-        FEniCS functions (or FEniCS trail or test functions). See, for example,
-        `demos/demo03_poisson_circular.py` for an example of how to define the
-        full form.
-        
-        The python function representing the right hand side takes as input the
-        Bayesian parameter and the adjoint variable.
+        If passed as a tuple of two callables: the first callable returns the 
+        weak form of the PDE left hand side, and the second callable returns the
+        weak form of the PDE right hand side. The left hand side callable takes
+        the same three arguments as described above. The right hand side 
+        callable takes only the parameter and the adjoint variable as arguments.
+        See the example below.
 
     mesh : FEniCS mesh
         FEniCS mesh object that defines the discretization of the domain.
@@ -74,7 +71,40 @@ class FEniCSPDE(PDE,ABC):
 
     Example
     --------
-    See `demos/demo03_poisson_circular.py` for an example of how to define a `cuqipy_fenics.pde` objects.
+
+    .. code-block:: python
+
+        # Define mesh
+        mesh = dl.UnitSquareMesh(20, 20)
+        
+        # Set up function spaces
+        solution_function_space = dl.FunctionSpace(mesh, 'Lagrange', 2)
+        parameter_function_space = dl.FunctionSpace(mesh, 'Lagrange', 1)
+        
+        # Set up Dirichlet boundaries
+        def u_boundary(x, on_boundary):
+            return on_boundary
+        
+        dirichlet_bc_expr = dl.Expression("0", degree=1) 
+        dirichlet_bc = dl.DirichletBC(solution_function_space,
+                                      dirichlet_bc_expr,
+                                      u_boundary)
+        
+        # Set up PDE variational form
+        def lhs_form(m,u,p):
+            return ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(p))*ufl.dx 
+        
+        def rhs_form(m,p):
+            return - dl.Constant(1)*p*ufl.dx
+        
+        # Create the PDE object 
+        PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( 
+                (lhs_form, rhs_form1),
+                mesh, 
+                parameter_function_space=parameter_function_space,
+                solution_function_space=solution_function_space,
+                dirichlet_bc=dirichlet_bc)
+            
 
     """
 
@@ -136,7 +166,7 @@ class FEniCSPDE(PDE,ABC):
 
         # Subsequent times setting the parameter (avoid assigning the parameter
         # to new object, set parameter array in place instead)
-        elif self._is_parameter_updated(value):
+        elif self._is_parameter_new(value):
             self._parameter.vector().set_local(value.vector().get_local())
             # The operator in the solver is no longer valid
             self._flags["is_operator_valid"] = False
@@ -227,13 +257,13 @@ class FEniCSPDE(PDE,ABC):
     def _create_observation_operator(self, observation_operator):
         raise NotImplementedError
 
-    def _is_parameter_updated(self, value):
-        """ A helper function to check if the PDE model parameter (the parameter
-         to be inferred) is updated """
+    def _is_parameter_new(self, input_parameter):
+        """ A helper function to check if the `input_parameter` is different 
+        from the current parameter (cached in self._parameter). """
 
         if hasattr(self, '_parameter') \
             and np.allclose(self._parameter.vector().get_local(),
-                            value.vector().get_local(),
+                            input_parameter.vector().get_local(),
                             atol=dl.DOLFIN_EPS, rtol=dl.DOLFIN_EPS):
             return False
         else:
@@ -267,6 +297,14 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         form. The user can set the flag `reuse_assembled` to True in both PDE
         objects to allow the two PDE objects to reuse the factorized 
         differential operators. """
+
+        # Warn the user if reuse_assembled is set to False
+        if not self.reuse_assembled:
+            warnings.warn('The flag `reuse_assembled` is set to False. '+\
+                'The new PDE object will not be able to reuse the '+\
+                'factorized differential operators from the current PDE'+\
+                'object.')
+
         new_pde = copy(self)
         new_pde.rhs_form = rhs_form
         new_pde.rhs = None
