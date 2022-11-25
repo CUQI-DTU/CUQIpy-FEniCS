@@ -4,6 +4,8 @@ from cuqi.pde import PDE
 from cuqi.samples import CUQIarray
 import dolfin as dl
 import ufl
+from copy import copy
+import warnings
 
 __all__ = [
     'FEniCSPDE',
@@ -18,10 +20,19 @@ class FEniCSPDE(PDE,ABC):
 
     Parameters
     ----------
-    PDE_form : python function handle
-        Function handle of a python function that returns the FEniCS weak form of the PDE.
+    PDE_form : callable or tuple of two callables
+        If passed as a callable: the callable returns the weak form of the PDE.
+        The callable should take three arguments, the first argument is the 
+        parameter (input of the forward model), the second argument is the state
+        variable (solution variable), and the third argument is the adjoint
+        variable (the test variable in the weak formulation).
 
-        This python function takes as input, in this given order, the Bayesian parameter (input of the forward model), the state variable (solution variable), the adjoint variable (which is also the test variable in the weak formulation) as FEniCS functions (or FEniCS trail or test functions). See, for example, `demos/demo03_poisson_circular.py` for an example of how to define this function.
+        If passed as a tuple of two callables: the first callable returns the 
+        weak form of the PDE left hand side, and the second callable returns the
+        weak form of the PDE right hand side. The left hand side callable takes
+        the same three arguments as described above. The right hand side 
+        callable takes only the parameter and the adjoint variable as arguments.
+        See the example below.
 
     mesh : FEniCS mesh
         FEniCS mesh object that defines the discretization of the domain.
@@ -46,20 +57,96 @@ class FEniCSPDE(PDE,ABC):
 
         Examples of `observation_operator` are `lambda m, u: m*u` and `lambda m, u: m*dl.sqrt(dl.inner(dl.grad(u),dl.grad(u)))`
 
+    reuse_assembled : bool, optional
+        Flag to indicate whether the assembled (and possibly factored) 
+        differential operator should be reused when the parameter is not 
+        changed.
+        If True, the assembled matrices are reused. If False, the assembled 
+        matrices are not reused. Default is False.
+
+    linalg_solve : FEniCS linear solver object, optional
+
+    linalg_solve_kwargs : dict, optional
+        Dictionary of keyword arguments to be passed to the linear solver object.
+
     Example
     --------
-    See `demos/demo03_poisson_circular.py` for an example of how to define a `cuqipy_fenics.pde` objects.
+
+    .. code-block:: python
+
+        # Define mesh
+        mesh = dl.UnitSquareMesh(20, 20)
+        
+        # Set up function spaces
+        solution_function_space = dl.FunctionSpace(mesh, 'Lagrange', 2)
+        parameter_function_space = dl.FunctionSpace(mesh, 'Lagrange', 1)
+        
+        # Set up Dirichlet boundaries
+        def u_boundary(x, on_boundary):
+            return on_boundary
+        
+        dirichlet_bc_expr = dl.Expression("0", degree=1) 
+        dirichlet_bc = dl.DirichletBC(solution_function_space,
+                                      dirichlet_bc_expr,
+                                      u_boundary)
+        
+        # Set up PDE variational form
+        def lhs_form(m,u,p):
+            return ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(p))*ufl.dx 
+        
+        def rhs_form(m,p):
+            return - dl.Constant(1)*p*ufl.dx
+        
+        # Create the PDE object 
+        PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( 
+                (lhs_form, rhs_form),
+                mesh, 
+                parameter_function_space=parameter_function_space,
+                solution_function_space=solution_function_space,
+                dirichlet_bc=dirichlet_bc)
+            
 
     """
 
-    def __init__(self, PDE_form, mesh, solution_function_space, parameter_function_space, dirichlet_bc, adjoint_dirichlet_bc=None, observation_operator=None):
-        self.PDE_form = PDE_form # function of PDE_solution, PDE_parameter, test_function
-        self.mesh = mesh 
-        self.solution_function_space  = solution_function_space
+    def __init__(self, PDE_form, mesh, solution_function_space,
+                 parameter_function_space, dirichlet_bc, adjoint_dirichlet_bc=None,
+                 observation_operator=None, reuse_assembled=False, linalg_solve=None,
+                 linalg_solve_kwargs=None):
+
+        if PDE_form is None:
+            raise ValueError('PDE_form should be provided and cannot be None.')
+
+        self._form = PDE_form
+
+        self.mesh = mesh
+        self.solution_function_space = solution_function_space
         self.parameter_function_space = parameter_function_space
-        self.dirichlet_bc  = dirichlet_bc
+        self.dirichlet_bc = dirichlet_bc
         self.adjoint_dirichlet_bc = adjoint_dirichlet_bc
-        self.observation_operator = self._create_observation_operator(observation_operator)
+        self.observation_operator = self._create_observation_operator(
+            observation_operator)
+        self.reuse_assembled = reuse_assembled
+
+        if linalg_solve is None:
+            linalg_solve = dl.LUSolver()
+        if linalg_solve_kwargs is None:
+            linalg_solve_kwargs = {}
+
+        self._solver = linalg_solve
+
+        # Flag to store whether the solver has correct operator
+        # initially is set to False. These flags are shared between
+        # shallow copies of this class.
+        self._flags = {"is_operator_valid": False}
+
+        # Set the solver parameters
+        self._linalg_solve_kwargs = linalg_solve_kwargs
+        for key, value in linalg_solve_kwargs.items():
+            self._solver.parameters[key] = value
+
+        # Initialize the parameter
+        self.parameter = dl.Function(self.parameter_function_space)
+
 
     @property
     def parameter(self):
@@ -68,14 +155,78 @@ class FEniCSPDE(PDE,ABC):
     
     @parameter.setter
     def parameter(self, value):
-        """ Set the parameter of the PDE. Since the PDE solution depends on the parameter, this will set the PDE solution to None. """
-        self._parameter = value
+        """ Set the parameter of the PDE. Since the PDE solution depends on the 
+        parameter, this will set the PDE solution to None. """
+        if value is None:
+            raise ValueError('Parameter cannot be None.')
+
+        # First time setting the parameter
+        if not hasattr(self, '_parameter'):
+            self._parameter = value
+
+        # Subsequent times setting the parameter (avoid assigning the parameter
+        # to new object, set parameter array in place instead)
+        elif self._is_parameter_new(value):
+            self._parameter.vector().set_local(value.vector().get_local())
+            # The operator in the solver is no longer valid
+            self._flags["is_operator_valid"] = False
+
+        # Clear the solution and the rhs
         self._forward_solution = None
+        self._adjoint_solution = None
+        self._gradient = None
+        self.rhs = None
+
 
     @property
     def forward_solution(self):
         """ Get the forward solution of the PDE """
         return self._forward_solution
+
+    @property
+    def PDE_form(self):
+        """ Get the PDE form """
+        if isinstance(self._form, tuple):
+            return lambda m, u, p: self._form[0](m, u, p) - self._form[1](m, p)
+        else:
+            return self._form
+
+    @property
+    def lhs_form(self):
+        """ Get the lhs form """
+        if isinstance(self._form, tuple):
+            return self._form[0]
+        else:
+            return None
+
+    @property
+    def rhs_form(self):
+        """ Get the rhs form """
+        if isinstance(self._form, tuple):
+            return self._form[1]
+        else:
+            return None
+
+    @property
+    def reuse_assembled(self):
+        """ Get the reuse_assembled flag """
+        return self._reuse_assembled
+
+    @reuse_assembled.setter
+    def reuse_assembled(self, value):
+        """ Set the reuse_assembled flag """
+        if not isinstance(self._form, tuple) and value:
+            raise ValueError('PDE_form should be a tuple of the lhs and rhs"+\
+            "forms to be able to set the reuse_assembled flag to True.')
+        self._reuse_assembled = value
+
+    @rhs_form.setter
+    def rhs_form(self, value):
+        """ Set the rhs form """
+        if isinstance(self._form, tuple):
+            self._form = (self._form[0], value)
+        else:
+            raise ValueError('Cannot set rhs_form if PDE_form is not a tuple.')
 
     @forward_solution.setter
     def forward_solution(self, value):
@@ -106,22 +257,112 @@ class FEniCSPDE(PDE,ABC):
     def _create_observation_operator(self, observation_operator):
         raise NotImplementedError
 
+    def _is_parameter_new(self, input_parameter):
+        """ A helper function to check if the `input_parameter` is different 
+        from the current parameter (cached in self._parameter). """
+
+        if hasattr(self, '_parameter') \
+            and np.allclose(self._parameter.vector().get_local(),
+                            input_parameter.vector().get_local(),
+                            atol=dl.DOLFIN_EPS, rtol=dl.DOLFIN_EPS):
+            return False
+        else:
+            return True
+
+
 class SteadyStateLinearFEniCSPDE(FEniCSPDE):
     """ Class representation of steady state linear PDEs defined in FEniCS. It accepts the same arguments as the base class `cuqipy_fenics.pde.FEniCSPDE`."""
 
     def assemble(self, parameter=None):
+        self._solution_trial_function = dl.TrialFunction(
+            self.solution_function_space)
+        self._solution_test_function = dl.TestFunction(
+            self.solution_function_space)
+
         if parameter is not None:
             self.parameter = parameter
 
-        solution_trial_function = dl.TrialFunction(self.solution_function_space)
-        solution_test_function = dl.TestFunction(self.solution_function_space)
-        self.diff_op, self.rhs  = \
-            dl.lhs(self.PDE_form(self.parameter, solution_trial_function,solution_test_function)),\
-            dl.rhs(self.PDE_form(self.parameter, solution_trial_function, solution_test_function))
+        # Either assemble the lhs and rhs forms separately or the full PDE form
+        if self.lhs_form is not None:
+            self._assemble_lhs()
+            self._assemble_rhs()
+
+        else:
+            self._assemble_full()
+
+
+
+    def with_updated_rhs(self, rhs_form):
+        """ A method to create a shallow copy of the PDE model with updated rhs 
+        form. The user can set the flag `reuse_assembled` to True in both PDE
+        objects to allow the two PDE objects to reuse the factorized 
+        differential operators. """
+
+        # Warn the user if reuse_assembled is set to False
+        if not self.reuse_assembled:
+            warnings.warn('The flag `reuse_assembled` is set to False. '+\
+                'The new PDE object will not be able to reuse the '+\
+                'factorized differential operators from the current PDE'+\
+                'object.')
+
+        new_pde = copy(self)
+        new_pde.rhs_form = rhs_form
+        new_pde.rhs = None
+        return new_pde
+
+    def _assemble_full(self):
+        """ Assemble the full PDE form """
+        if self.reuse_assembled\
+                and self._flags["is_operator_valid"] and\
+                self.rhs is not None:
+            return
+
+        diff_op = dl.lhs(self.PDE_form(self.parameter,
+                                       self._solution_trial_function,
+                                       self._solution_test_function))
+        self.rhs = dl.rhs(self.PDE_form(self.parameter,
+                                        self._solution_trial_function,
+                                        self._solution_test_function))
+
+        if self.rhs.empty():
+            self.rhs = dl.Constant(0)*self._solution_test_function*dl.dx
+
+        diff_op = dl.assemble(diff_op)
+        self.rhs = dl.assemble(self.rhs)
+
+        self.dirichlet_bc.apply(diff_op)
+        self.dirichlet_bc.apply(self.rhs)
+        self._solver.set_operator(diff_op)
+        self._flags["is_operator_valid"] = True
+
+    def _assemble_lhs(self):
+        """ Assemble the lhs form """
+        if self.reuse_assembled\
+                and self._flags["is_operator_valid"]:
+            return
+
+        diff_op = dl.assemble(self.lhs_form(self.parameter,
+                                            self._solution_trial_function,
+                                            self._solution_test_function))
+
+        self.dirichlet_bc.apply(diff_op)
+        self._solver.set_operator(diff_op)
+        self._flags["is_operator_valid"] = True
+
+    def _assemble_rhs(self):
+        """ Assemble the rhs form """
+        if self.reuse_assembled\
+                and self.rhs is not None:
+            return
+
+        self.rhs = dl.assemble(self.rhs_form(self.parameter,
+                                             self._solution_test_function))
+        self.dirichlet_bc.apply(self.rhs)
+
 
     def solve(self):
-        self.forward_solution = dl.Function(self.solution_function_space)
-        dl.solve(self.diff_op ==  self.rhs, self.forward_solution, self.dirichlet_bc)
+        self.forward_solution = dl.Function(self.solution_function_space)       
+        self._solver.solve(self.forward_solution.vector(), self.rhs)
         return self.forward_solution, None
 
     def observe(self,PDE_solution_fun):
