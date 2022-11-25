@@ -99,7 +99,7 @@ class FEniCSPDE(PDE,ABC):
         
         # Create the PDE object 
         PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( 
-                (lhs_form, rhs_form1),
+                (lhs_form, rhs_form),
                 mesh, 
                 parameter_function_space=parameter_function_space,
                 solution_function_space=solution_function_space,
