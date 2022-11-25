@@ -62,8 +62,8 @@ class FEniCSPDE(PDE,ABC):
 
     reuse_assembled : bool, optional
         Flag to indicate whether the assembled (and possibly factored) 
-        differential operator should be reused (when the parameter is not 
-        changed).
+        differential operator should be reused when the parameter is not 
+        changed.
         If True, the assembled matrices are reused. If False, the assembled 
         matrices are not reused. Default is False.
 
@@ -105,7 +105,8 @@ class FEniCSPDE(PDE,ABC):
         self._solver = linalg_solve
 
         # Flag to store whether the solver has correct operator
-        # initially is set to False
+        # initially is set to False. These flags are shared between
+        # shallow copies of this class.
         self._flags = {"is_operator_valid": False}
 
         # Set the solver parameters
