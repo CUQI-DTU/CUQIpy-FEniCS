@@ -123,8 +123,7 @@ class FEniCSPDE(PDE,ABC):
         self.parameter_function_space = parameter_function_space
         self.dirichlet_bc = dirichlet_bc
         self.adjoint_dirichlet_bc = adjoint_dirichlet_bc
-        self.observation_operator = self._create_observation_operator(
-            observation_operator)
+        self.observation_operator = observation_operator
         self.reuse_assembled = reuse_assembled
 
         if linalg_solve is None:
@@ -232,6 +231,16 @@ class FEniCSPDE(PDE,ABC):
     def forward_solution(self, value):
         """ Set the forward solution of the PDE """
         self._forward_solution = value
+
+    @property
+    def observation_operator(self):
+        """ Get the observation operator """
+        return self._observation_operator
+
+    @observation_operator.setter
+    def observation_operator(self, value):
+        """ Set the observation operator """
+        self._observation_operator = self._create_observation_operator(value)
 
     @abstractmethod
     def assemble(self,parameter):
