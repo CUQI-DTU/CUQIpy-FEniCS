@@ -354,3 +354,53 @@ class Poisson:
     @bc.setter
     def bc(self, bc):
         self._bc = bc
+
+
+def test_observation_operator_setter():
+    """Test that the observation setter works as expected"""
+    # Create the variational problem
+    poisson = Poisson()
+    poisson.mesh = dl.UnitSquareMesh(50, 50)
+
+    # Set up model parameters
+    m = dl.Function(poisson.parameter_function_space)
+    m.vector()[:] = 1.0
+
+    # Create the observation operator
+    observation_operator = lambda m, u: u.vector().get_local()[200:205] 
+
+    # Create a PDE object (set observation_operator through setter)
+    PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        (poisson.lhs_form, poisson.rhs_form),
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bc,
+        observation_operator=None)
+    PDE1.observation_operator = observation_operator
+
+    # Create a PDE object (pass observation_operator as argument)  
+    PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        (poisson.lhs_form, poisson.rhs_form),
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bc,
+        observation_operator=observation_operator)
+
+    # Solve the first PDE
+    PDE1.assemble(m)
+    u1, info = PDE1.solve()
+    u1_obs = PDE1.observe(u1)
+
+    # Solve the second PDE
+    PDE2.assemble(m)
+    u2, info = PDE2.solve()
+    u2_obs = PDE2.observe(u2)
+
+    # Apply the observation operator directly
+    u3_obs = observation_operator(None, u2)
+
+    # Check that the solutions are the same
+    assert np.allclose(u1_obs, u2_obs) and np.allclose(u2_obs, u3_obs)
+    assert len(u1_obs) == 5
