@@ -5,6 +5,7 @@ import cuqipy_fenics
 import cuqi
 import matplotlib.pyplot as plt
 
+#%%
 # 1: Common settings
 x0 = 0
 x1 = 1
@@ -18,12 +19,15 @@ obs_times = np.linspace(t0, t1, 10)
 obs_loc = [0.2, 0.7]
 g1 = lambda t: np.exp(-t)
 g2 = 0
-u0 = lambda x: np.exp(-10 * (x - 0.5) ** 2)
+u0_func = lambda x: 1/30*(1-np.cos(2*np.pi*(L-x)/(L)))\
+                    +1/30*np.exp(-2*(10*(x-0.5))**2)+\
+                     1/30*np.exp(-2*(10*(x-0.8))**2)
 
 M = None
-library = "core" # "core" or "fenics"
+library = "core"  # "core" or "fenics"
 
-# Construct PDE and 
+#%%
+# 2: Construct PDE and 
 if library == "core":
     # Heat 1D CUQIpy Core
     grid = np.linspace(dx, L, N, endpoint=False)
@@ -33,26 +37,52 @@ if library == "core":
     def PDE_form(initial_condition, t): return (Dxx, np.zeros(N),
                                                 initial_condition)
 
-    x_exact_raw =1/30*(1-np.cos(2*np.pi*(L-grid)/(L)))\
-                    +1/30*np.exp(-2*(10*(grid-0.5))**2)+\
-                     1/30*np.exp(-2*(10*(grid-0.8))**2)
+
 
     PDE = cuqi.pde.TimeDependentLinearPDE(
         PDE_form, times, grid_sol=grid, grid_obs=grid_obs)
-
-    PDE.assemble(x_exact_raw)
-    u, _ = PDE.solve()
-    u_obs = PDE.observe(u)
+    u0 = u0_func(grid)
+    plt.plot(grid, u0, label="Initial condition")
+    plt.legend()
 
 elif library == "fenics":
     # Heat 1D CUQIpy-FEniCS
-    pass
+    # Heat 1D CUQIpy Core
+    mesh = dl.IntervalMesh(N, x0, x1) 
+    grid_obs = np.array(obs_loc)
+    V = dl.FunctionSpace(mesh, "Lagrange", 1)
+    u = dl.TrialFunction(V)
+    v = dl.TestFunction(V)
+
+    def PDE_form(m,u,p): 
+        return -dl.inner(dl.grad(u), dl.grad(v)) * dl.dx
+
+    Time_dependent_form = None
+    initial_condition_exp = cuqipy_fenics.utilities.ExpressionFromCallable(u0_func) 
+
+    u0 = dl.interpolate(initial_condition_exp, V)
+    dl.plot(u0, title="Initial condition")
+
+
+    #x_exact_raw =1/30*(1-np.cos(2*np.pi*(L-grid)/(L)))\
+    #                +1/30*np.exp(-2*(10*(grid-0.5))**2)+\
+    #                 1/30*np.exp(-2*(10*(grid-0.8))**2)
+
+    #PDE = cuqi.pde.TimeDependentLinearPDE(
+    #    PDE_form, times, grid_sol=grid, grid_obs=grid_obs)
+
 
 else:
     raise ValueError("Unknown library: %s" % library)
 
 #%%
-# Plot final solution
+# 3: Solve the PDE
+PDE.assemble(u0)
+u, _ = PDE.solve()
+u_obs = PDE.observe(u)
+
+#%%
+# 4: Plot final solution
 plt.plot(grid, u, label="Solution")
 plt.plot(grid_obs, u_obs, "o", label="Observations")
 plt.plot(grid, x_exact_raw, label="Initial condition")
