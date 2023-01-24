@@ -24,8 +24,8 @@ u0_func = lambda x: 1/30*(1-np.cos(2*np.pi*(L-x)/(L)))\
                      1/30*np.exp(-2*(10*(x-0.8))**2)
 
 M = None
-library = "core"  # "core" or "fenics"
-
+#library = "core"  # "core" or "fenics"
+library = "fenics"  
 #%%
 # 2: Construct PDE and 
 if library == "core":
@@ -77,16 +77,18 @@ else:
 
 #%%
 # 3: Solve the PDE
-PDE.assemble(u0)
-u, _ = PDE.solve()
-u_obs = PDE.observe(u)
+if False:
+    PDE.assemble(u0)
+    u, _ = PDE.solve()
+    u_obs = PDE.observe(u)
 
 #%%
 # 4: Plot final solution
-plt.plot(grid, u, label="Solution")
-plt.plot(grid_obs, u_obs, "o", label="Observations")
-plt.plot(grid, x_exact_raw, label="Initial condition")
-plt.legend()
+if False:
+    plt.plot(grid, u, label="Solution")
+    plt.plot(grid_obs, u_obs, "o", label="Observations")
+    plt.plot(grid, x_exact_raw, label="Initial condition")
+    plt.legend()
 
 # Plot the time evolution of the solution
 
