@@ -464,3 +464,8 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         else:
             raise NotImplementedError
         return observation_operator
+
+
+#TODO: add TimeDependentLinearPDE(LinearPDE)
+class TimeDependentLinearFEniCSPDE(FEniCSPDE):
+    pass
