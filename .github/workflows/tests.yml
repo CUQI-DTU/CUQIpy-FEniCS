@@ -23,9 +23,8 @@ jobs:
         with:
           auto-update-conda: true
           python-version: 3.8
-          mamba-version: "*"
-          channels: conda-forge,defaults
-          channel-priority: true
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
 
       - name: Conda info
         shell: bash -l {0}
