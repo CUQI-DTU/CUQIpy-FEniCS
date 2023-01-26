@@ -1,6 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from cuqi.pde import PDE
+from cuqi.pde import PDE, get_integrator_object
 from cuqi.samples import CUQIarray
 import dolfin as dl
 import ufl
@@ -278,10 +278,44 @@ class FEniCSPDE(PDE,ABC):
         else:
             return True
 
+    def _apply_obs_op(self, PDE_parameter_fun, PDE_solution_fun,):
+        obs = self.observation_operator(PDE_parameter_fun, PDE_solution_fun)
+        if isinstance(obs, ufl.algebra.Operator):
+            return dl.project(obs, self.solution_function_space)
+        elif isinstance(obs, dl.function.function.Function):
+            return obs
+        elif isinstance(obs, (np.ndarray, int, float)):
+            return obs
+        else:
+            raise NotImplementedError("obs_op output must be a number, a numpy array or a ufl.algebra.Operator type")
+    
 
-class SteadyStateLinearFEniCSPDE(FEniCSPDE):
-    """ Class representation of steady state linear PDEs defined in FEniCS. It accepts the same arguments as the base class `cuqipy_fenics.pde.FEniCSPDE`."""
+    def _create_observation_operator(self, observation_operator):
+        """
+        """
+        if observation_operator == 'potential':
+            observation_operator = lambda m, u: u 
+        elif observation_operator == 'gradu_squared':
+            observation_operator = lambda m, u: dl.inner(dl.grad(u),dl.grad(u))
+        elif observation_operator == 'power_density':
+            observation_operator = lambda m, u: m*dl.inner(dl.grad(u),dl.grad(u))
+        elif observation_operator == 'sigma_u':
+            observation_operator = lambda m, u: m*u
+        elif observation_operator == 'sigma_norm_gradu':
+            observation_operator = lambda m, u: m*dl.sqrt(dl.inner(dl.grad(u),dl.grad(u)))
+        elif observation_operator == None or callable(observation_operator):
+            observation_operator = observation_operator
+        else:
+            raise NotImplementedError
+        return observation_operator
 
+    def observe(self,PDE_solution_fun):
+        if self.observation_operator is None: 
+            return PDE_solution_fun
+        else:
+            return self._apply_obs_op(self.parameter, PDE_solution_fun)
+
+class LinearFEniCSPDE(FEniCSPDE):
     def assemble(self, parameter=None):
         self._solution_trial_function = dl.TrialFunction(
             self.solution_function_space)
@@ -298,26 +332,6 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
 
         else:
             self._assemble_full()
-
-
-
-    def with_updated_rhs(self, rhs_form):
-        """ A method to create a shallow copy of the PDE model with updated rhs 
-        form. The user can set the flag `reuse_assembled` to True in both PDE
-        objects to allow the two PDE objects to reuse the factorized 
-        differential operators. """
-
-        # Warn the user if reuse_assembled is set to False
-        if not self.reuse_assembled:
-            warnings.warn('The flag `reuse_assembled` is set to False. '+\
-                'The new PDE object will not be able to reuse the '+\
-                'factorized differential operators from the current PDE'+\
-                'object.')
-
-        new_pde = copy(self)
-        new_pde.rhs_form = rhs_form
-        new_pde.rhs = None
-        return new_pde
 
     def _assemble_full(self):
         """ Assemble the full PDE form """
@@ -369,16 +383,32 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         self.dirichlet_bc.apply(self.rhs)
 
 
+class SteadyStateLinearFEniCSPDE(LinearFEniCSPDE):
+    """ Class representation of steady state linear PDEs defined in FEniCS. It accepts the same arguments as the base class `cuqipy_fenics.pde.FEniCSPDE`."""
+
+    def with_updated_rhs(self, rhs_form):
+        """ A method to create a shallow copy of the PDE model with updated rhs 
+        form. The user can set the flag `reuse_assembled` to True in both PDE
+        objects to allow the two PDE objects to reuse the factorized 
+        differential operators. """
+
+        # Warn the user if reuse_assembled is set to False
+        if not self.reuse_assembled:
+            warnings.warn('The flag `reuse_assembled` is set to False. '+\
+                'The new PDE object will not be able to reuse the '+\
+                'factorized differential operators from the current PDE'+\
+                'object.')
+
+        new_pde = copy(self)
+        new_pde.rhs_form = rhs_form
+        new_pde.rhs = None
+        return new_pde
+
+
     def solve(self):
         self.forward_solution = dl.Function(self.solution_function_space)       
         self._solver.solve(self.forward_solution.vector(), self.rhs)
         return self.forward_solution, None
-
-    def observe(self,PDE_solution_fun):
-        if self.observation_operator is None: 
-            return PDE_solution_fun
-        else:
-            return self._apply_obs_op(self.parameter, PDE_solution_fun)
 
     def gradient_wrt_parameter(self, direction, wrt, **kwargs):
         """ Compute the gradient of the PDE with respect to the parameter
@@ -434,38 +464,45 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         return gradient
 
 
-    def _apply_obs_op(self, PDE_parameter_fun, PDE_solution_fun,):
-        obs = self.observation_operator(PDE_parameter_fun, PDE_solution_fun)
-        if isinstance(obs, ufl.algebra.Operator):
-            return dl.project(obs, self.solution_function_space)
-        elif isinstance(obs, dl.function.function.Function):
-            return obs
-        elif isinstance(obs, (np.ndarray, int, float)):
-            return obs
-        else:
-            raise NotImplementedError("obs_op output must be a number, a numpy array or a ufl.algebra.Operator type")
-    
 
-    def _create_observation_operator(self, observation_operator):
-        """
-        """
-        if observation_operator == 'potential':
-            observation_operator = lambda m, u: u 
-        elif observation_operator == 'gradu_squared':
-            observation_operator = lambda m, u: dl.inner(dl.grad(u),dl.grad(u))
-        elif observation_operator == 'power_density':
-            observation_operator = lambda m, u: m*dl.inner(dl.grad(u),dl.grad(u))
-        elif observation_operator == 'sigma_u':
-            observation_operator = lambda m, u: m*u
-        elif observation_operator == 'sigma_norm_gradu':
-            observation_operator = lambda m, u: m*dl.sqrt(dl.inner(dl.grad(u),dl.grad(u)))
-        elif observation_operator == None or callable(observation_operator):
-            observation_operator = observation_operator
-        else:
-            raise NotImplementedError
-        return observation_operator
-
-
-#TODO: add TimeDependentLinearPDE(LinearPDE)
+#TODO: add TimeDependentLinearPDE(LinearPDE) class
 class TimeDependentLinearFEniCSPDE(FEniCSPDE):
-    pass
+    """ Class representation of steady state linear PDEs defined in FEniCS. It accepts the same arguments as the base class `cuqipy_fenics.pde.FEniCSPDE`."""
+    def __init__(self, PDE_form, mesh, solution_function_space,
+                 parameter_function_space, time_steps, method='forward_euler', **kwargs):
+        
+        super().__init__(PDE_form, mesh, solution_function_space,
+                 parameter_function_space, **kwargs)
+        self.time_steps = time_steps
+        self.method = method
+        #TODO: refactor this hack
+        self.PDE_form_t = self.PDE_form
+
+    def assemble_step(self, t, parameter=None):
+        # evaluate the form at a time
+        # TODO: refactor this hack
+        self.PDE_form = lambda parameter, solution, test: self.PDE_form_t(parameter, solution, test, t)
+        self.assemble(parameter)
+         
+    def solve(self):
+        self.forward_solution = dl.Function(self.solution_function_space)       
+        self._solver.solve(self.forward_solution.vector(), self.rhs)
+        #return self.forward_solution, None
+
+        for idx, t in enumerate(self.time_steps[:-1]):
+            dt = self.time_steps[idx+1] - t
+            self.assemble_step(t)
+            if idx == 0:
+                u = self.initial_condition
+            u, _ = self.method.propagate(u, dt, self.rhs, self.diff_op, self._solve_linear_system)
+        info = None
+
+        return u, info
+
+    @property
+    def method(self):
+        return self._method
+
+    @method.setter
+    def method(self, value):
+        self._method = get_integrator_object(value)
