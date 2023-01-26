@@ -54,11 +54,15 @@ elif library == "fenics":
     u = dl.TrialFunction(V)
     v = dl.TestFunction(V)
 
-    def PDE_form(m,u,p): 
-        return -dl.inner(dl.grad(u), dl.grad(v)) * dl.dx
+    def PDE_form(m,u,p,t): 
+        return -m*dl.inner(dl.grad(u), dl.grad(p)) * dl.dx
 
     Time_dependent_form = None
     initial_condition_exp = cuqipy_fenics.utilities.ExpressionFromCallable(u0_func) 
+
+    PDE = cuqipy_fenics.pde.TimeDependentLinearFEniCSPDE(PDE_form, mesh, V,
+                 V, times)
+
 
     u0 = dl.interpolate(initial_condition_exp, V)
     dl.plot(u0, title="Initial condition")
