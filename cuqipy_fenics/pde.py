@@ -1,6 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from cuqi.pde import PDE, get_integrator_object
+from cuqi.pde import PDE
+from .time_integrator import BackwardEuler
 from cuqi.samples import CUQIarray
 import dolfin as dl
 import ufl
@@ -340,7 +341,7 @@ class LinearFEniCSPDE(FEniCSPDE):
                 self.rhs is not None:
             return
 
-        diff_op = dl.lhs(self.PDE_form(self.parameter,
+        self._diff_op = dl.lhs(self.PDE_form(self.parameter,
                                        self._solution_trial_function,
                                        self._solution_test_function))
         self.rhs = dl.rhs(self.PDE_form(self.parameter,
@@ -350,12 +351,12 @@ class LinearFEniCSPDE(FEniCSPDE):
         if self.rhs.empty():
             self.rhs = dl.Constant(0)*self._solution_test_function*dl.dx
 
-        diff_op = dl.assemble(diff_op)
+        self._diff_op = dl.assemble(self._diff_op)
         self.rhs = dl.assemble(self.rhs)
 
-        self.dirichlet_bc.apply(diff_op)
+        self.dirichlet_bc.apply(self._diff_op)
         self.dirichlet_bc.apply(self.rhs)
-        self._solver.set_operator(diff_op)
+        self._solver.set_operator(self._diff_op)
         self._flags["is_operator_valid"] = True
 
     def _assemble_lhs(self):
@@ -364,12 +365,12 @@ class LinearFEniCSPDE(FEniCSPDE):
                 and self._flags["is_operator_valid"]:
             return
 
-        diff_op = dl.assemble(self.lhs_form(self.parameter,
+        self._diff_op = dl.assemble(self.lhs_form(self.parameter,
                                             self._solution_trial_function,
                                             self._solution_test_function))
 
-        self.dirichlet_bc.apply(diff_op)
-        self._solver.set_operator(diff_op)
+        self.dirichlet_bc.apply(self._diff_op)
+        self._solver.set_operator(self._diff_op)
         self._flags["is_operator_valid"] = True
 
     def _assemble_rhs(self):
@@ -466,43 +467,48 @@ class SteadyStateLinearFEniCSPDE(LinearFEniCSPDE):
 
 
 #TODO: add TimeDependentLinearPDE(LinearPDE) class
-class TimeDependentLinearFEniCSPDE(FEniCSPDE):
+class TimeDependentLinearFEniCSPDE(LinearFEniCSPDE):
     """ Class representation of steady state linear PDEs defined in FEniCS. It accepts the same arguments as the base class `cuqipy_fenics.pde.FEniCSPDE`."""
     def __init__(self, PDE_form, mesh, solution_function_space,
-                 parameter_function_space, time_steps, method='forward_euler', **kwargs):
+                 parameter_function_space, 
+                 dirichlet_bc,
+                 time_steps, method=ForwardEuler(), **kwargs):
         
         super().__init__(PDE_form, mesh, solution_function_space,
-                 parameter_function_space, **kwargs)
+                 parameter_function_space, dirichlet_bc, **kwargs)
         self.time_steps = time_steps
         self.method = method
+        test_function = dl.TestFunction(self.solution_function_space)
+        trial_function = dl.TrialFunction(self.solution_function_space)
+        self._I = dl.assemble(ufl.inner(test_function, trial_function) * ufl.dx)
         #TODO: refactor this hack
         self.PDE_form_t = self.PDE_form
 
-    def assemble_step(self, t, parameter=None):
+    def assemble_time_dependant_step(self, t, parameter=None):
         # evaluate the form at a time
         # TODO: refactor this hack
-        self.PDE_form = lambda parameter, solution, test: self.PDE_form_t(parameter, solution, test, t)
+        # TODO: replace form to PDE_form
+        self._form = lambda parameter, solution, test: self.PDE_form_t(parameter, solution, test, t)
         self.assemble(parameter)
          
-    def solve(self):
-        self.forward_solution = dl.Function(self.solution_function_space)       
-        self._solver.solve(self.forward_solution.vector(), self.rhs)
-        #return self.forward_solution, None
+    def solve(self, parameter=None):
+        #TODO: refactor this hack (parameter is general)
+        u = parameter
 
         for idx, t in enumerate(self.time_steps[:-1]):
             dt = self.time_steps[idx+1] - t
-            self.assemble_step(t)
-            if idx == 0:
-                u = self.initial_condition
-            u, _ = self.method.propagate(u, dt, self.rhs, self.diff_op, self._solve_linear_system)
+            #hack: self.assemble_step(t, ones)
+            self.assemble_time_dependant_step(t, parameter)
+            u, _ = self.method.propagate(u, dt, self.rhs, self._diff_op, self._solver, self._I, self.dirichlet_bc.apply)
+
         info = None
 
         return u, info
 
-    @property
-    def method(self):
-        return self._method
+    def gradient_wrt_parameter(self):
+        """ Compute gradient of the PDE weak form w.r.t. the parameter"""
+        raise NotImplementedError 
 
-    @method.setter
-    def method(self, value):
-        self._method = get_integrator_object(value)
+    #@PDE_form.setter
+    #def PDE_form(self, value):
+    #    self._form = value
