@@ -1,6 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from cuqi.pde import PDE
+from .time_integrator import BackwardEuler
 from cuqi.samples import CUQIarray
 import dolfin as dl
 import ufl
@@ -278,10 +279,44 @@ class FEniCSPDE(PDE,ABC):
         else:
             return True
 
+    def _apply_obs_op(self, PDE_parameter_fun, PDE_solution_fun,):
+        obs = self.observation_operator(PDE_parameter_fun, PDE_solution_fun)
+        if isinstance(obs, ufl.algebra.Operator):
+            return dl.project(obs, self.solution_function_space)
+        elif isinstance(obs, dl.function.function.Function):
+            return obs
+        elif isinstance(obs, (np.ndarray, int, float)):
+            return obs
+        else:
+            raise NotImplementedError("obs_op output must be a number, a numpy array or a ufl.algebra.Operator type")
+    
 
-class SteadyStateLinearFEniCSPDE(FEniCSPDE):
-    """ Class representation of steady state linear PDEs defined in FEniCS. It accepts the same arguments as the base class `cuqipy_fenics.pde.FEniCSPDE`."""
+    def _create_observation_operator(self, observation_operator):
+        """
+        """
+        if observation_operator == 'potential':
+            observation_operator = lambda m, u: u 
+        elif observation_operator == 'gradu_squared':
+            observation_operator = lambda m, u: dl.inner(dl.grad(u),dl.grad(u))
+        elif observation_operator == 'power_density':
+            observation_operator = lambda m, u: m*dl.inner(dl.grad(u),dl.grad(u))
+        elif observation_operator == 'sigma_u':
+            observation_operator = lambda m, u: m*u
+        elif observation_operator == 'sigma_norm_gradu':
+            observation_operator = lambda m, u: m*dl.sqrt(dl.inner(dl.grad(u),dl.grad(u)))
+        elif observation_operator == None or callable(observation_operator):
+            observation_operator = observation_operator
+        else:
+            raise NotImplementedError
+        return observation_operator
 
+    def observe(self,PDE_solution_fun):
+        if self.observation_operator is None: 
+            return PDE_solution_fun
+        else:
+            return self._apply_obs_op(self.parameter, PDE_solution_fun)
+
+class LinearFEniCSPDE(FEniCSPDE):
     def assemble(self, parameter=None):
         self._solution_trial_function = dl.TrialFunction(
             self.solution_function_space)
@@ -299,7 +334,58 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         else:
             self._assemble_full()
 
+    def _assemble_full(self):
+        """ Assemble the full PDE form """
+        if self.reuse_assembled\
+                and self._flags["is_operator_valid"] and\
+                self.rhs is not None:
+            return
 
+        self._diff_op = dl.lhs(self.PDE_form(self.parameter,
+                                       self._solution_trial_function,
+                                       self._solution_test_function))
+        self.rhs = dl.rhs(self.PDE_form(self.parameter,
+                                        self._solution_trial_function,
+                                        self._solution_test_function))
+
+        if self.rhs.empty():
+            self.rhs = dl.Constant(0)*self._solution_test_function*dl.dx
+
+        self._diff_op = dl.assemble(self._diff_op)
+        self.rhs = dl.assemble(self.rhs)
+
+        self.dirichlet_bc.apply(self._diff_op)
+        self.dirichlet_bc.apply(self.rhs)
+        self._solver.set_operator(self._diff_op)
+        self._flags["is_operator_valid"] = True
+
+    def _assemble_lhs(self):
+        """ Assemble the lhs form """
+        if self.reuse_assembled\
+                and self._flags["is_operator_valid"]:
+            return
+
+        self._diff_op = dl.assemble(self.lhs_form(self.parameter,
+                                            self._solution_trial_function,
+                                            self._solution_test_function))
+
+        self.dirichlet_bc.apply(self._diff_op)
+        self._solver.set_operator(self._diff_op)
+        self._flags["is_operator_valid"] = True
+
+    def _assemble_rhs(self):
+        """ Assemble the rhs form """
+        if self.reuse_assembled\
+                and self.rhs is not None:
+            return
+
+        self.rhs = dl.assemble(self.rhs_form(self.parameter,
+                                             self._solution_test_function))
+        self.dirichlet_bc.apply(self.rhs)
+
+
+class SteadyStateLinearFEniCSPDE(LinearFEniCSPDE):
+    """ Class representation of steady state linear PDEs defined in FEniCS. It accepts the same arguments as the base class `cuqipy_fenics.pde.FEniCSPDE`."""
 
     def with_updated_rhs(self, rhs_form):
         """ A method to create a shallow copy of the PDE model with updated rhs 
@@ -319,66 +405,11 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         new_pde.rhs = None
         return new_pde
 
-    def _assemble_full(self):
-        """ Assemble the full PDE form """
-        if self.reuse_assembled\
-                and self._flags["is_operator_valid"] and\
-                self.rhs is not None:
-            return
-
-        diff_op = dl.lhs(self.PDE_form(self.parameter,
-                                       self._solution_trial_function,
-                                       self._solution_test_function))
-        self.rhs = dl.rhs(self.PDE_form(self.parameter,
-                                        self._solution_trial_function,
-                                        self._solution_test_function))
-
-        if self.rhs.empty():
-            self.rhs = dl.Constant(0)*self._solution_test_function*dl.dx
-
-        diff_op = dl.assemble(diff_op)
-        self.rhs = dl.assemble(self.rhs)
-
-        self.dirichlet_bc.apply(diff_op)
-        self.dirichlet_bc.apply(self.rhs)
-        self._solver.set_operator(diff_op)
-        self._flags["is_operator_valid"] = True
-
-    def _assemble_lhs(self):
-        """ Assemble the lhs form """
-        if self.reuse_assembled\
-                and self._flags["is_operator_valid"]:
-            return
-
-        diff_op = dl.assemble(self.lhs_form(self.parameter,
-                                            self._solution_trial_function,
-                                            self._solution_test_function))
-
-        self.dirichlet_bc.apply(diff_op)
-        self._solver.set_operator(diff_op)
-        self._flags["is_operator_valid"] = True
-
-    def _assemble_rhs(self):
-        """ Assemble the rhs form """
-        if self.reuse_assembled\
-                and self.rhs is not None:
-            return
-
-        self.rhs = dl.assemble(self.rhs_form(self.parameter,
-                                             self._solution_test_function))
-        self.dirichlet_bc.apply(self.rhs)
-
 
     def solve(self):
         self.forward_solution = dl.Function(self.solution_function_space)       
         self._solver.solve(self.forward_solution.vector(), self.rhs)
         return self.forward_solution, None
-
-    def observe(self,PDE_solution_fun):
-        if self.observation_operator is None: 
-            return PDE_solution_fun
-        else:
-            return self._apply_obs_op(self.parameter, PDE_solution_fun)
 
     def gradient_wrt_parameter(self, direction, wrt, **kwargs):
         """ Compute the gradient of the PDE with respect to the parameter
@@ -434,33 +465,50 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         return gradient
 
 
-    def _apply_obs_op(self, PDE_parameter_fun, PDE_solution_fun,):
-        obs = self.observation_operator(PDE_parameter_fun, PDE_solution_fun)
-        if isinstance(obs, ufl.algebra.Operator):
-            return dl.project(obs, self.solution_function_space)
-        elif isinstance(obs, dl.function.function.Function):
-            return obs
-        elif isinstance(obs, (np.ndarray, int, float)):
-            return obs
-        else:
-            raise NotImplementedError("obs_op output must be a number, a numpy array or a ufl.algebra.Operator type")
-    
 
-    def _create_observation_operator(self, observation_operator):
-        """
-        """
-        if observation_operator == 'potential':
-            observation_operator = lambda m, u: u 
-        elif observation_operator == 'gradu_squared':
-            observation_operator = lambda m, u: dl.inner(dl.grad(u),dl.grad(u))
-        elif observation_operator == 'power_density':
-            observation_operator = lambda m, u: m*dl.inner(dl.grad(u),dl.grad(u))
-        elif observation_operator == 'sigma_u':
-            observation_operator = lambda m, u: m*u
-        elif observation_operator == 'sigma_norm_gradu':
-            observation_operator = lambda m, u: m*dl.sqrt(dl.inner(dl.grad(u),dl.grad(u)))
-        elif observation_operator == None or callable(observation_operator):
-            observation_operator = observation_operator
-        else:
-            raise NotImplementedError
-        return observation_operator
+#TODO: add TimeDependentLinearPDE(LinearPDE) class
+class TimeDependentLinearFEniCSPDE(LinearFEniCSPDE):
+    """ Class representation of steady state linear PDEs defined in FEniCS. It accepts the same arguments as the base class `cuqipy_fenics.pde.FEniCSPDE`."""
+    def __init__(self, PDE_form, mesh, solution_function_space,
+                 parameter_function_space, 
+                 dirichlet_bc,
+                 time_steps, method=ForwardEuler(), **kwargs):
+        
+        super().__init__(PDE_form, mesh, solution_function_space,
+                 parameter_function_space, dirichlet_bc, **kwargs)
+        self.time_steps = time_steps
+        self.method = method
+        test_function = dl.TestFunction(self.solution_function_space)
+        trial_function = dl.TrialFunction(self.solution_function_space)
+        self._I = dl.assemble(ufl.inner(test_function, trial_function) * ufl.dx)
+        #TODO: refactor this hack
+        self.PDE_form_t = self.PDE_form
+
+    def assemble_time_dependant_step(self, t, parameter=None):
+        # evaluate the form at a time
+        # TODO: refactor this hack
+        # TODO: replace form to PDE_form
+        self._form = lambda parameter, solution, test: self.PDE_form_t(parameter, solution, test, t)
+        self.assemble(parameter)
+         
+    def solve(self, parameter=None):
+        #TODO: refactor this hack (parameter is general)
+        u = parameter
+
+        for idx, t in enumerate(self.time_steps[:-1]):
+            dt = self.time_steps[idx+1] - t
+            #hack: self.assemble_step(t, ones)
+            self.assemble_time_dependant_step(t, parameter)
+            u, _ = self.method.propagate(u, dt, self.rhs, self._diff_op, self._solver, self._I, self.dirichlet_bc.apply)
+
+        info = None
+
+        return u, info
+
+    def gradient_wrt_parameter(self):
+        """ Compute gradient of the PDE weak form w.r.t. the parameter"""
+        raise NotImplementedError 
+
+    #@PDE_form.setter
+    #def PDE_form(self, value):
+    #    self._form = value
