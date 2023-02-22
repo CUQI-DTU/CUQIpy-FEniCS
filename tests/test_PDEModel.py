@@ -14,7 +14,7 @@ def test_model_input():
 
     # Test passing a CUQIarray containing parameters
     u = dl.Function(V)
-    u_CUQIarray = cuqi.samples.CUQIarray(u.vector().get_local(), is_par=True, geometry=model.domain_geometry)
+    u_CUQIarray = cuqi.array.CUQIarray(u.vector().get_local(), is_par=True, geometry=model.domain_geometry)
     y = model(u_CUQIarray)
 
     # Test passing parameters as a numpy array
@@ -24,13 +24,13 @@ def test_model_input():
 
     # Test passing a CUQIarray containing dolfin function
     u = dl.Function(V)
-    u_CUQIarray = cuqi.samples.CUQIarray(u, is_par=False, geometry=model.domain_geometry)
+    u_CUQIarray = cuqi.array.CUQIarray(u, is_par=False, geometry=model.domain_geometry)
     y = model(u_CUQIarray)
 
     # Test passing a CUQIarray containing dolfin function wrapped in np.array
     # This is not recommended, but should work
     u = dl.Function(V)
-    u_CUQIarray = cuqi.samples.CUQIarray(np.array(u, dtype='O'), is_par=False, geometry=model.domain_geometry)
+    u_CUQIarray = cuqi.array.CUQIarray(np.array(u, dtype='O'), is_par=False, geometry=model.domain_geometry)
     y = model(u_CUQIarray)  
 
     # Test passing a dolfin function (should fail)
@@ -244,7 +244,7 @@ def test_with_updated_rhs(copy_reference, case):
 
     # Create exact solution and data
     np.random.seed(0)
-    exact_solution = cuqi.samples.CUQIarray(
+    exact_solution = cuqi.array.CUQIarray(
         np.random.randn(domain_geometry.par_dim),
         is_par=True, geometry=domain_geometry)
 
