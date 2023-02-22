@@ -1,7 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from cuqi.pde import PDE
-from cuqi.array import CUQIarray
+from cuqi.samples import CUQIarray
 import dolfin as dl
 import ufl
 from copy import copy

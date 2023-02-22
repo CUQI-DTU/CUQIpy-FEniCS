@@ -120,7 +120,7 @@ class FEniCSDiffusion1D(BayesianProblem):
             exactSolution = np.ones(N)*.8
             exactSolution[np.where(grid > endpoint/2.0)
                           ] = fun(grid[np.where(grid > endpoint/2.0)])
-            exactSolution = cuqi.array.CUQIarray(
+            exactSolution = cuqi.samples.CUQIarray(
                 exactSolution, geometry=domain_geometry)
 
         # Generate exact data
@@ -132,7 +132,7 @@ class FEniCSDiffusion1D(BayesianProblem):
         noise = np.random.normal(0, 1, b_exact.shape)
         alpha = np.linalg.norm(b_exact)/(np.sqrt(SNR)*np.linalg.norm(noise))
 
-        data = cuqi.array.CUQIarray(
+        data = cuqi.samples.CUQIarray(
             b_exact + alpha*noise, geometry=range_geometry)
 
         # Create likelihood

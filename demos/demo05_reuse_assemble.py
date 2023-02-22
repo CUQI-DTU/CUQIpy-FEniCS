@@ -84,7 +84,7 @@ x = cuqi.distribution.Gaussian(mean=np.zeros(cuqi_model1.domain_dim),
 
 
 #%% 2.6. Create exact solution and data
-exact_solution =cuqi.array.CUQIarray( 
+exact_solution =cuqi.samples.CUQIarray( 
     np.random.randn(domain_geometry.par_dim),
     is_par=True,geometry= domain_geometry )
 
