@@ -15,8 +15,8 @@ import time
 #%% 1. Set up FEniCS PDE
 #%% 1.1. Set up mesh
 ndim = 1
-nx = 10
-ny = 10
+nx = 20
+ny = 20
 mesh = dl.UnitSquareMesh(nx, ny)
 
 #%% 1.2. Set up function spaces
@@ -73,7 +73,7 @@ B =np.zeros((len(bnd_idx),solution_function_space.dim() ))
 for idx in range(len(bnd_idx)):
     B[idx,bnd_idx[idx]] = 1 
 
-observation_operator = None #B# lambda solution : B@solution.vector().get_local()
+observation_operator = None#B# lambda solution : B@solution.vector().get_local()
 
 #obsrv = observation_operator(test)
 
@@ -117,7 +117,7 @@ elif exact_choice == 2: # Custom signal
     plt.colorbar(im[0])
 
 elif exact_choice == 3: #square-circle # Custom signal
-    expr = dl.Expression("7*(pow(r,2)>pow(x[0]-c0,2)+pow(x[1]-c1,2))+1+12*(x[0]<0.3)", r = 0.2, c0=0.8, c1=0.4, degree=1)
+    expr = dl.Expression("9*(pow(r,2)>pow(x[0]-c0,2)+pow(x[1]-c1,2))+1.1+7*(x[0]<0.3)", r = 0.2, c0=0.8, c1=0.4, degree=1)
     exact_fun = dl.interpolate(expr, parameter_function_space)
     exact_solution =cuqi.array.CUQIarray( exact_fun,is_par=False,geometry= domain_geometry )
     im = exact_solution.plot()
@@ -165,11 +165,11 @@ plt.plot(scipy_grad , '--')
 
 
 #%% 2.10. Sample posterior
-Ns = 50
+Ns = 500
 #sampler = cuqi.sampler.MALA(cuqi_posterior, scale = 2/solution_function_space.dim(),x0=np.zeros(domain_geometry.dim))
 t0 = time.time()
 sampler = cuqi.sampler.NUTS(cuqi_posterior)
-samples = sampler.sample_adapt(Ns,Nb=10)
+samples = sampler.sample_adapt(Ns,Nb=100)
 t1 = time.time()
 print("Sampling time: ", t1-t0)
 
