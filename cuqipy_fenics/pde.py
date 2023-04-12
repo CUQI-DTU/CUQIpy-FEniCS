@@ -400,6 +400,7 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         # Compute forward solution
         # TODO: Use stored forward solution if available and wrt == self.parameter
         self.parameter = wrt
+        self.assemble()
         self.forward_solution, _ = self.solve()
 
         # Compute adjoint solution
