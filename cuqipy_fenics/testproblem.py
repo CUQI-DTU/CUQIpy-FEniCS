@@ -32,7 +32,7 @@ class FEniCSDiffusion1D(BayesianProblem):
         Signal-to-noise ratio.
     
     mapping: str or function
-        mapping to parametrize the Bayesain parameters. If provided as string, it can take one of the values: ['exponential'] 
+        mapping to parametrize the Bayesian parameters. If provided as string, it can take one of the values: ['exponential']
 
     Attributes
     ----------
@@ -40,7 +40,7 @@ class FEniCSDiffusion1D(BayesianProblem):
         Generated (noisy) data
 
     model : cuqi.model.Model
-        Deconvolution forward model
+        The forward model
 
     prior : cuqi.distribution.Distribution
         Distribution of the prior (Default = None)
@@ -146,4 +146,5 @@ class FEniCSDiffusion1D(BayesianProblem):
         self.exactSolution = exactSolution
         self.exactData = b_exact
         self.infoString = f"Noise type: Additive i.i.d. noise with mean zero and signal to noise ratio: {SNR}"
+
 
