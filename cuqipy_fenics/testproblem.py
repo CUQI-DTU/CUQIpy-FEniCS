@@ -208,7 +208,6 @@ class FEniCSPoisson2D(BayesianProblem):
 
         # Create the function space
         V = dl.FunctionSpace(mesh, 'Lagrange', 1)
-        p = dl.TestFunction(V) # Test function
 
         # Set up boundary conditions
         if bc_type is None:
@@ -216,8 +215,10 @@ class FEniCSPoisson2D(BayesianProblem):
         if bc_values is None:
             bc_values = [0, 0, 0, 0]
         bc_values = [value_to_expression(bc_value) for bc_value in bc_values]
+
+        self._create_boundaries_subdomains(mesh)
         dirichlet_bcs = self._set_up_dirichlet_bcs(V, bc_type, bc_values)
-        neumann_bcs = self._set_up_neumann_bcs(p, bc_type, bc_values)
+        neumann_bcs = self._set_up_neumann_bcs(V, bc_type, bc_values)
 
         # Set up the source term
         if f is None:
@@ -291,37 +292,65 @@ class FEniCSPoisson2D(BayesianProblem):
         self.exactData = exact_data
         self.infoString = f"Noise type: Additive i.i.d. noise with mean zero and signal to noise ratio: {SNR}"
 
+    def _create_boundaries_subdomains(self):
+        """
+        Create subdomains for the boundary conditions.
+        """
+        class Left(dl.SubDomain):
+            def inside(self, x, on_boundary):
+                return on_boundary and x[0] < dl.DOLFIN_EPS
+            
+        class Bottom(dl.SubDomain):
+            def inside(self, x, on_boundary):
+                return on_boundary and x[1] < dl.DOLFIN_EPS
+            
+        class Right(dl.SubDomain):
+            def inside(self, x, on_boundary):
+                return on_boundary and x[0] > 1.0 - dl.DOLFIN_EPS
+        
+        class Top(dl.SubDomain):
+            def inside(self, x, on_boundary):
+                return on_boundary and x[1] > 1.0 - dl.DOLFIN_EPS
+            
+        self._subdomains = [Left(), Bottom(), Right(), Top()]
+    
 
-    def _set_up_dirichlet_bc(self, V, bc_type, bc_values):
+    def _set_up_dirichlet_bcs(self, V, bc_types, bc_values):
         """
         Set up Dirichlet boundary conditions for the Poisson PDE problem defined
         on the unit square mesh, where V is the function space.
         """
-
         dirichlet_bcs = []
-        dirichlet_bc_locations = [lambda x, on_boundary: on_boundary and x[0] < dl.DOLFIN_EPS,
-                                   lambda x, on_boundary: on_boundary and x[1] < dl.DOLFIN_EPS,
-                                   lambda x, on_boundary: on_boundary and x[0] > 1.0 - dl.DOLFIN_EPS,
-                                   lambda x, on_boundary: on_boundary and x[1] > 1.0 - dl.DOLFIN_EPS]
         
-        for i, bc in enumerate(bc_type):
+        for i, bc in enumerate(bc_types):
             if bc.lower() == 'dirichlet':
-                dirichlet_bcs.append(dl.DirichletBC(V, bc_values[i], dirichlet_bc_locations[i]))
+                dirichlet_bcs.append(dl.DirichletBC(V, bc_values[i], self._subdomains[i].inside))
 
         return dirichlet_bcs
     
-    def _set_up_neumann_bcs(self, p, bc_type, bc_values):
+    def _set_up_neumann_bcs(self, V, bc_types, bc_values):
         """
         Set up Neumann boundary conditions for the Poisson PDE problem defined
-        on the unit square mesh, where p is the FEM test function.
+        on the unit square mesh, where V is the function space.
         """
-        neumann_bcs = None
-        
-        for i, bc in enumerate(bc_type):
-            if bc.lower() == 'neumann':
+        p = dl.TestFunction(V) # Test function
+
+        boundary_markers = dl.MeshFunction('size_t', V.mesh(), V.mesh.topology().dim()-1)
+        boundary_markers.set_all(0)
+        for i, subdomain in enumerate(self._subdomains):
+            subdomain.mark(boundary_markers, i+1)
+        ds = dl.Measure('ds', domain=V.mesh(), subdomain_data=boundary_markers)
+
+        V.mesh().topology().dim()
+
+        for i, bc_type in enumerate(bc_types):
+            if bc_type.lower() == 'neumann':
                 if neumann_bcs is None:
-                    neumann_bcs = p*bc_values[i]*dl.ds[i]
+                    neumann_bcs = bc_values[i]*p*ds(i+1)
                 else:
-                    neumann_bcs += p*bc_values[i]*dl.ds[i]
+                    neumann_bcs += bc_values[i]*p*ds(i+1)
+
+        if neumann_bcs is None:
+            neumann_bcs = dl.Constant(0)*p*dl.ds
 
         return neumann_bcs
