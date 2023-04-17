@@ -156,7 +156,6 @@ class FEniCSDiffusion1D(BayesianProblem):
         self.infoString = f"Noise type: Additive i.i.d. noise with mean zero and signal to noise ratio: {SNR}"
 
 
-
 class FEniCSPoisson2D(BayesianProblem):
     """
     2D Diffusion PDE-based Bayesian inverse problem that uses FEniCS. 
@@ -205,18 +204,18 @@ class FEniCSPoisson2D(BayesianProblem):
         | A dictionary of keyword arguments that the underlying geometry accepts. (Passed to the underlying geometry when field type is "KL" or None). For example, for "KL" field type, the dictionary can be `{"length_scale": 0.1, "num_terms": 32}`. If None is passed as field_type, this argument is ignored.
 
     mapping : str or callable , Default None
-        | mapping to parametrize the Bayesian parameters. If None, no mapping is applied. If provided as callable , it should take a FEniCS function as input and return a FEniCS form.
+        | mapping to parametrize the Bayesian parameters. If None, no mapping is applied. If provided as callable, it should take a FEniCS function as input and return a FEniCS form.
         If provided as string, it can take one of the values: 
         | 'exponential' : Parameterization in which the unknown parameter becomes the log of the diffusion coefficient.
 
     prior : cuqi.distribution.Distribution, Default Gaussian
         | Distribution of the prior. Needs to be i.i.d standard Gaussian if field_type is "KL". The prior name property, i.e., `prior.name` is expected to be "x".
     """
-    
+
     def __init__(self, dim=(32, 32), bc_type=None, bc_values=None,
                  exactSolution=None, f=None, relative_noise_std=None, field_type=None,
                  field_params=None, mapping=None, prior=None):
-        
+
         # Create the mesh
         mesh = dl.UnitSquareMesh(dim[0], dim[1])
 
@@ -231,8 +230,10 @@ class FEniCSPoisson2D(BayesianProblem):
         bc_values = [to_dolfin_expression(bc_value) for bc_value in bc_values]
 
         subdomains = self._create_boundaries_subdomains(mesh)
-        dirichlet_bcs = self._set_up_dirichlet_bcs(V, bc_type, bc_values, subdomains)
-        neumann_bcs = self._set_up_neumann_bcs(V, bc_type, bc_values, subdomains)
+        dirichlet_bcs = self._set_up_dirichlet_bcs(
+            V, bc_type, bc_values, subdomains)
+        neumann_bcs = self._set_up_neumann_bcs(
+            V, bc_type, bc_values, subdomains)
 
         # Set up the source term
         if f is None:
@@ -240,16 +241,16 @@ class FEniCSPoisson2D(BayesianProblem):
         else:
             f = to_dolfin_expression(f)
 
-        # Set up the variational problem form 
+        # Set up the variational problem form
         if mapping is None:
-            parameter_form = lambda m: m
+            def parameter_form(m): return m
         elif mapping == 'exponential':
-            parameter_form = lambda m: ufl.exp(m)
+            def parameter_form(m): return ufl.exp(m)
 
-        def form(m,u,p):
+        def form(m, u, p):
             return parameter_form(m)*ufl.inner(ufl.grad(u), ufl.grad(p))*ufl.dx\
-                    - f*p*ufl.dx\
-                    - neumann_bcs(m, p)
+                - f*p*ufl.dx\
+                - neumann_bcs(m, p)
 
         # Create the CUQI PDE object
         PDE = SteadyStateLinearFEniCSPDE(
@@ -276,25 +277,27 @@ class FEniCSPoisson2D(BayesianProblem):
         # Create the forward model
         A = PDEModel(PDE, domain_geometry=G_domain, range_geometry=G_range)
 
-        # Create the prior 
+        # Create the prior
         if prior is None:
-            prior = Gaussian(np.zeros(A.domain_dim), 1, geometry=G_domain, name='x')
+            prior = Gaussian(np.zeros(A.domain_dim), 1,
+                             geometry=G_domain, name='x')
         elif prior.name != 'x':
-                raise ValueError('Prior name is expected to be "x".')
+            raise ValueError('Prior name is expected to be "x".')
 
         # Set up the exact solution
         if exactSolution is None and field_type is "KL":
-            np.random.seed(15) 
+            np.random.seed(15)
             exactSolution = np.random.randn(G_domain.par_dim)
         elif exactSolution is None:
-            exactSolution = lambda x, y: 1.5 + 0.5*np.sin(2*np.pi*x)*np.sin(2*np.pi*y) 
-            
+            def exactSolution(x, y): return 1.5 + 0.5 * \
+                np.sin(2*np.pi*x)*np.sin(2*np.pi*y)
+
         if isinstance(exactSolution, np.ndarray):
             exactSolution = cuqi.array.CUQIarray(
                 exactSolution,
                 is_par=True,
                 geometry=G_domain)
-            
+
         elif callable(exactSolution):
             exactSolution_expr = to_dolfin_expression(exactSolution)
             exactSolution_func = dl.interpolate(exactSolution_expr, V)
@@ -302,20 +305,20 @@ class FEniCSPoisson2D(BayesianProblem):
                 exactSolution_func,
                 is_par=False,
                 geometry=G_domain)
-                        
-        # Create the exact data 
+
+        # Create the exact data
         exact_data = A(exactSolution)
 
         # Create the data distribution and the noisy data
         noise = np.random.randn(len(exact_data))
-        if relative_noise_std is None:  
-            relative_noise_std = 0.01     
-        noise_std = relative_noise_std*np.linalg.norm(exact_data)/np.linalg.norm(noise)
-        noise =  noise_std*noise
+        if relative_noise_std is None:
+            relative_noise_std = 0.01
+        noise_std = relative_noise_std * \
+            np.linalg.norm(exact_data)/np.linalg.norm(noise)
+        noise = noise_std*noise
+        data = exact_data + noise
 
         y = Gaussian(mean=A(prior), cov=noise_std**2, geometry=G_range)
-
-        data = exact_data + noise
 
         # Create the Bayesian problem
         super().__init__(y, prior, y=data)
@@ -332,21 +335,20 @@ class FEniCSPoisson2D(BayesianProblem):
         class Left(dl.SubDomain):
             def inside(self, x, on_boundary):
                 return on_boundary and x[0] < dl.DOLFIN_EPS
-            
+
         class Bottom(dl.SubDomain):
             def inside(self, x, on_boundary):
                 return on_boundary and x[1] < dl.DOLFIN_EPS
-            
+
         class Right(dl.SubDomain):
             def inside(self, x, on_boundary):
                 return on_boundary and x[0] > 1.0 - dl.DOLFIN_EPS
-        
+
         class Top(dl.SubDomain):
             def inside(self, x, on_boundary):
                 return on_boundary and x[1] > 1.0 - dl.DOLFIN_EPS
-            
+
         return [Left(), Bottom(), Right(), Top()]
-    
 
     def _set_up_dirichlet_bcs(self, V, bc_types, bc_values, subdomains):
         """
@@ -354,20 +356,22 @@ class FEniCSPoisson2D(BayesianProblem):
         on the unit square mesh, where V is the function space.
         """
         dirichlet_bcs = []
-        
+
         for i, bc in enumerate(bc_types):
             if bc.lower() == 'dirichlet':
-                dirichlet_bcs.append(dl.DirichletBC(V, bc_values[i], subdomains[i].inside))
+                dirichlet_bcs.append(dl.DirichletBC(
+                    V, bc_values[i], subdomains[i].inside))
 
         return dirichlet_bcs
-    
+
     def _set_up_neumann_bcs(self, V, bc_types, bc_values, subdomains):
         """
         Set up Neumann boundary conditions for the Poisson PDE problem defined
         on the unit square mesh, where V is the function space.
         """
 
-        boundary_markers = dl.MeshFunction('size_t', V.mesh(), V.mesh.topology().dim()-1)
+        boundary_markers = dl.MeshFunction(
+            'size_t', V.mesh(), V.mesh.topology().dim()-1)
         boundary_markers.set_all(0)
         for i, subdomain in enumerate(subdomains):
             subdomain.mark(boundary_markers, i+1)
