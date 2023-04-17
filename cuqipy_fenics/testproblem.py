@@ -285,7 +285,7 @@ class FEniCSPoisson2D(BayesianProblem):
             raise ValueError('Prior name is expected to be "x".')
 
         # Set up the exact solution
-        if exactSolution is None and field_type is "KL":
+        if exactSolution is None and field_type == "KL":
             np.random.seed(15)
             exactSolution = np.random.randn(G_domain.par_dim)
         elif exactSolution is None:
