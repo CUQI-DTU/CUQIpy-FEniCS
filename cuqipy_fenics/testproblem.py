@@ -379,6 +379,7 @@ class FEniCSPoisson2D(BayesianProblem):
 
         V.mesh().topology().dim()
 
+        neumann_bcs = None
         for i, bc_type in enumerate(bc_types):
             if bc_type.lower() == 'neumann':
                 if neumann_bcs is None:
