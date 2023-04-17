@@ -43,11 +43,11 @@ class FEniCSPDE(PDE,ABC):
     parameter_function_space : FEniCS function space
         FEniCS function space object that defines the function space of the Bayesian parameter (input of the forward model).
 
-    dirichlet_bc : FEniCS Dirichlet boundary condition object
-        FEniCS Dirichlet boundary condition object that defines the Dirichlet boundary conditions of the PDE.
+    dirichlet_bcs: FEniCS Dirichlet boundary condition object or a list of them
+        FEniCS Dirichlet boundary condition object(s) that define the Dirichlet boundary conditions of the PDE.
 
-    adjoint_dirichlet_bc : FEniCS Dirichlet boundary condition object, required if the gradient is to be computed
-        FEniCS Dirichlet boundary condition object that defines the Dirichlet boundary conditions of the adjoint PDE.
+    adjoint_dirichlet_bcs : FEniCS Dirichlet boundary condition object or a list of them, required if the gradient is to be computed
+        FEniCS Dirichlet boundary condition object(s) that define the Dirichlet boundary conditions of the adjoint PDE.
 
     observation_operator : python function handle, optional
         Function handle of a python function that returns the observed quantity from the PDE solution. If not provided, the identity operator is assumed (i.e. the entire solution is observed).
@@ -86,7 +86,7 @@ class FEniCSPDE(PDE,ABC):
             return on_boundary
         
         dirichlet_bc_expr = dl.Expression("0", degree=1) 
-        dirichlet_bc = dl.DirichletBC(solution_function_space,
+        dirichlet_bcs = dl.DirichletBC(solution_function_space,
                                       dirichlet_bc_expr,
                                       u_boundary)
         
@@ -103,13 +103,13 @@ class FEniCSPDE(PDE,ABC):
                 mesh, 
                 parameter_function_space=parameter_function_space,
                 solution_function_space=solution_function_space,
-                dirichlet_bc=dirichlet_bc)
+                dirichlet_bcs=dirichlet_bcs)
             
 
     """
 
     def __init__(self, PDE_form, mesh, solution_function_space,
-                 parameter_function_space, dirichlet_bc, adjoint_dirichlet_bc=None,
+                 parameter_function_space, dirichlet_bcs, adjoint_dirichlet_bcs=None,
                  observation_operator=None, reuse_assembled=False, linalg_solve=None,
                  linalg_solve_kwargs=None):
 
@@ -121,8 +121,10 @@ class FEniCSPDE(PDE,ABC):
         self.mesh = mesh
         self.solution_function_space = solution_function_space
         self.parameter_function_space = parameter_function_space
-        self.dirichlet_bc = dirichlet_bc
-        self.adjoint_dirichlet_bc = adjoint_dirichlet_bc
+        self._dirichlet_bcs = dirichlet_bcs if isinstance(
+            dirichlet_bcs, list) else [dirichlet_bcs]
+        self._adjoint_dirichlet_bcs = adjoint_dirichlet_bcs if isinstance(
+            adjoint_dirichlet_bcs, list) else [adjoint_dirichlet_bcs]
         self.observation_operator = observation_operator
         self.reuse_assembled = reuse_assembled
 
@@ -338,9 +340,9 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
 
         diff_op = dl.assemble(diff_op)
         self.rhs = dl.assemble(self.rhs)
-
-        self.dirichlet_bc.apply(diff_op)
-        self.dirichlet_bc.apply(self.rhs)
+        for bc in self._dirichlet_bcs: 
+            bc.apply(diff_op)
+            bc.apply(self.rhs)
         self._solver.set_operator(diff_op)
         self._flags["is_operator_valid"] = True
 
@@ -354,7 +356,7 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
                                             self._solution_trial_function,
                                             self._solution_test_function))
 
-        self.dirichlet_bc.apply(diff_op)
+        for bc in self._dirichlet_bcs: bc.apply(diff_op)
         self._solver.set_operator(diff_op)
         self._flags["is_operator_valid"] = True
 
@@ -366,7 +368,7 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
 
         self.rhs = dl.assemble(self.rhs_form(self.parameter,
                                              self._solution_test_function))
-        self.dirichlet_bc.apply(self.rhs)
+        for bc in self._dirichlet_bcs: bc.apply(self.rhs)
 
 
     def solve(self):
@@ -389,7 +391,7 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         See also: Gunzburger, M. D. (2002). Perspectives in flow control and optimization. Society for Industrial and Applied Mathematics, for adjoint based derivative derivation. 
         """
         # Raise an error if the adjoint boundary conditions are not provided
-        if self.adjoint_dirichlet_bc is None:
+        if self._adjoint_dirichlet_bcs is None:
             raise ValueError(
                 "The adjoint Dirichlet boundary conditions are not defined.")
 
@@ -414,7 +416,7 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         adjoint_matrix, _ = dl.assemble_system(
             adjoint_form,
             ufl.inner(self.forward_solution, test_solution) * ufl.dx,
-            self.adjoint_dirichlet_bc,
+            self._adjoint_dirichlet_bcs,
         )
 
         #TODO: account for observation operator
