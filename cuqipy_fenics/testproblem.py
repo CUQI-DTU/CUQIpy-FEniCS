@@ -244,6 +244,8 @@ class FEniCSPoisson2D(BayesianProblem):
             V, bc_types, bc_values, subdomains)
         neumann_bcs = self._set_up_neumann_bcs(
             V, bc_types, bc_values, subdomains)
+        adjoint_dirichlet_bcs = self._set_up_adjoint_dirichlet_bcs(
+            V, bc_types, subdomains)
 
         # Set up the source term
         if f is None:
@@ -272,7 +274,8 @@ class FEniCSPoisson2D(BayesianProblem):
             mesh,
             parameter_function_space=V,
             solution_function_space=V,
-            dirichlet_bcs=dirichlet_bcs)
+            dirichlet_bcs=dirichlet_bcs,
+            adjoint_dirichlet_bcs=adjoint_dirichlet_bcs)
 
         # Create the domain geometry
         G_FEM = FEniCSContinuous(V)
@@ -385,6 +388,20 @@ class FEniCSPoisson2D(BayesianProblem):
                     V, bc_values[i], subdomains[i]))
 
         return dirichlet_bcs
+    
+    def _set_up_adjoint_dirichlet_bcs(self, V, bc_types, subdomains):
+        """
+        Set up Dirichlet boundary conditions for the adjoint Poisson PDE problem defined
+        on the unit square mesh, where V is the function space.
+        """
+        adjoint_dirichlet_bcs = []
+        
+        for i, bc in enumerate(bc_types):
+            if bc.lower() == 'dirichlet':
+                adjoint_dirichlet_bcs.append(dl.DirichletBC(
+                    V, dl.Constant(0), subdomains[i]))
+
+        return adjoint_dirichlet_bcs
 
     def _set_up_neumann_bcs(self, V, bc_types, bc_values, subdomains):
         """
