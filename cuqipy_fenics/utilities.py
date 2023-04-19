@@ -17,8 +17,8 @@ def to_dolfin_expression(value, **expression_kwargs):
     of the keyword arguments is the `degree` argument for `dolfin.Expression` 
     which is used to specify the element (polynomial) degree of the expression.
     """
-
-    if not callable(value) and expression_kwargs is not {}:
+    
+    if not callable(value) and expression_kwargs != {}:
         raise ValueError("Cannot pass kwargs to non-callable value")
     if callable(value):
         return ExpressionFromCallable(value, **expression_kwargs)
