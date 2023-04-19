@@ -3,14 +3,14 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 sys.path.append("../")
-from cuqipy_fenics.geometry import MaternExpansion, FEniCSContinuous
+from cuqipy_fenics.geometry import MaternKLExpansion, FEniCSContinuous
 from cuqi.distribution import Gaussian
 import dolfin as dl
 
 mesh = dl.UnitSquareMesh(20,20)
 V = dl.FunctionSpace(mesh, 'CG', 1)
 geometry = FEniCSContinuous(V)
-MaternGeometry = MaternExpansion(geometry, 
+MaternGeometry = MaternKLExpansion(geometry, 
                                 length_scale = .2,
                                 num_terms=128)
 
