@@ -208,7 +208,7 @@ def test_with_updated_rhs(copy_reference, case):
         poisson1.mesh,
         parameter_function_space=poisson1.parameter_function_space,
         solution_function_space=poisson1.solution_function_space,
-        dirichlet_bc=poisson1.bc,
+        dirichlet_bcs=poisson1.bc,
         observation_operator=None,
         reuse_assembled=False)
 
@@ -217,7 +217,7 @@ def test_with_updated_rhs(copy_reference, case):
         poisson2.mesh,
         parameter_function_space=poisson2.parameter_function_space,
         solution_function_space=poisson2.solution_function_space,
-        dirichlet_bc=poisson2.bc,
+        dirichlet_bcs=poisson2.bc,
         observation_operator=None,
         reuse_assembled=False)
 

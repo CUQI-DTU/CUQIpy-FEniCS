@@ -51,14 +51,14 @@ def rhs_form2(m,p):
 PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( (lhs_form, rhs_form1), mesh, 
         parameter_function_space=parameter_function_space,
         solution_function_space=solution_function_space,
-        dirichlet_bc=dirichlet_bc,
+        dirichlet_bcs=dirichlet_bc,
         observation_operator=None,
         reuse_assembled=False)
 
 PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( (lhs_form, rhs_form2), mesh, 
         parameter_function_space=parameter_function_space,
         solution_function_space=solution_function_space,
-        dirichlet_bc=dirichlet_bc,
+        dirichlet_bcs=dirichlet_bc,
         observation_operator=None,
         reuse_assembled=False)
 
