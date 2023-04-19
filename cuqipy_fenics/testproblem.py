@@ -324,15 +324,17 @@ class FEniCSPoisson2D(BayesianProblem):
                 exactSolution_func,
                 is_par=False,
                 geometry=G_domain)
-            
+
         else:
-            raise ValueError('exactSolution should be a numpy array, a function or None.')
+            raise ValueError(
+                'exactSolution should be a numpy array, a function or None.')
         print(exactSolution.__class__)
-        
+
         # Create the exact data
         exact_data = A(exactSolution)
         if not isinstance(exact_data, cuqi.array.CUQIarray):
-            exact_data = cuqi.array.CUQIarray(exact_data, is_par=True, geometry=G_range)
+            exact_data = cuqi.array.CUQIarray(
+                exact_data, is_par=True, geometry=G_range)
 
         # Create the data distribution and the noisy data
         noise = np.random.randn(len(exact_data))
@@ -381,21 +383,21 @@ class FEniCSPoisson2D(BayesianProblem):
         on the unit square mesh, where V is the function space.
         """
         dirichlet_bcs = []
-        
+
         for i, bc in enumerate(bc_types):
             if bc.lower() == 'dirichlet':
                 dirichlet_bcs.append(dl.DirichletBC(
                     V, bc_values[i], subdomains[i]))
 
         return dirichlet_bcs
-    
+
     def _set_up_adjoint_dirichlet_bcs(self, V, bc_types, subdomains):
         """
         Set up Dirichlet boundary conditions for the adjoint Poisson PDE problem defined
         on the unit square mesh, where V is the function space.
         """
         adjoint_dirichlet_bcs = []
-        
+
         for i, bc in enumerate(bc_types):
             if bc.lower() == 'dirichlet':
                 adjoint_dirichlet_bcs.append(dl.DirichletBC(
@@ -419,7 +421,7 @@ class FEniCSPoisson2D(BayesianProblem):
         neumann_bcs = []
         for i, bc_type in enumerate(bc_types):
             if bc_type.lower() == 'neumann':
-                neumann_bcs.append( lambda m, p: bc_values[i]*p*ds(i+1))
+                neumann_bcs.append(lambda m, p: bc_values[i]*p*ds(i+1))
 
         if neumann_bcs == []:
             return lambda m, p: dl.Constant(0)*p*dl.ds
