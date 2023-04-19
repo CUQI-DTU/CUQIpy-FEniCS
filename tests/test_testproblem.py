@@ -38,7 +38,7 @@ def test_FEniCSPoisson2D_bc(bc_types, bc_values, case):
                                           bc_types=bc_types, bc_values=bc_values, f=0)
 
     if case == "missing_bc_error":
-        with pytest.raises(ValueError, match=r"length of bc_type should be 4"):
+        with pytest.raises(ValueError, match=r"length of bc_types list should be 4"):
             testproblem = FEniCSPoisson2D((20, 20),
                                           bc_types=bc_types, bc_values=bc_values, f=0)
 
