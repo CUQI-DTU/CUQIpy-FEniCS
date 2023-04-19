@@ -179,24 +179,23 @@ class FEniCSPoisson2D(BayesianProblem):
     bc_value : list of entries, each is a float or a callable , Default [0, 0, 0, 0]
         | Boundary condition values on each boundary. The accepted values are:
         | A float: a constant value.
-        | A callable : a callable that takes coordinate value as input. For this test problem in which the unit square mesh is used, the coordinate value is a float value from 0 to 1. The callable should return the boundary condition value at the corresponding point.
+        | A callable : a callable that takes coordinate value list as input and return the boundary condition value at the corresponding point, e.g. `lambda x: np.sin(x[0])+np.cos(x[1])`.
         | The list should be ordered as follows: [left, bottom, right, top]
 
     exactSolution : ndarray, CUQIarray, or callable , Default None
-        | Exact solution to the Bayesian inverse problem used to generate data, the diffusivity coefficient field in this case. When passed as a callable, it should take x and y values as input and return the exact solution at the corresponding point. If None, a default exact solution is chosen.
+        | Exact solution to the Bayesian inverse problem used to generate data, the diffusivity coefficient field in this case. When passed as a callable, it should take coordinate value list as input and return the exact solution at the corresponding point, `lambda x: np.sin(x[0])+np.cos(x[1])`. If None, a default exact solution is chosen.
 
     f : float, callable, or dolfin.Expression, Default 1
         | Source term in the PDE. The accepted values are:
         | A float: a constant value.
-        | A callable: a callable that takes x and y values as input and return the source term at the corresponding point
+        | A callable: a callable that takes coordinate value list as input and returns the source term at the corresponding point `lambda x: np.sin(x[0])+np.cos(x[1])`.
         | A dolfin.Expression: a dolfin.Expression object that defines the source term.
         
     relative_noise_std : float, default 0.01
         Standard deviation of the noise relative to the exact data. By default, the noise is 1% (=0.01) of the exact data.
 
-    field_type : str or Geometry-type object, Default None
+    field_type : str, Default None
         | Field type of the forward model domain. The accepted values are:
-        | A Geometry object.
         | "KL": a :class:`MaternExpansion` geometry object will be created and set as a domain geometry.
         | None: a :class:`FEniCSContinuous` geometry object will be created and set as a domain geometry.
 
@@ -204,7 +203,7 @@ class FEniCSPoisson2D(BayesianProblem):
         | A dictionary of keyword arguments that the underlying geometry accepts. (Passed to the underlying geometry when field type is "KL" or None). For example, for "KL" field type, the dictionary can be `{"length_scale": 0.1, "num_terms": 32}`. If None is passed as field_type, this argument is ignored.
 
     mapping : str or callable , Default None
-        | mapping to parametrize the Bayesian parameters. If None, no mapping is applied. If provided as callable, it should take a FEniCS function as input and return a FEniCS form.
+        | mapping to parametrize the Bayesian parameters. If None, no mapping is applied. If provided as callable, it should take a FEniCS function (of the unknown parameter) as input and return a FEniCS form, e.g. `lambda m: ufl.exp(m)`.
         If provided as string, it can take one of the values: 
         | 'exponential' : Parameterization in which the unknown parameter becomes the log of the diffusion coefficient.
 
@@ -212,28 +211,39 @@ class FEniCSPoisson2D(BayesianProblem):
         | Distribution of the prior. Needs to be i.i.d standard Gaussian if field_type is "KL". The prior name property, i.e., `prior.name` is expected to be "x".
     """
 
-    def __init__(self, dim=(32, 32), bc_type=None, bc_values=None,
+    def __init__(self, dim=None, bc_types=None, bc_values=None,
                  exactSolution=None, f=None, relative_noise_std=None, field_type=None,
                  field_params=None, mapping=None, prior=None):
 
         # Create the mesh
+        if dim is None:
+            dim = (32, 32)
         mesh = dl.UnitSquareMesh(dim[0], dim[1])
 
         # Create the function space
         V = dl.FunctionSpace(mesh, 'Lagrange', 1)
 
         # Set up boundary conditions
-        if bc_type is None:
-            bc_type = ['Dirichlet', 'Dirichlet', 'Dirichlet', 'Dirichlet']
+        if bc_types is None:
+            bc_types = ['Dirichlet', 'Dirichlet', 'Dirichlet', 'Dirichlet']
+        elif len(bc_types) != 4:
+            raise ValueError(
+                "The length of bc_types list should be 4. The list should be ordered as follows: [left, bottom, right, top]")
+        elif all(bc_type.lower() in ['neumann'] for bc_type in bc_types):
+            raise ValueError(
+                "All boundary conditions cannot be Neumann. At least one boundary condition should be Dirichlet.")
         if bc_values is None:
             bc_values = [0, 0, 0, 0]
+        elif len(bc_values) != 4:
+            raise ValueError(
+                "The length of bc_values list should be 4. The list should be ordered as follows: [left, bottom, right, top]")
         bc_values = [to_dolfin_expression(bc_value) for bc_value in bc_values]
 
-        subdomains = self._create_boundaries_subdomains(mesh)
+        subdomains = self._create_boundaries_subdomains()
         dirichlet_bcs = self._set_up_dirichlet_bcs(
-            V, bc_type, bc_values, subdomains)
+            V, bc_types, bc_values, subdomains)
         neumann_bcs = self._set_up_neumann_bcs(
-            V, bc_type, bc_values, subdomains)
+            V, bc_types, bc_values, subdomains)
 
         # Set up the source term
         if f is None:
@@ -244,8 +254,12 @@ class FEniCSPoisson2D(BayesianProblem):
         # Set up the variational problem form
         if mapping is None:
             def parameter_form(m): return m
-        elif mapping == 'exponential':
+        elif callable(mapping):
+            parameter_form = mapping
+        elif mapping.lower() == 'exponential':
             def parameter_form(m): return ufl.exp(m)
+        else:
+            raise ValueError('mapping should be a callable, None or a string.')
 
         def form(m, u, p):
             return parameter_form(m)*ufl.inner(ufl.grad(u), ufl.grad(p))*ufl.dx\
@@ -258,16 +272,18 @@ class FEniCSPoisson2D(BayesianProblem):
             mesh,
             parameter_function_space=V,
             solution_function_space=V,
-            dirichlet_bc=dirichlet_bcs)
+            dirichlet_bcs=dirichlet_bcs)
 
         # Create the domain geometry
         G_FEM = FEniCSContinuous(V)
+        if field_params is None:
+            field_params = {}
         if field_type is None:
             G_domain = G_FEM
         elif field_type == 'KL':
+            if field_params == {}:
+                field_params = {'length_scale': 0.1, 'num_terms': 32}
             G_domain = MaternExpansion(G_FEM, **field_params)
-        elif isinstance(field_type, Geometry):
-            G_domain = field_type
         else:
             raise ValueError('Unknown field type.')
 
@@ -289,8 +305,8 @@ class FEniCSPoisson2D(BayesianProblem):
             np.random.seed(15)
             exactSolution = np.random.randn(G_domain.par_dim)
         elif exactSolution is None:
-            def exactSolution(x, y): return 1.5 + 0.5 * \
-                np.sin(2*np.pi*x)*np.sin(2*np.pi*y)
+            def exactSolution(x): return 1.5 + 0.5 * \
+                np.sin(2*np.pi*x[0])*np.sin(2*np.pi*x[1])
 
         if isinstance(exactSolution, np.ndarray):
             exactSolution = cuqi.array.CUQIarray(
@@ -305,9 +321,15 @@ class FEniCSPoisson2D(BayesianProblem):
                 exactSolution_func,
                 is_par=False,
                 geometry=G_domain)
-
+            
+        else:
+            raise ValueError('exactSolution should be a numpy array, a function or None.')
+        print(exactSolution.__class__)
+        
         # Create the exact data
         exact_data = A(exactSolution)
+        if not isinstance(exact_data, cuqi.array.CUQIarray):
+            exact_data = cuqi.array.CUQIarray(exact_data, is_par=True, geometry=G_range)
 
         # Create the data distribution and the noisy data
         noise = np.random.randn(len(exact_data))
@@ -356,11 +378,11 @@ class FEniCSPoisson2D(BayesianProblem):
         on the unit square mesh, where V is the function space.
         """
         dirichlet_bcs = []
-
+        
         for i, bc in enumerate(bc_types):
             if bc.lower() == 'dirichlet':
                 dirichlet_bcs.append(dl.DirichletBC(
-                    V, bc_values[i], subdomains[i].inside))
+                    V, bc_values[i], subdomains[i]))
 
         return dirichlet_bcs
 
@@ -371,23 +393,18 @@ class FEniCSPoisson2D(BayesianProblem):
         """
 
         boundary_markers = dl.MeshFunction(
-            'size_t', V.mesh(), V.mesh.topology().dim()-1)
+            'size_t', V.mesh(), V.mesh().topology().dim()-1)
         boundary_markers.set_all(0)
         for i, subdomain in enumerate(subdomains):
             subdomain.mark(boundary_markers, i+1)
         ds = dl.Measure('ds', domain=V.mesh(), subdomain_data=boundary_markers)
 
-        V.mesh().topology().dim()
-
-        neumann_bcs = None
+        neumann_bcs = []
         for i, bc_type in enumerate(bc_types):
             if bc_type.lower() == 'neumann':
-                if neumann_bcs is None:
-                    neumann_bcs = bc_values[i]*ds(i+1)
-                else:
-                    neumann_bcs += bc_values[i]*ds(i+1)
+                neumann_bcs.append( lambda m, p: bc_values[i]*p*ds(i+1))
 
-        if neumann_bcs is None:
-            neumann_bcs = dl.Constant(0)*dl.ds
-
-        return lambda m, p: neumann_bcs*p
+        if neumann_bcs == []:
+            return lambda m, p: dl.Constant(0)*p*dl.ds
+        else:
+            return lambda m, p: sum([nbc(m, p) for nbc in neumann_bcs])
