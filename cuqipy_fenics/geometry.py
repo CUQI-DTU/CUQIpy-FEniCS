@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import dolfin as dl
 import ufl
+import warnings
 
 __all__ = [
     'FEniCSContinuous',
@@ -15,7 +16,7 @@ class FEniCSContinuous(Geometry):
     def __init__(self, function_space, labels = ['x', 'y']):
         self.function_space = function_space
         if self.physical_dim >2:
-            raise NotImplementedError("'FenicsContinuous' object does not support 3D meshes yet. 'mesh' needs to be a 1D or 2D mesh.")
+            raise NotImplementedError("'FEniCSContinuous' object does not support 3D meshes yet. 'mesh' needs to be a 1D or 2D mesh.")
         self.labels = labels
 
     @property
@@ -29,8 +30,18 @@ class FEniCSContinuous(Geometry):
     @property
     def par_shape(self):
         return (self.function_space.dim(),)
+    
+    @property
+    def fun_as_array(self):
+        """ Returns True if the function value can
+        be represented by a 1D array. """
+        if self.function_space.ufl_element().family() == "Lagrange": 
+            return True
+        else:
+            warnings.warn("The function space is not a Lagrange space. The function value cannot be represented by a 1D array since the dof value might not correspond to the function value.")
+            return False
 
-    def par2fun(self,par):
+    def par2fun(self,par, fun_as_1D_array=False):
         """The parameter to function map used to map parameters to function values in e.g. plotting."""
         par = self._process_values(par)
         Ns = par.shape[-1]
@@ -39,6 +50,8 @@ class FEniCSContinuous(Geometry):
             fun = dl.Function(self.function_space)
             fun.vector().zero()
             fun.vector().set_local(par[...,idx])
+            if fun_as_1D_array:
+                fun = fun.vector().get_local()
             fun_list.append(fun)
 
         if len(fun_list) == 1:
@@ -46,9 +59,12 @@ class FEniCSContinuous(Geometry):
         else:
             return fun_list
 
-    def fun2par(self,fun):
+    def fun2par(self,fun, fun_as_1D_array=False):
         """ Map the function values (FEniCS object) to the corresponding parameters (ndarray)."""
-        return fun.vector().get_local()
+        if fun_as_1D_array:
+            return fun_as_1D_array
+        else:
+            return fun.vector().get_local()
 
     def gradient(self, direction, wrt=None, is_direction_par=False, is_wrt_par=True):
         """ Computes the gradient of the par2fun map with respect to the parameters in the direction `direction` evaluated at the point `wrt`"""
@@ -108,7 +124,7 @@ class FEniCSMappedGeometry(MappedGeometry):
     """
     def par2fun(self,p):
         funvals = self.geometry.par2fun(p)
-        if isinstance(funvals, dl.function.function.Function):
+        if not isinstance(funvals, list):
             funvals = [funvals]
         mapped_value_list = []
         for idx in range(len(funvals)):
@@ -206,6 +222,10 @@ class MaternExpansion(_WrappedGeometry):
         return self._num_terms
 
     @property
+    def function_space(self):
+        return self.geometry.function_space
+    
+    @property
     def eig_val(self):
         return self._eig_val
 
@@ -256,7 +276,7 @@ class MaternExpansion(_WrappedGeometry):
     def _build_basis(self):
         """Builds the basis of expansion of the Matern covariance operator"""
         # Define function space, test and trial functions
-        V = self._build_space()
+        V = self.function_space
         u = dl.TrialFunction(V)
         v = dl.TestFunction(V)
 
@@ -302,14 +322,4 @@ class MaternExpansion(_WrappedGeometry):
             self._eig_vec /= np.linalg.norm( self._eig_vec )
 
 
-    def _build_space(self):
-        """Create the function space on which the Matern covariance is discretized"""
 
-        if hasattr(self.geometry, 'mesh'): 
-            mesh = self.geometry.mesh
-            V = dl.FunctionSpace(mesh, "CG", 1)
-	
-        else:
-            raise NotImplementedError
-
-        return V
