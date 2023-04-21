@@ -40,6 +40,14 @@ class FEniCSContinuous(Geometry):
         else:
             warnings.warn("The function space is not a Lagrange space. The function value cannot be represented by a 1D array since the dof value might not correspond to the function value.")
             return False
+        
+    @property
+    def fun_shape(self):
+        """ Returns the shape of the function value. """
+        if self.fun_as_array:
+            return (self.function_space.dim(),)
+        else:
+            return super().fun_shape
 
     def par2fun(self,par, fun_as_1D_array=False):
         """The parameter to function map used to map parameters to function values in e.g. plotting."""
@@ -73,7 +81,7 @@ class FEniCSContinuous(Geometry):
         else:
             return self.fun2par(direction)
 
-    def _plot(self,values,subplots=True,**kwargs):
+    def _plot(self,values,subplots=True, fun_as_1D_array=False, **kwargs):
         """
         Overrides :meth:`cuqi.geometry.Geometry.plot`. See :meth:`cuqi.geometry.Geometry.plot` for description  and definition of the parameter `values`.
         
@@ -82,7 +90,8 @@ class FEniCSContinuous(Geometry):
         kwargs : keyword arguments
             keyword arguments which the function :meth:`dolfin.plot` normally takes.
         """
-        if isinstance(values, dl.function.function.Function):
+        if isinstance(values, dl.function.function.Function)\
+        or (hasattr(values,'shape') and len(values.shape) == 1):
             Ns = 1
             values = [values]
         elif hasattr(values,'__len__'): 
@@ -92,6 +101,10 @@ class FEniCSContinuous(Geometry):
         ims = []
         for rows,cols,subplot_id in subplot_ids:
             fun = values[subplot_id-1]
+            if fun_as_1D_array:
+                fun_temp = dl.Function(self.function_space)
+                fun_temp.vector().set_local(fun)
+                fun = fun_temp
             if subplots:
                 plt.subplot(rows,cols,subplot_id); 
             ims.append(dl.plot(fun, **kwargs))
@@ -206,6 +219,14 @@ class MaternExpansion(_WrappedGeometry):
         self._normalize = normalize
 
     @property
+    def fun_as_array(self):
+        return self.geometry.fun_as_array
+    
+    @property
+    def fun_shape(self):
+        return self.geometry.fun_shape
+    
+    @property
     def par_shape(self):
         return (self.num_terms,)
 
@@ -245,8 +266,8 @@ class MaternExpansion(_WrappedGeometry):
     def __repr__(self) -> str:
         return "{} on {}".format(self.__class__.__name__,self.geometry.__repr__())
 
-    def par2fun(self,p):
-        return self.geometry.par2fun(self.par2field(p))
+    def par2fun(self,p, fun_as_1D_array=False):
+        return self.geometry.par2fun(self.par2field(p), fun_as_1D_array=fun_as_1D_array)
 
     def gradient(self, direction, wrt):
         direction = self.geometry.gradient(direction, wrt)
