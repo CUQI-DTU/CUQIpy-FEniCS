@@ -60,8 +60,6 @@ class FEniCSContinuous(Geometry):
             fun = dl.Function(self.function_space)
             fun.vector().zero()
             fun.vector().set_local(par[...,idx])
-            if fun_as_1D_array:
-                fun = fun.vector().get_local()
             fun_list.append(fun)
 
         if len(fun_list) == 1:
