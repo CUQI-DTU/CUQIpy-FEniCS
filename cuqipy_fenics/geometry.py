@@ -67,12 +67,9 @@ class FEniCSContinuous(Geometry):
         else:
             return fun_list
 
-    def fun2par(self,fun, fun_as_1D_array=False):
+    def fun2par(self,fun):
         """ Map the function values (FEniCS object) to the corresponding parameters (ndarray)."""
-        if fun_as_1D_array:
-            return fun_as_1D_array
-        else:
-            return fun.vector().get_local()
+        return fun.vector().get_local()
 
     def fun2alt_fun_rpr(self,fun):
         """ Map the function values (FEniCS object) to the corresponding alternative function representation (ndarray)."""
@@ -269,12 +266,19 @@ class MaternExpansion(_WrappedGeometry):
     def normalize(self):
         return self._normalize
 
-
     def __repr__(self) -> str:
         return "{} on {}".format(self.__class__.__name__,self.geometry.__repr__())
 
     def par2fun(self,p):
         return self.geometry.par2fun(self.par2field(p))
+
+    def fun2alt_fun_rpr(self,fun):
+        """Converts a function to the alternative representation of the function"""
+        return self.geometry.fun2alt_fun_rpr(fun)
+    
+    def alt_fun_rpr2fun(self,alt_fun_rpr):
+        """Converts the alternative representation of the function to the function"""
+        return self.geometry.alt_fun_rpr2fun(alt_fun_rpr)
 
     def gradient(self, direction, wrt):
         direction = self.geometry.gradient(direction, wrt)
