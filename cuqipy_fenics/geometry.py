@@ -91,7 +91,7 @@ class FEniCSContinuous(Geometry):
         else:
             return self.fun2par(direction)
 
-    def _plot(self,values,subplots=True, fun_as_1D_array=False, **kwargs):
+    def _plot(self,values,subplots=True, **kwargs):
         """
         Overrides :meth:`cuqi.geometry.Geometry.plot`. See :meth:`cuqi.geometry.Geometry.plot` for description  and definition of the parameter `values`.
         
@@ -100,8 +100,8 @@ class FEniCSContinuous(Geometry):
         kwargs : keyword arguments
             keyword arguments which the function :meth:`dolfin.plot` normally takes.
         """
-        if isinstance(values, dl.function.function.Function)\
-        or (hasattr(values,'shape') and len(values.shape) == 1):
+        if isinstance(values, dl.function.function.Function):#\
+        #or (hasattr(values,'shape') and len(values.shape) == 1):
             Ns = 1
             values = [values]
         elif hasattr(values,'__len__'): 
@@ -111,10 +111,6 @@ class FEniCSContinuous(Geometry):
         ims = []
         for rows,cols,subplot_id in subplot_ids:
             fun = values[subplot_id-1]
-            if fun_as_1D_array:
-                fun_temp = dl.Function(self.function_space)
-                fun_temp.vector().set_local(fun)
-                fun = fun_temp
             if subplots:
                 plt.subplot(rows,cols,subplot_id); 
             ims.append(dl.plot(fun, **kwargs))
@@ -147,7 +143,8 @@ class FEniCSMappedGeometry(MappedGeometry):
     """
     def par2fun(self,p):
         funvals = self.geometry.par2fun(p)
-        if not isinstance(funvals, list):
+        if isinstance(funvals, dl.function.function.Function):
+        #if not isinstance(funvals, list):
             funvals = [funvals]
         mapped_value_list = []
         for idx in range(len(funvals)):
@@ -229,8 +226,8 @@ class MaternExpansion(_WrappedGeometry):
         self._normalize = normalize
 
     @property
-    def fun_as_array(self):
-        return self.geometry.fun_as_array
+    def has_alt_fun_rpr(self):
+        return self.geometry.has_alt_fun_rpr
     
     @property
     def fun_shape(self):
@@ -276,8 +273,8 @@ class MaternExpansion(_WrappedGeometry):
     def __repr__(self) -> str:
         return "{} on {}".format(self.__class__.__name__,self.geometry.__repr__())
 
-    def par2fun(self,p, fun_as_1D_array=False):
-        return self.geometry.par2fun(self.par2field(p), fun_as_1D_array=fun_as_1D_array)
+    def par2fun(self,p):
+        return self.geometry.par2fun(self.par2field(p))
 
     def gradient(self, direction, wrt):
         direction = self.geometry.gradient(direction, wrt)
