@@ -32,9 +32,11 @@ class FEniCSContinuous(Geometry):
         return (self.function_space.dim(),)
     
     @property
-    def fun_as_array(self):
-        """ Returns True if the function value can
-        be represented by a 1D array. """
+    def has_alt_fun_rpr(self):
+        """Flag to indicate whether the geometry has an alternative function 
+         representation. In particular, a 1D array representation of the function
+         that can be useful for example in computing sample statistics on 
+         function values."""
         if self.function_space.ufl_element().family() == "Lagrange": 
             return True
         else:
@@ -44,12 +46,12 @@ class FEniCSContinuous(Geometry):
     @property
     def fun_shape(self):
         """ Returns the shape of the function value. """
-        if self.fun_as_array:
+        if self.has_alt_fun_rpr:
             return (self.function_space.dim(),)
         else:
             return super().fun_shape
 
-    def par2fun(self,par, fun_as_1D_array=False):
+    def par2fun(self,par):
         """The parameter to function map used to map parameters to function values in e.g. plotting."""
         par = self._process_values(par)
         Ns = par.shape[-1]
@@ -74,6 +76,16 @@ class FEniCSContinuous(Geometry):
         else:
             return fun.vector().get_local()
 
+    def fun2alt_fun_rpr(self,fun):
+        """ Map the function values (FEniCS object) to the corresponding alternative function representation (ndarray)."""
+        return fun.vector().get_local()
+    
+    def alt_fun_rpr2fun(self,alt_fun_rpr):
+        """ Map the alternative function representation (ndarray) to the corresponding function values (FEniCS object)."""
+        fun = dl.Function(self.function_space)
+        fun.vector().set_local(alt_fun_rpr)
+        return fun
+    
     def gradient(self, direction, wrt=None, is_direction_par=False, is_wrt_par=True):
         """ Computes the gradient of the par2fun map with respect to the parameters in the direction `direction` evaluated at the point `wrt`"""
         if is_direction_par:
