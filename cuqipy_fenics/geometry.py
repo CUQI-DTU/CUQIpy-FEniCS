@@ -93,8 +93,7 @@ class FEniCSContinuous(Geometry):
         kwargs : keyword arguments
             keyword arguments which the function :meth:`dolfin.plot` normally takes.
         """
-        if isinstance(values, dl.function.function.Function):#\
-        #or (hasattr(values,'shape') and len(values.shape) == 1):
+        if isinstance(values, dl.function.function.Function) or (hasattr(values,'shape') and len(values.shape) == 1):
             Ns = 1
             values = [values]
         elif hasattr(values,'__len__'): 
@@ -134,6 +133,18 @@ class FEniCSContinuous(Geometry):
 class FEniCSMappedGeometry(MappedGeometry):
     """
     """
+    @property
+    def function_space(self):
+        return self.geometry.function_space
+    
+    @property
+    def has_alt_fun_rpr(self):
+        return self.geometry.has_alt_fun_rpr
+    
+    @property
+    def alt_fun_rpr_dim(self):
+        return self.geometry.alt_fun_rpr_dim 
+    
     def par2fun(self,p):
         funvals = self.geometry.par2fun(p)
         if isinstance(funvals, dl.function.function.Function):
@@ -156,6 +167,12 @@ class FEniCSMappedGeometry(MappedGeometry):
     
     def fun2par(self,f):
         raise NotImplementedError
+    
+    def fun2alt_fun_rpr(self,f):
+        return self.geometry.fun2alt_fun_rpr(f)
+
+    def alt_fun_rpr2fun(self,alt_fun_rpr):
+        return self.geometry.alt_fun_rpr2fun(alt_fun_rpr)
 
 
 class MaternExpansion(_WrappedGeometry):
