@@ -32,7 +32,7 @@ class FEniCSContinuous(Geometry):
         return (self.function_space.dim(),)
     
     @property
-    def has_alt_fun_rpr(self):
+    def has_funvec(self):
         """Flag to indicate whether the geometry has an alternative function 
          representation. In particular, a 1D array representation of the function
          that can be useful for example in computing sample statistics on 
@@ -44,7 +44,7 @@ class FEniCSContinuous(Geometry):
             return False
 
     @property
-    def alt_fun_rpr_dim(self):
+    def funvec_dim(self):
         return self.function_space.dim()
 
     def par2fun(self,par):
@@ -67,14 +67,14 @@ class FEniCSContinuous(Geometry):
         """ Map the function values (FEniCS object) to the corresponding parameters (ndarray)."""
         return fun.vector().get_local()
 
-    def fun2alt_fun_rpr(self,fun):
+    def fun2funvec(self,fun):
         """ Map the function values (FEniCS object) to the corresponding alternative function representation (ndarray)."""
         return fun.vector().get_local()
     
-    def alt_fun_rpr2fun(self,alt_fun_rpr):
+    def funvec2fun(self,funvec):
         """ Map the alternative function representation (ndarray) to the corresponding function values (FEniCS object)."""
         fun = dl.Function(self.function_space)
-        fun.vector().set_local(alt_fun_rpr)
+        fun.vector().set_local(funvec)
         return fun
     
     def gradient(self, direction, wrt=None, is_direction_par=False, is_wrt_par=True):
@@ -138,12 +138,12 @@ class FEniCSMappedGeometry(MappedGeometry):
         return self.geometry.function_space
     
     @property
-    def has_alt_fun_rpr(self):
-        return self.geometry.has_alt_fun_rpr
+    def has_funvec(self):
+        return self.geometry.has_funvec
     
     @property
-    def alt_fun_rpr_dim(self):
-        return self.geometry.alt_fun_rpr_dim 
+    def funvec_dim(self):
+        return self.geometry.funvec_dim 
     
     def par2fun(self,p):
         funvals = self.geometry.par2fun(p)
@@ -168,11 +168,11 @@ class FEniCSMappedGeometry(MappedGeometry):
     def fun2par(self,f):
         raise NotImplementedError
     
-    def fun2alt_fun_rpr(self,f):
-        return self.geometry.fun2alt_fun_rpr(f)
+    def fun2funvec(self,f):
+        return self.geometry.fun2funvec(f)
 
-    def alt_fun_rpr2fun(self,alt_fun_rpr):
-        return self.geometry.alt_fun_rpr2fun(alt_fun_rpr)
+    def funvec2fun(self,funvec):
+        return self.geometry.funvec2fun(funvec)
 
 
 class MaternExpansion(_WrappedGeometry):
@@ -236,12 +236,12 @@ class MaternExpansion(_WrappedGeometry):
         self._normalize = normalize
 
     @property
-    def has_alt_fun_rpr(self):
-        return self.geometry.has_alt_fun_rpr
+    def has_funvec(self):
+        return self.geometry.has_funvec
     
     @property
-    def alt_fun_rpr_dim(self):
-        return self.geometry.alt_fun_rpr_dim
+    def funvec_dim(self):
+        return self.geometry.funvec_dim
     
     @property
     def par_shape(self):
@@ -285,13 +285,13 @@ class MaternExpansion(_WrappedGeometry):
     def par2fun(self,p):
         return self.geometry.par2fun(self.par2field(p))
 
-    def fun2alt_fun_rpr(self,fun):
+    def fun2funvec(self,fun):
         """Converts a function to the alternative representation of the function"""
-        return self.geometry.fun2alt_fun_rpr(fun)
+        return self.geometry.fun2funvec(fun)
     
-    def alt_fun_rpr2fun(self,alt_fun_rpr):
+    def funvec2fun(self,funvec):
         """Converts the alternative representation of the function to the function"""
-        return self.geometry.alt_fun_rpr2fun(alt_fun_rpr)
+        return self.geometry.funvec2fun(funvec)
 
     def gradient(self, direction, wrt):
         direction = self.geometry.gradient(direction, wrt)
