@@ -42,11 +42,11 @@ class FEniCSContinuous(Geometry):
         else:
             warnings.warn("The function space is not a Lagrange space. The function value cannot be represented by a 1D array since the dof value might not correspond to the function value.")
             return False
-
+    
     @property
-    def funvec_dim(self):
-        return self.function_space.dim()
-
+    def funvec_shape(self):
+        return (self.function_space.dim(),)
+    
     def par2fun(self,par):
         """The parameter to function map used to map parameters to function values in e.g. plotting."""
         par = self._process_values(par)
@@ -142,8 +142,8 @@ class FEniCSMappedGeometry(MappedGeometry):
         return self.geometry.has_funvec
     
     @property
-    def funvec_dim(self):
-        return self.geometry.funvec_dim 
+    def funvec_shape(self):
+        return self.geometry.funvec_shape
     
     def par2fun(self,p):
         funvals = self.geometry.par2fun(p)
@@ -240,8 +240,8 @@ class MaternExpansion(_WrappedGeometry):
         return self.geometry.has_funvec
     
     @property
-    def funvec_dim(self):
-        return self.geometry.funvec_dim
+    def funvec_shape(self):
+        return self.geometry.funvec_shape
     
     @property
     def par_shape(self):
