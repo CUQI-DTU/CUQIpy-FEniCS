@@ -224,7 +224,7 @@ def test_with_updated_rhs(copy_reference, case):
     # Create domain geometry
     fenics_continuous_geo = cuqipy_fenics.geometry.FEniCSContinuous(
         poisson1.parameter_function_space)
-    domain_geometry = cuqipy_fenics.geometry.MaternExpansion(
+    domain_geometry = cuqipy_fenics.geometry.MaternKLExpansion(
         fenics_continuous_geo, length_scale=.1, num_terms=5)
 
     # Create range geometry
