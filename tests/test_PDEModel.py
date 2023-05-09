@@ -54,7 +54,7 @@ def test_solver_choice():
         poisson.mesh,
         poisson.solution_function_space,
         poisson.parameter_function_space,
-        poisson.bc,
+        poisson.bcs,
         linalg_solve=dl.KrylovSolver())
 
     # Solve the PDE
@@ -67,7 +67,7 @@ def test_solver_choice():
         poisson.mesh,
         poisson.solution_function_space,
         poisson.parameter_function_space,
-        poisson.bc,
+        poisson.bcs,
         linalg_solve=dl.LUSolver())
 
     # Solve the PDE
@@ -97,7 +97,7 @@ def test_reuse_assembled():
             poisson.mesh,
             poisson.solution_function_space,
             poisson.parameter_function_space,
-            poisson.bc,
+            poisson.bcs,
             reuse_assembled=True)
 
     # Create a PDE object
@@ -106,7 +106,7 @@ def test_reuse_assembled():
         poisson.mesh,
         poisson.solution_function_space,
         poisson.parameter_function_space,
-        poisson.bc,
+        poisson.bcs,
         reuse_assembled=True)
 
     # Solve the PDE
@@ -151,7 +151,7 @@ def test_form():
         poisson.mesh,
         poisson.solution_function_space,
         poisson.parameter_function_space,
-        poisson.bc)
+        poisson.bcs)
 
     # Solve the PDE
     PDE_with_full_form.assemble(m)
@@ -163,7 +163,7 @@ def test_form():
         poisson.mesh,
         poisson.solution_function_space,
         poisson.parameter_function_space,
-        poisson.bc)
+        poisson.bcs)
 
     # Solve the PDE
     PDE_with_lhs_rhs_forms.assemble(m)
@@ -186,21 +186,21 @@ def test_with_updated_rhs(copy_reference, case):
     # Set up first poisson problem
     poisson1 = Poisson()
     poisson1.mesh = dl.UnitSquareMesh(40, 40)
-    poisson1.f = dl.Constant(1.0)
+    poisson1.source_term = dl.Constant(1.0)
 
     # Set up second poisson problem
     poisson2 = Poisson()
     poisson2.mesh = poisson1.mesh
-    poisson2.f = dl.Expression("sin(2*x[0]*pi)*sin(2*x[1]*pi)", degree=1)
+    poisson2.source_term = dl.Expression("sin(2*x[0]*pi)*sin(2*x[1]*pi)", degree=1)
 
     # Set up boundary function (where the Dirichlet boundary conditions are applied)
     def u_boundary(x, on_boundary):
         return on_boundary and\
             (x[0] < dl.DOLFIN_EPS or x[0] > 1.0 - dl.DOLFIN_EPS)
 
-    poisson1.bc = dl.DirichletBC(poisson1.solution_function_space,
+    poisson1.bcs = dl.DirichletBC(poisson1.solution_function_space,
                                  dl.Constant(0.0), u_boundary)
-    poisson2.bc = poisson1.bc
+    poisson2.bcs = poisson1.bcs
 
     # Create two PDE objects with different rhs terms
     PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
@@ -208,7 +208,7 @@ def test_with_updated_rhs(copy_reference, case):
         poisson1.mesh,
         parameter_function_space=poisson1.parameter_function_space,
         solution_function_space=poisson1.solution_function_space,
-        dirichlet_bcs=poisson1.bc,
+        dirichlet_bcs=poisson1.bcs,
         observation_operator=None,
         reuse_assembled=False)
 
@@ -217,7 +217,7 @@ def test_with_updated_rhs(copy_reference, case):
         poisson2.mesh,
         parameter_function_space=poisson2.parameter_function_space,
         solution_function_space=poisson2.solution_function_space,
-        dirichlet_bcs=poisson2.bc,
+        dirichlet_bcs=poisson2.bcs,
         observation_operator=None,
         reuse_assembled=False)
 
@@ -319,13 +319,13 @@ class Poisson:
         self.bc_value = dl.Constant(0.0)
 
         # the source term
-        self.f = dl.Expression('x[0]', degree=1)
+        self.source_term = dl.Expression('x[0]', degree=1)
 
     @property
     def form(self):
         return lambda m, u, v:\
             ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(v))*ufl.dx\
-            + self.f*v*ufl.dx
+            + self.source_term*v*ufl.dx
 
     @property
     def lhs_form(self):
@@ -334,7 +334,7 @@ class Poisson:
 
     @property
     def rhs_form(self):
-        return lambda m, v: -self.f*v*ufl.dx
+        return lambda m, v: -self.source_term*v*ufl.dx
 
     @property
     def solution_function_space(self):
@@ -345,15 +345,15 @@ class Poisson:
         return dl.FunctionSpace(self.mesh, "Lagrange", 1)
 
     @property
-    def bc(self):
-        if not hasattr(self, "_bc") or self._bc is None:
-            self._bc = dl.DirichletBC(self.solution_function_space,
+    def bcs(self):
+        if not hasattr(self, "_bcs") or self._bcs is None:
+            self._bcs = dl.DirichletBC(self.solution_function_space,
                                       self.bc_value, "on_boundary")
-        return self._bc
+        return self._bcs
 
-    @bc.setter
-    def bc(self, bc):
-        self._bc = bc
+    @bcs.setter
+    def bcs(self, bcs):
+        self._bcs = bcs
 
 
 def test_observation_operator_setter():
@@ -375,7 +375,7 @@ def test_observation_operator_setter():
         poisson.mesh,
         poisson.solution_function_space,
         poisson.parameter_function_space,
-        poisson.bc,
+        poisson.bcs,
         observation_operator=None)
     PDE1.observation_operator = observation_operator
 
@@ -385,7 +385,7 @@ def test_observation_operator_setter():
         poisson.mesh,
         poisson.solution_function_space,
         poisson.parameter_function_space,
-        poisson.bc,
+        poisson.bcs,
         observation_operator=observation_operator)
 
     # Solve the first PDE
