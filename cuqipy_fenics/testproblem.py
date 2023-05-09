@@ -159,7 +159,7 @@ class FEniCSDiffusion1D(BayesianProblem):
 class FEniCSPoisson2D(BayesianProblem):
     """
     2D Diffusion PDE-based Bayesian inverse problem that uses FEniCS. 
-    The problem is sat up on a unit square mesh with either Dirichlet
+    The problem is set up on a unit square mesh with either Dirichlet
     or Neumann boundary conditions on each boundary. The unknown parameter
     is the (possibly heterogeneous) diffusion coefficient (e.g. conductivity)
     field. The unknown parameter (e.g. conductivity) and the PDE solution 
