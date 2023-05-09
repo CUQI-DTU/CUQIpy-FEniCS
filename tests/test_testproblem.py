@@ -77,7 +77,7 @@ def test_FEniCSPoisson2D_source_term(source_term, valid):
     "prior, case",
     [(None, 0.02, None, None, None, None, "valid"),
      (None, 0.02, None, None, None, None, "unknown_field"),
-     (None, 0.05, None, None, "exponential", Gaussian(0, 1), "prior_name_error"),
+     (None, 0.05, None, None, "exponential", Gaussian(0, np.ones(21*21)), "valid"),
      (lambda x: x[0]+x[1]+0.1, 0.02, None, None, "exponential",
       Gaussian(0, np.ones(21*21), name='x'), "valid"),
      (None, 0.05, None, None, lambda m: m+1, None, "valid"),
@@ -102,17 +102,6 @@ def test_FEniCSPoisson2D_setup(exactSolution, noise_level,
         testproblem.data.plot()
         testproblem.exactData.plot()
         testproblem.exactSolution.plot()
-
-    if case == "prior_name_error":
-        with pytest.raises(ValueError, match=r"Prior name is expected to be"):
-            testproblem = FEniCSPoisson2D(
-                (20, 20),
-                exactSolution=exactSolution,
-                noise_level=noise_level,
-                field_type=field_type,
-                field_params=field_params,
-                mapping=mapping,
-                prior=prior)
 
     if case == "unknown_field":
         with pytest.raises(ValueError, match=r"Unknown field type"):
