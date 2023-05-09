@@ -353,7 +353,7 @@ class FEniCSPoisson2D(BayesianProblem):
 
         # Create the Bayesian problem
         super().__init__(data_dist, prior)
-        super().set_data(data)
+        super().set_data(y=data)
 
         # Store exact values and information
         self.exactSolution = exactSolution
