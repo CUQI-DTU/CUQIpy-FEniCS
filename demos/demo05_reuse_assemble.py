@@ -28,7 +28,7 @@ def u_boundary(x, on_boundary):
 
 dirichlet_bc_expr = dl.Expression("0", degree=1) 
 adjoint_dirichlet_bc_expr = dl.Constant(0.0)
-dirichlet_bc = dl.DirichletBC(solution_function_space,
+dirichlet_bcs = dl.DirichletBC(solution_function_space,
                               dirichlet_bc_expr,
                               u_boundary) #forward problem bcs
 
@@ -51,14 +51,14 @@ def rhs_form2(m,p):
 PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( (lhs_form, rhs_form1), mesh, 
         parameter_function_space=parameter_function_space,
         solution_function_space=solution_function_space,
-        dirichlet_bcs=dirichlet_bc,
+        dirichlet_bcs=dirichlet_bcs,
         observation_operator=None,
         reuse_assembled=False)
 
 PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( (lhs_form, rhs_form2), mesh, 
         parameter_function_space=parameter_function_space,
         solution_function_space=solution_function_space,
-        dirichlet_bcs=dirichlet_bc,
+        dirichlet_bcs=dirichlet_bcs,
         observation_operator=None,
         reuse_assembled=False)
 
