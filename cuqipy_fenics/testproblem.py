@@ -13,7 +13,7 @@ import dolfin as dl
 import ufl
 from .pde import SteadyStateLinearFEniCSPDE
 from .geometry import FEniCSContinuous, FEniCSMappedGeometry,\
-      MaternExpansion
+      MaternKLExpansion
 from .utilities import to_dolfin_expression
 
 
@@ -290,7 +290,7 @@ class FEniCSPoisson2D(BayesianProblem):
         elif field_type == 'KL':
             if field_params == {}:
                 field_params = {'length_scale': 0.1, 'num_terms': 32}
-            G_domain = MaternExpansion(G_FEM, **field_params)
+            G_domain = MaternKLExpansion(G_FEM, **field_params)
         else:
             raise ValueError('Unknown field type.')
 
