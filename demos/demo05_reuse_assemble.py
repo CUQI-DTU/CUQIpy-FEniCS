@@ -65,7 +65,7 @@ PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( (lhs_form, rhs_form2), mesh
 #%% 2.2. Create domain geometry 
 fenics_continuous_geo = cuqipy_fenics.geometry.FEniCSContinuous(
     parameter_function_space)
-domain_geometry = cuqipy_fenics.geometry.MaternExpansion(
+domain_geometry = cuqipy_fenics.geometry.MaternKLExpansion(
     fenics_continuous_geo, length_scale = .1, num_terms=32)
 
 #%% 2.3. Create range geometry
