@@ -8,7 +8,7 @@ import warnings
 __all__ = [
     'FEniCSContinuous',
     'FEniCSMappedGeometry',
-    'MaternExpansion'
+    'MaternKLExpansion'
 ]
 
 class FEniCSContinuous(Geometry):
@@ -175,8 +175,8 @@ class FEniCSMappedGeometry(MappedGeometry):
         return self.geometry.funvec2fun(funvec)
 
 
-class MaternExpansion(_WrappedGeometry):
-    """A geometry class that builds spectral representation of Matern covariance operator on the given input geometry. We create the representation using the stochastic partial differential operator, equation (15) in (Roininen, Huttunen and Lasanen, 2014). Zero Neumann boundary conditions are assumed for the stochastic partial differential equation (SPDE) and the smoothness parameter :math:`\\nu` is set to 1. To generate Matern field realizations, the method :meth:`par2field` is used. The input `p` of this method need to be an `n=dim` i.i.d random variables that follow a normal distribution. 
+class MaternKLExpansion(_WrappedGeometry):
+    """A geometry class that builds spectral representation of Matern covariance operator on the given input geometry. We create the representation using the stochastic partial differential operator, equation (15) in (Roininen, Huttunen and Lasanen, 2014). Zero Neumann boundary conditions are assumed for the stochastic partial differential equation (SPDE) and the default value of the smoothness parameter :math:`\\nu` is set to 0.5. To generate Matern field realizations, the method :meth:`par2field` is used. The input `p` of this method need to be an `n=dim` i.i.d random variables that follow a normal distribution. 
 
     For more details about the formulation of the SPDE see: Roininen, L., Huttunen, J. M., & Lasanen, S. (2014). Whittle-Matérn priors for Bayesian statistical inversion with applications in electrical impedance tomography. Inverse Problems & Imaging, 8(2), 561.
 
@@ -186,10 +186,14 @@ class MaternExpansion(_WrappedGeometry):
         An input geometry on which the Matern field representation is built (the geometry must have a mesh attribute)
 
     length_scale : float
-        Length scale paramater (controls correlation length)
+        Length scale parameter (controls correlation length)
 
     num_terms: int
-        Number of expantion terms to represent the Matern field realization
+        Number of expansion terms to represent the Matern field realization
+
+    nu : float, default 0.5 
+        Smoothness parameter of the Matern field, must be greater then
+        zero.
 
     boundary_conditions : str
         Boundary conditions for the SPDE. Currently 'Neumann' for zero flux, and 'zero' for zero Dirichlet boundary conditions are supported.
@@ -203,14 +207,14 @@ class MaternExpansion(_WrappedGeometry):
 
         import numpy as np
         import matplotlib.pyplot as plt
-        from cuqi.fenics.geometry import MaternExpansion, FEniCSContinuous
+        from cuqi.fenics.geometry import MaternKLExpansion, FEniCSContinuous
         from cuqi.distribution import Gaussian
         import dolfin as dl
         
         mesh = dl.UnitSquareMesh(20,20)
         V = dl.FunctionSpace(mesh, 'CG', 1)
         geometry = FEniCSContinuous(V)
-        MaternGeometry = MaternExpansion(geometry, 
+        MaternGeometry = MaternKLExpansion(geometry, 
                                         length_scale = .2,
                                         num_terms=128)
         
@@ -223,12 +227,19 @@ class MaternExpansion(_WrappedGeometry):
 
     """
 
-    def __init__(self, geometry, length_scale, num_terms, boundary_conditions='Neumann', normalize=True): 
+    def __init__(self, geometry, length_scale, num_terms, nu=0.5, boundary_conditions='Neumann', normalize=True): 
+
+        if nu <= 0:
+            raise ValueError("Smoothness parameter nu must be positive")
+        
+        if not isinstance(geometry, (FEniCSMappedGeometry, FEniCSContinuous)):
+            raise ValueError("Matern KL expansion is only implemented "+ 
+                             "for cuqipy_fenics geometries")
         super().__init__(geometry)
         if not hasattr(geometry, 'mesh'):
             raise NotImplementedError
         self._length_scale = length_scale
-        self._nu = 1
+        self._nu = nu
         self._num_terms = num_terms
         self._eig_val = None
         self._eig_vec = None
@@ -278,6 +289,11 @@ class MaternExpansion(_WrappedGeometry):
     @property
     def normalize(self):
         return self._normalize
+      
+    @property
+    def physical_dim(self):
+        """Returns the physical dimension of the geometry, e.g. 1, 2 or 3"""
+        return self.geometry.physical_dim
 
     def __repr__(self) -> str:
         return "{} on {}".format(self.__class__.__name__,self.geometry.__repr__())
@@ -310,8 +326,14 @@ class MaternExpansion(_WrappedGeometry):
         Ns = p.shape[-1]
         field_list = np.empty((self.geometry.par_dim,Ns))
 
+        nu = self.nu
+        d = self.physical_dim
         for idx in range(Ns):
-            field_list[:,idx] = self.eig_vec@( np.sqrt(self.eig_val)*p[...,idx] )
+            # For more details about the formulation below, see section 4.3 in
+            # Chen, V., Dunlop, M. M., Papaspiliopoulos, O., & Stuart, A. M.
+            # (2018). Dimension-robust MCMC in Bayesian inverse problems.
+            # arXiv preprint arXiv:1803.03344.
+            field_list[:,idx] = self.eig_vec@( self.eig_val**((nu+d/2)/2)*p[...,idx] )
 
         if len(field_list) == 1:
             return field_list[0]
