@@ -33,21 +33,26 @@ class FEniCSContinuous(Geometry):
     
     @property
     def has_funvec(self):
-        """Flag to indicate whether the geometry has an alternative function 
-         representation. In particular, a 1D array representation of the function
-         that can be useful for example in computing sample statistics on 
-         function values."""
+        """Flag to indicate whether the geometry can represent the function 
+        value as a vector. This can be useful, for example, in computing
+        sample statistics on function values."""
+        # Use the DOF values to represent the function value only if the 
+        # function space is a Lagrange space
         if self.function_space.ufl_element().family() == "Lagrange": 
             return True
         else:
-            warnings.warn("The function space is not a Lagrange space. The function value cannot be represented by a 1D array since the dof value might not correspond to the function value.")
+            warnings.warn("The function space is not a Lagrange space. "+ 
+                          "Obtaining a vector representation of the function "+ 
+                          "values is not implemented. Note that the DOF "+
+                          "values, in this case, does not necessarily "+ 
+                          "correspond to the function values.")
             return False
     
     @property
     def funvec_shape(self):
         return (self.function_space.dim(),)
     
-    def par2fun(self,par):
+    def par2fun(self, par):
         """The parameter to function map used to map parameters to function values in e.g. plotting."""
         par = self._process_values(par)
         Ns = par.shape[-1]
@@ -63,19 +68,17 @@ class FEniCSContinuous(Geometry):
         else:
             return fun_list
 
-    def fun2par(self,fun):
+    def fun2par(self, fun):
         """ Map the function values (FEniCS object) to the corresponding parameters (ndarray)."""
         return fun.vector().get_local()
 
-    def fun2funvec(self,fun):
+    def fun2funvec(self, fun):
         """ Map the function values (FEniCS object) to the corresponding alternative function representation (ndarray)."""
-        return fun.vector().get_local()
+        return self.fun2par(fun)
     
-    def funvec2fun(self,funvec):
+    def funvec2fun(self, funvec):
         """ Map the alternative function representation (ndarray) to the corresponding function values (FEniCS object)."""
-        fun = dl.Function(self.function_space)
-        fun.vector().set_local(funvec)
-        return fun
+        return self.par2fun(funvec)
     
     def gradient(self, direction, wrt=None, is_direction_par=False, is_wrt_par=True):
         """ Computes the gradient of the par2fun map with respect to the parameters in the direction `direction` evaluated at the point `wrt`"""
@@ -93,9 +96,12 @@ class FEniCSContinuous(Geometry):
         kwargs : keyword arguments
             keyword arguments which the function :meth:`dolfin.plot` normally takes.
         """
-        if isinstance(values, dl.function.function.Function) or (hasattr(values,'shape') and len(values.shape) == 1):
+        # If plotting one parameter/function is required:
+        if isinstance(values, dl.function.function.Function)\
+           or (hasattr(values,'shape') and len(values.shape) == 1):
             Ns = 1
             values = [values]
+        # If plotting multiple parameters/functions is required:
         elif hasattr(values,'__len__'): 
             Ns = len(values)
         subplot_ids = self._create_subplot_list(Ns,subplots=subplots)
@@ -148,7 +154,6 @@ class FEniCSMappedGeometry(MappedGeometry):
     def par2fun(self,p):
         funvals = self.geometry.par2fun(p)
         if isinstance(funvals, dl.function.function.Function):
-        #if not isinstance(funvals, list):
             funvals = [funvals]
         mapped_value_list = []
         for idx in range(len(funvals)):
@@ -365,6 +370,3 @@ class MaternExpansion(_WrappedGeometry):
         # Normalize the eigenvectors if required
         if self.normalize:
             self._eig_vec /= np.linalg.norm( self._eig_vec )
-
-
-
