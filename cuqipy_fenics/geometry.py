@@ -43,8 +43,8 @@ class FEniCSContinuous(Geometry):
         else:
             warnings.warn("The function space is not a Lagrange space. "+ 
                           "Obtaining a vector representation of the function "+ 
-                          "values is not implemented. Note that the DOF "+
-                          "values, in this case, does not necessarily "+ 
+                          "values is not implemented. Note that the function "+
+                          "DOF values, in this case, does not necessarily "+ 
                           "correspond to the function values.")
             return False
     
@@ -69,15 +69,17 @@ class FEniCSContinuous(Geometry):
             return fun_list
 
     def fun2par(self, fun):
-        """ Map the function values (FEniCS object) to the corresponding parameters (ndarray)."""
+        """ Maps the function values (FEniCS object) to the corresponding parameters (ndarray)."""
         return fun.vector().get_local()
 
     def fun2funvec(self, fun):
-        """ Map the function values (FEniCS object) to the corresponding alternative function representation (ndarray)."""
+        """ Maps the function value (FEniCS object) to the corresponding vector
+        representation of the function (ndarray of the function DOF values)."""
         return self.fun2par(fun)
     
     def funvec2fun(self, funvec):
-        """ Map the alternative function representation (ndarray) to the corresponding function values (FEniCS object)."""
+        """ Maps the vector representation of the function (ndarray of the
+        function DOF values) to the function value (FEniCS object)."""
         return self.par2fun(funvec)
     
     def gradient(self, direction, wrt=None, is_direction_par=False, is_wrt_par=True):
@@ -307,11 +309,13 @@ class MaternKLExpansion(_WrappedGeometry):
         return self.geometry.par2fun(self.par2field(p))
 
     def fun2funvec(self,fun):
-        """Converts a function to the alternative representation of the function"""
+        """ Maps the function value (FEniCS object) to the corresponding vector
+        representation of the function (ndarray of the function DOF values)."""
         return self.geometry.fun2funvec(fun)
     
     def funvec2fun(self,funvec):
-        """Converts the alternative representation of the function to the function"""
+        """ Maps the vector representation of the function (ndarray of the
+        function DOF values) to the function value (FEniCS object)."""
         return self.geometry.funvec2fun(funvec)
 
     def gradient(self, direction, wrt):
