@@ -124,7 +124,7 @@ plt.colorbar(im)
 
 # We first generate samples using the FEM geometry.
 x2 = Gaussian(0, np.ones(V.dim()), geometry=G_FEM)
-samples2 = x2.sample(3)
+samples2 = x2.sample(100)
 
 # mean and variance computed on the **parameter** space then mapped to the
 # function space
