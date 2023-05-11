@@ -2,7 +2,7 @@
 Samples Statistics Computation and Visualization
 ================================================
 This demo illustrates computing and visualizing sample statistics
-for samples that are interpreted using the cuqipy-fenics geometry.
+for samples that are interpreted using the cuqipy_fenics geometry.
 """
 
 # %%
