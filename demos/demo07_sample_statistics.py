@@ -14,7 +14,6 @@ from cuqipy_fenics.utilities import compute_stats
 import dolfin as dl
 import numpy as np
 import matplotlib.pyplot as plt
-import warnings
 
 # %%
 # Define the geometries
