@@ -1,6 +1,7 @@
 from . import pde
 from . import geometry
 from . import testproblem
+from . import utilities
 
 import dolfin as dl
 dl.set_log_active(False)
