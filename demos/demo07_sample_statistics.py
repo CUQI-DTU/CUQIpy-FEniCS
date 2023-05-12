@@ -32,7 +32,7 @@ num_terms = 10
 length_scale = 0.05
 G_KL = MaternKLExpansion(G_FEM, length_scale, num_terms)
 
-# 3. A mapping geometry applied to the KL expansion geometry
+# 3. A mapped geometry applied to the KL expansion geometry
 c_minus = 1
 c_plus = 10
 def heavy_map(func):
