@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 
 # %%
 # Define the geometries
-# -------------------
+# ---------------------
 # First define the FEniCS mesh and function space.
 mesh = dl.UnitSquareMesh(32, 32)
 V = dl.FunctionSpace(mesh, "CG", 2) #1
