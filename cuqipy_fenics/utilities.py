@@ -28,17 +28,21 @@ def compute_stats(samples):
 
     # Compute variance 
     # Approach 1 (this approach is general for all FEM function spaces)
-    # Loop to create terms required for variance computation 
-    var_terms = np.empty((V.dim(), samples.samples.shape[1]))   
+
+    # Create a function space with higher order elements
+    V2 = dl.FunctionSpace(V.mesh(), V.ufl_element().family(), V.ufl_element().degree()*2)
+
+    # Loop to create terms required for variance computation
+    var_terms = np.empty((V2.dim(), samples.samples.shape[1]))   
     for i, sample_f in enumerate(sample_funs):
-        expr_f = dl.project(sample_f*sample_f - 2*sample_mean_f*sample_f, V)
+        expr_f = dl.project(sample_f*sample_f - 2*sample_mean_f*sample_f, V2)
         var_terms[:, i] = expr_f.vector().get_local()
     
     mean_var_terms = np.mean(var_terms, axis=1)
-    mean_var_terms_f = dl.Function(V)
+    mean_var_terms_f = dl.Function(V2)
     mean_var_terms_f.vector().set_local(mean_var_terms)
     
-    var1 = dl.project(mean_var_terms_f + sample_mean_f*sample_mean_f , V)
+    var1 = dl.project(mean_var_terms_f + sample_mean_f*sample_mean_f , V2)
 
     # Approach 2 (this approach is specific for some FEM function spaces, e.g. CG1)
     if V.ufl_element().family() != 'Lagrange':
