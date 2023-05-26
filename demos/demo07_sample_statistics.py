@@ -84,6 +84,15 @@ plt.figure()
 im = dl.plot(var2, title="variance_2 of samples, G_map, function space, computed using helper function", vmin=-5, vmax=25, mode="color")
 plt.colorbar(im)
 
+# Interpolate variance_1 on the space V (from higher to lower dimension
+# space)
+print("variance_1 dim:", var1.function_space().dim())
+print("variance_2 dim:", var2.function_space().dim())
+print("V dim:", V.dim())
+var1_interpolated = dl.interpolate(var1, V)
+print("error norm: error between var1_interpolated and var2:",
+      dl.errornorm(var1_interpolated, var2))
+print("norm of var1_interpolated:", dl.norm(var1_interpolated))
 
 # %% 
 # Compute sample statistics based on the geometry G_KL
@@ -117,6 +126,16 @@ plt.colorbar(im)
 plt.figure()
 im = dl.plot(var2, title="variance_2 of samples, G_KL, function space, computed using helper function", vmin=0, vmax=0.02, mode="color")
 plt.colorbar(im)
+
+# Interpolate variance_1 on the space V (from higher to lower dimension
+# space)
+print("variance_1 dim:", var1.function_space().dim())
+print("variance_2 dim:", var2.function_space().dim())
+print("V dim:", V.dim())
+var1_interpolated = dl.interpolate(var1, V)
+print("error norm: error between var1_interpolated and var2:",
+      dl.errornorm(var1_interpolated, var2))
+print("norm of var1_interpolated:", dl.norm(var1_interpolated))
 
 # %%
 # Compute sample statistics based on the geometry G_FEM
@@ -155,3 +174,13 @@ plt.colorbar(im)
 plt.figure()
 im = dl.plot(var2, title="variance_2 of samples, G_FEM, function space, computed using helper function", vmin=-2, vmax=8, mode="color")
 plt.colorbar(im)
+
+# Interpolate variance_1 on the space V (from higher to lower dimension
+# space)
+print("variance_1 dim:", var1.function_space().dim())
+print("variance_2 dim:", var2.function_space().dim())
+print("V dim:", V.dim())
+var1_interpolated = dl.interpolate(var1, V)
+print("error norm: error between var1_interpolated and var2:",
+      dl.errornorm(var1_interpolated, var2))
+print("norm of var1_interpolated:", dl.norm(var1_interpolated))
