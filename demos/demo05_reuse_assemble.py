@@ -120,7 +120,7 @@ cuqi_posterior = cuqi.distribution.JointDistribution( y1, y2, x)._as_stacked()
 #%% 3.1. Sample the posterior (Case 1: no reuse of assembled operators)
 Ns = 100
 np.random.seed(0) # fix seed for reproducibility 
-sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
+sampler = cuqi.sampler.MH(cuqi_posterior)
 t0 = time.time()
 samples1 = sampler.sample_adapt(Ns,Nb=10)
 t1 = time.time()
@@ -134,7 +134,7 @@ cuqi_model2.pde = PDE2
 
 #%% 3.3. Sample the posterior again (Case 2: reuse of assembled operators)
 np.random.seed(0)
-sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
+sampler = cuqi.sampler.MH(cuqi_posterior)
 t0 = time.time()
 samples2 = sampler.sample_adapt(Ns,Nb=10)
 t1 = time.time()
