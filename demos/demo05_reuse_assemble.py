@@ -28,7 +28,7 @@ def u_boundary(x, on_boundary):
 
 dirichlet_bc_expr = dl.Expression("0", degree=1) 
 adjoint_dirichlet_bc_expr = dl.Constant(0.0)
-dirichlet_bc = dl.DirichletBC(solution_function_space,
+dirichlet_bcs = dl.DirichletBC(solution_function_space,
                               dirichlet_bc_expr,
                               u_boundary) #forward problem bcs
 
@@ -51,14 +51,14 @@ def rhs_form2(m,p):
 PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( (lhs_form, rhs_form1), mesh, 
         parameter_function_space=parameter_function_space,
         solution_function_space=solution_function_space,
-        dirichlet_bc=dirichlet_bc,
+        dirichlet_bcs=dirichlet_bcs,
         observation_operator=None,
         reuse_assembled=False)
 
 PDE2 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE( (lhs_form, rhs_form2), mesh, 
         parameter_function_space=parameter_function_space,
         solution_function_space=solution_function_space,
-        dirichlet_bc=dirichlet_bc,
+        dirichlet_bcs=dirichlet_bcs,
         observation_operator=None,
         reuse_assembled=False)
 
@@ -120,7 +120,7 @@ cuqi_posterior = cuqi.distribution.JointDistribution( y1, y2, x)._as_stacked()
 #%% 3.1. Sample the posterior (Case 1: no reuse of assembled operators)
 Ns = 100
 np.random.seed(0) # fix seed for reproducibility 
-sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
+sampler = cuqi.sampler.MH(cuqi_posterior)
 t0 = time.time()
 samples1 = sampler.sample_adapt(Ns,Nb=10)
 t1 = time.time()
@@ -134,7 +134,7 @@ cuqi_model2.pde = PDE2
 
 #%% 3.3. Sample the posterior again (Case 2: reuse of assembled operators)
 np.random.seed(0)
-sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
+sampler = cuqi.sampler.MH(cuqi_posterior)
 t0 = time.time()
 samples2 = sampler.sample_adapt(Ns,Nb=10)
 t1 = time.time()
