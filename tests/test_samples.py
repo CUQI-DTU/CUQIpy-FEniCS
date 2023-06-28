@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 def test_samples_statistics_par_fun(case):
 
     # Define the mesh and the function space
-    mesh = dl.UnitSquareMesh(32, 32)
+    mesh = dl.UnitSquareMesh(10, 10)
     V = dl.FunctionSpace(mesh, "CG", 2) 
 
     # Define the geometries depending on the case
@@ -37,7 +37,7 @@ def test_samples_statistics_par_fun(case):
     
     # Create a distribution and sample the distribution
     x = Gaussian(0, np.ones(geom.par_dim), geometry=geom)
-    samples = x.sample(50)
+    samples = x.sample(5)
     samples_funvals = samples.funvals
     
     # Compute mean and variance on the **parameter** space
@@ -47,9 +47,18 @@ def test_samples_statistics_par_fun(case):
     assert np.allclose(mean, samples.samples.mean(axis=1))
     assert np.allclose(var, samples.samples.var(axis=1))
 
-    # Compute mean and variance on the **function** space
-    mean_funvals = samples_funvals.mean()
-    var_funvals = samples_funvals.variance()
+    # Compute mean and variance on the **function** space (this will generate an
+    # error because the samples are not converted to vector form)
+    with pytest.raises(Exception, match="cuqi.samples._samples added message:"):
+        samples_funvals.mean()
+
+    with pytest.raises(Exception, match="cuqi.samples._samples added message:"):
+        samples_funvals.variance()
+
+    # Compute mean and variance on the **function** space after converting the
+    # samples to vector form
+    mean_funvals = samples_funvals.vector.mean()
+    var_funvals = samples_funvals.vector.variance()
 
     # Compute mean and variance on the **function** space using helper function
     mean_helper, var1_helper, var2_helper = compute_stats(samples)
