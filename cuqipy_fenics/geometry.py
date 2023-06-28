@@ -277,7 +277,7 @@ class MaternKLExpansion(_WrappedGeometry):
     @property
     def normalize(self):
         return self._normalize
-      
+    
     @property
     def physical_dim(self):
         """Returns the physical dimension of the geometry, e.g. 1, 2 or 3"""
