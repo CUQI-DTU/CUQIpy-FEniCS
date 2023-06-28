@@ -32,24 +32,9 @@ class FEniCSContinuous(Geometry):
         return (self.function_space.dim(),)
     
     @property
-    def has_funvec(self):
-        """Flag to indicate whether the geometry can represent the function 
-        value as a vector. This can be useful, for example, in computing
-        sample statistics on function values."""
-        # Use the DOF values to represent the function value only if the 
-        # function space is a Lagrange space
-        if self.function_space.ufl_element().family() == "Lagrange": 
-            return True
-        else:
-            warnings.warn("The function space is not a Lagrange space. "+ 
-                          "Obtaining a vector representation of the function "+ 
-                          "values is not implemented. Note that the function "+
-                          "DOF values, in this case, does not necessarily "+ 
-                          "correspond to the function values.")
-            return False
-    
-    @property
     def funvec_shape(self):
+        """The shape of the geometry (shape of the vector representation of the
+        function value)."""
         return (self.function_space.dim(),)
     
     def par2fun(self, par):
@@ -72,12 +57,12 @@ class FEniCSContinuous(Geometry):
         """ Maps the function values (FEniCS object) to the corresponding parameters (ndarray)."""
         return fun.vector().get_local()
 
-    def fun2funvec(self, fun):
+    def fun2vec(self, fun):
         """ Maps the function value (FEniCS object) to the corresponding vector
         representation of the function (ndarray of the function DOF values)."""
         return self.fun2par(fun)
     
-    def funvec2fun(self, funvec):
+    def vec2fun(self, funvec):
         """ Maps the vector representation of the function (ndarray of the
         function DOF values) to the function value (FEniCS object)."""
         return self.par2fun(funvec)
@@ -146,11 +131,9 @@ class FEniCSMappedGeometry(MappedGeometry):
         return self.geometry.function_space
     
     @property
-    def has_funvec(self):
-        return self.geometry.has_funvec
-    
-    @property
     def funvec_shape(self):
+        """The shape of the geometry (shape of the vector representation of the
+        function value)."""
         return self.geometry.funvec_shape
     
     def par2fun(self,p):
@@ -175,11 +158,11 @@ class FEniCSMappedGeometry(MappedGeometry):
     def fun2par(self,f):
         raise NotImplementedError
     
-    def fun2funvec(self,f):
-        return self.geometry.fun2funvec(f)
+    def fun2vec(self,f):
+        return self.geometry.fun2vec(f)
 
-    def funvec2fun(self,funvec):
-        return self.geometry.funvec2fun(funvec)
+    def vec2fun(self,funvec):
+        return self.geometry.vec2fun(funvec)
 
 
 class MaternKLExpansion(_WrappedGeometry):
@@ -254,11 +237,9 @@ class MaternKLExpansion(_WrappedGeometry):
         self._normalize = normalize
 
     @property
-    def has_funvec(self):
-        return self.geometry.has_funvec
-    
-    @property
     def funvec_shape(self):
+        """The shape of the geometry (shape of the vector representation of the
+        function value)."""
         return self.geometry.funvec_shape
     
     @property
@@ -308,15 +289,15 @@ class MaternKLExpansion(_WrappedGeometry):
     def par2fun(self,p):
         return self.geometry.par2fun(self.par2field(p))
 
-    def fun2funvec(self,fun):
+    def fun2vec(self,fun):
         """ Maps the function value (FEniCS object) to the corresponding vector
         representation of the function (ndarray of the function DOF values)."""
-        return self.geometry.fun2funvec(fun)
+        return self.geometry.fun2vec(fun)
     
-    def funvec2fun(self,funvec):
+    def vec2fun(self,funvec):
         """ Maps the vector representation of the function (ndarray of the
         function DOF values) to the function value (FEniCS object)."""
-        return self.geometry.funvec2fun(funvec)
+        return self.geometry.vec2fun(funvec)
 
     def gradient(self, direction, wrt):
         direction = self.geometry.gradient(direction, wrt)
