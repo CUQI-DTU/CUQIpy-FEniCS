@@ -269,7 +269,7 @@ def test_with_updated_rhs(copy_reference, case):
     # Sample the posterior (Case 1: no reuse of assembled operators)
     Ns = 20
     np.random.seed(0)
-    sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
+    sampler = cuqi.sampler.MH(cuqi_posterior)
     t0 = time.time()
     samples1 = sampler.sample_adapt(Ns, Nb=10)
     t1 = time.time()
@@ -284,7 +284,7 @@ def test_with_updated_rhs(copy_reference, case):
 
         # Sample the posterior again (Case 2: reuse of assembled operators)
         np.random.seed(0)
-        sampler = cuqi.sampler.MetropolisHastings(cuqi_posterior)
+        sampler = cuqi.sampler.MH(cuqi_posterior)
         t0 = time.time()
         samples2 = sampler.sample_adapt(Ns, Nb=10)
         t1 = time.time()
