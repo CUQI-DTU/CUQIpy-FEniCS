@@ -66,10 +66,10 @@ plt.title("variance of samples, G_map, parameter space")
 
 # mean and variance computed on the **function** space directly
 plt.figure()
-samples.funvals.plot_mean()
+samples.funvals.vector.plot_mean()
 plt.title("mean of samples, G_map, function space")
 plt.figure()
-im = samples.funvals.plot_variance(vmin=-5, vmax=25, mode="color")
+im = samples.funvals.vector.plot_variance(vmin=-5, vmax=25, mode="color")
 plt.title("variance of samples, G_map, function space")
 plt.colorbar(im[0])
 
@@ -109,10 +109,10 @@ plt.title("variance of samples, G_KL, parameter space")
 
 # mean and variance computed on the **function** space directly
 plt.figure()
-samples.funvals.plot_mean()
+samples.funvals.vector.plot_mean()
 plt.title("mean of samples, G_KL, function space")
 plt.figure()
-im = samples.funvals.plot_variance(vmin=0, vmax=0.02, mode="color")
+im = samples.funvals.vector.plot_variance(vmin=0, vmax=0.02, mode="color")
 plt.title("variance of samples, G_KL, function space")
 plt.colorbar(im[0])
 
@@ -157,10 +157,10 @@ plt.title("variance of samples, G_FEM, parameter space")
 
 # mean and variance computed on the **function** space directly
 plt.figure()
-samples2.funvals.plot_mean()
+samples2.funvals.vector.plot_mean()
 plt.title("mean of samples, G_FEM, function space")
 plt.figure()
-im = samples2.funvals.plot_variance(vmin=-2, vmax=8, mode="color")
+im = samples2.funvals.vector.plot_variance(vmin=-2, vmax=8, mode="color")
 plt.title("variance of samples, G_FEM, function space")
 plt.colorbar(im[0])
 
