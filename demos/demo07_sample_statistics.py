@@ -10,7 +10,7 @@ for samples that are interpreted using the cuqipy_fenics geometry.
 # ----------------------------
 from cuqi.distribution import Gaussian
 from cuqipy_fenics.geometry import FEniCSContinuous, MaternKLExpansion, FEniCSMappedGeometry
-from cuqipy_fenics.utilities import compute_stats
+from cuqipy_fenics.utilities import _compute_stats
 import dolfin as dl
 import numpy as np
 import matplotlib.pyplot as plt
@@ -74,7 +74,7 @@ plt.title("variance of samples, G_map, function space")
 plt.colorbar(im[0])
 
 # variance computed on the **function** space using the helper function
-mean_f, var1, var2 = compute_stats(samples)
+mean_f, var1, var2 = _compute_stats(samples)
 plt.figure()
 dl.plot(mean_f, title="mean of samples, G_map, function space, computed using helper function")
 plt.figure()
@@ -117,7 +117,7 @@ plt.title("variance of samples, G_KL, function space")
 plt.colorbar(im[0])
 
 # variance computed on the **function** space using the helper function
-mean_f, var1, var2 = compute_stats(samples)
+mean_f, var1, var2 = _compute_stats(samples)
 plt.figure()
 dl.plot(mean_f, title="mean of samples, G_KL, function space, computed using helper function")
 plt.figure()
@@ -165,7 +165,7 @@ plt.title("variance of samples, G_FEM, function space")
 plt.colorbar(im[0])
 
 # variance computed on the **function** space using the helper function
-mean_f, var1, var2 = compute_stats(samples2)
+mean_f, var1, var2 = _compute_stats(samples2)
 plt.figure()
 dl.plot(mean_f, title="mean of samples, G_FEM, function space, computed using helper function")
 plt.figure()
