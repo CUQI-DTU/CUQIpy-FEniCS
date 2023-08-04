@@ -3,7 +3,6 @@ import dolfin as dl
 import warnings
 from numbers import Number
 from cuqi.samples import Samples
-from .geometry import FEniCSContinuous
 
 
 def _compute_stats(samples: Samples):
@@ -20,10 +19,11 @@ def _compute_stats(samples: Samples):
     """
 
     geom = samples.geometry
-    # raise error if geom is not cuqipy_fenics.geometry.FEniCSContinuous
-    if not isinstance(geom, FEniCSContinuous):
-        raise TypeError("The geometry must be an instance of FEniCSContinuous")
-
+    # raise error if geom does not have a function_space attribute
+    if not hasattr(geom, 'function_space'):
+        raise AttributeError("The geometry must have a "+\
+                             "function_space attribute")
+ 
     V = geom.function_space
 
     # Loop to compute the samples function value
