@@ -77,9 +77,10 @@ def test_FEniCSPoisson2D_source_term(source_term, valid):
     "prior, case",
     [(None, 0.02, None, None, None, None, "valid"),
      (None, 0.02, None, None, None, None, "unknown_field"),
-     (None, 0.05, None, None, "exponential", Gaussian(0, np.ones(21*21)), "valid"),
+     (None, 0.05, None, None, "exponential",
+      Gaussian(np.zeros(21*21), 1), "valid"),
      (lambda x: x[0]+x[1]+0.1, 0.02, None, None, "exponential",
-      Gaussian(0, np.ones(21*21), name='x'), "valid"),
+      Gaussian(np.zeros(21*21), 1, name='x'), "valid"),
      (None, 0.05, None, None, lambda m: m+1, None, "valid"),
      (None, 0.1, "KL", None, "exponential", None, "valid"),
      (np.random.randn(10), 0.02, "KL",
@@ -89,6 +90,9 @@ def test_FEniCSPoisson2D_setup(exactSolution, noise_level,
                                prior, case):
     """Test creating a FEniCSPoisson2D testproblem with different 
     parametrization, exact solution and noise level"""
+    # set the random seed
+    np.random.seed(0)
+
     if case == "valid":
         testproblem = FEniCSPoisson2D(
             (20, 20),
@@ -102,6 +106,7 @@ def test_FEniCSPoisson2D_setup(exactSolution, noise_level,
         testproblem.data.plot()
         testproblem.exactData.plot()
         testproblem.exactSolution.plot()
+        testproblem.UQ(Ns=20, percent=90)
 
     if case == "unknown_field":
         with pytest.raises(ValueError, match=r"Unknown field type"):
