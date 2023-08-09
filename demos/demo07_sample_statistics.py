@@ -10,7 +10,6 @@ for samples that are interpreted using the cuqipy_fenics geometry.
 # ----------------------------
 from cuqi.distribution import Gaussian
 from cuqipy_fenics.geometry import FEniCSContinuous, MaternKLExpansion, FEniCSMappedGeometry
-from cuqipy_fenics.utilities import _compute_stats
 import dolfin as dl
 import numpy as np
 import matplotlib.pyplot as plt
@@ -73,27 +72,6 @@ im = samples.funvals.vector.plot_variance(vmin=-5, vmax=25, mode="color")
 plt.title("variance of samples, G_map, function space")
 plt.colorbar(im[0])
 
-# variance computed on the **function** space using the helper function
-mean_f, var1, var2 = _compute_stats(samples)
-plt.figure()
-dl.plot(mean_f, title="mean of samples, G_map, function space, computed using helper function")
-plt.figure()
-im = dl.plot(var1, title="variance_1 of samples, G_map, function space, computed using helper function", vmin=-5, vmax=25, mode="color")
-plt.colorbar(im)
-plt.figure()
-im = dl.plot(var2, title="variance_2 of samples, G_map, function space, computed using helper function", vmin=-5, vmax=25, mode="color")
-plt.colorbar(im)
-
-# Interpolate variance_1 on the space V (from higher to lower dimension
-# space)
-print("variance_1 dim:", var1.function_space().dim())
-print("variance_2 dim:", var2.function_space().dim())
-print("V dim:", V.dim())
-var1_interpolated = dl.interpolate(var1, V)
-print("error norm: error between var1_interpolated and var2:",
-      dl.errornorm(var1_interpolated, var2))
-print("norm of var1_interpolated:", dl.norm(var1_interpolated))
-
 # %% 
 # Compute sample statistics based on the geometry G_KL
 # -----------------------------------------------------
@@ -115,27 +93,6 @@ plt.figure()
 im = samples.funvals.vector.plot_variance(vmin=0, vmax=0.02, mode="color")
 plt.title("variance of samples, G_KL, function space")
 plt.colorbar(im[0])
-
-# variance computed on the **function** space using the helper function
-mean_f, var1, var2 = _compute_stats(samples)
-plt.figure()
-dl.plot(mean_f, title="mean of samples, G_KL, function space, computed using helper function")
-plt.figure()
-im = dl.plot(var1, title="variance_1 of samples, G_KL, function space, computed using helper function", vmin=0, vmax=0.02, mode="color")
-plt.colorbar(im)
-plt.figure()
-im = dl.plot(var2, title="variance_2 of samples, G_KL, function space, computed using helper function", vmin=0, vmax=0.02, mode="color")
-plt.colorbar(im)
-
-# Interpolate variance_1 on the space V (from higher to lower dimension
-# space)
-print("variance_1 dim:", var1.function_space().dim())
-print("variance_2 dim:", var2.function_space().dim())
-print("V dim:", V.dim())
-var1_interpolated = dl.interpolate(var1, V)
-print("error norm: error between var1_interpolated and var2:",
-      dl.errornorm(var1_interpolated, var2))
-print("norm of var1_interpolated:", dl.norm(var1_interpolated))
 
 # %%
 # Compute sample statistics based on the geometry G_FEM
@@ -163,24 +120,3 @@ plt.figure()
 im = samples2.funvals.vector.plot_variance(vmin=-2, vmax=8, mode="color")
 plt.title("variance of samples, G_FEM, function space")
 plt.colorbar(im[0])
-
-# variance computed on the **function** space using the helper function
-mean_f, var1, var2 = _compute_stats(samples2)
-plt.figure()
-dl.plot(mean_f, title="mean of samples, G_FEM, function space, computed using helper function")
-plt.figure()
-im = dl.plot(var1, title="variance_1 of samples, G_FEM, function space, computed using helper function", vmin=-2, vmax=8, mode="color")
-plt.colorbar(im)
-plt.figure()
-im = dl.plot(var2, title="variance_2 of samples, G_FEM, function space, computed using helper function", vmin=-2, vmax=8, mode="color")
-plt.colorbar(im)
-
-# Interpolate variance_1 on the space V (from higher to lower dimension
-# space)
-print("variance_1 dim:", var1.function_space().dim())
-print("variance_2 dim:", var2.function_space().dim())
-print("V dim:", V.dim())
-var1_interpolated = dl.interpolate(var1, V)
-print("error norm: error between var1_interpolated and var2:",
-      dl.errornorm(var1_interpolated, var2))
-print("norm of var1_interpolated:", dl.norm(var1_interpolated))
