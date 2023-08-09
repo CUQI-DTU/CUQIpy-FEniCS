@@ -94,12 +94,14 @@ def to_dolfin_expression(value, **expression_kwargs):
     
     if not callable(value) and expression_kwargs != {}:
         raise ValueError("Cannot pass kwargs to non-callable value")
-    if callable(value):
-        return ExpressionFromCallable(value, **expression_kwargs)
-    elif isinstance(value, dl.UserExpression) \
+    # Note that dl.Expression and dl.Constant objects are
+    # callable objects, so we need to check for them first
+    if isinstance(value, dl.UserExpression) \
         or isinstance(value, dl.Expression)\
             or isinstance(value, dl.Constant):
         return value
+    elif callable(value):
+        return ExpressionFromCallable(value, **expression_kwargs)
     elif isinstance(value, Number):
         return dl.Constant(value)
     else:
