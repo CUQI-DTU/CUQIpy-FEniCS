@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import dolfin as dl
 import ufl
+import warnings
 
 __all__ = [
     'FEniCSContinuous',
@@ -15,7 +16,7 @@ class FEniCSContinuous(Geometry):
     def __init__(self, function_space, labels = ['x', 'y']):
         self.function_space = function_space
         if self.physical_dim >2:
-            raise NotImplementedError("'FenicsContinuous' object does not support 3D meshes yet. 'mesh' needs to be a 1D or 2D mesh.")
+            raise NotImplementedError("'FEniCSContinuous' object does not support 3D meshes yet. 'mesh' needs to be a 1D or 2D mesh.")
         self.labels = labels
 
     @property
@@ -29,8 +30,14 @@ class FEniCSContinuous(Geometry):
     @property
     def par_shape(self):
         return (self.function_space.dim(),)
-
-    def par2fun(self,par):
+    
+    @property
+    def funvec_shape(self):
+        """The shape of the geometry (shape of the vector representation of the
+        function value)."""
+        return (self.function_space.dim(),)
+    
+    def par2fun(self, par):
         """The parameter to function map used to map parameters to function values in e.g. plotting."""
         par = self._process_values(par)
         Ns = par.shape[-1]
@@ -46,10 +53,20 @@ class FEniCSContinuous(Geometry):
         else:
             return fun_list
 
-    def fun2par(self,fun):
-        """ Map the function values (FEniCS object) to the corresponding parameters (ndarray)."""
+    def fun2par(self, fun):
+        """ Maps the function values (FEniCS object) to the corresponding parameters (ndarray)."""
         return fun.vector().get_local()
 
+    def fun2vec(self, fun):
+        """ Maps the function value (FEniCS object) to the corresponding vector
+        representation of the function (ndarray of the function DOF values)."""
+        return self.fun2par(fun)
+    
+    def vec2fun(self, funvec):
+        """ Maps the vector representation of the function (ndarray of the
+        function DOF values) to the function value (FEniCS object)."""
+        return self.par2fun(funvec)
+    
     def gradient(self, direction, wrt=None, is_direction_par=False, is_wrt_par=True):
         """ Computes the gradient of the par2fun map with respect to the parameters in the direction `direction` evaluated at the point `wrt`"""
         if is_direction_par:
@@ -57,7 +74,7 @@ class FEniCSContinuous(Geometry):
         else:
             return self.fun2par(direction)
 
-    def _plot(self,values,subplots=True,**kwargs):
+    def _plot(self,values,subplots=True, **kwargs):
         """
         Overrides :meth:`cuqi.geometry.Geometry.plot`. See :meth:`cuqi.geometry.Geometry.plot` for description  and definition of the parameter `values`.
         
@@ -66,9 +83,12 @@ class FEniCSContinuous(Geometry):
         kwargs : keyword arguments
             keyword arguments which the function :meth:`dolfin.plot` normally takes.
         """
-        if isinstance(values, dl.function.function.Function):
+        # If plotting one parameter/function is required:
+        if isinstance(values, dl.function.function.Function)\
+           or (hasattr(values,'shape') and len(values.shape) == 1):
             Ns = 1
             values = [values]
+        # If plotting multiple parameters/functions is required:
         elif hasattr(values,'__len__'): 
             Ns = len(values)
         subplot_ids = self._create_subplot_list(Ns,subplots=subplots)
@@ -106,6 +126,16 @@ class FEniCSContinuous(Geometry):
 class FEniCSMappedGeometry(MappedGeometry):
     """
     """
+    @property
+    def function_space(self):
+        return self.geometry.function_space
+    
+    @property
+    def funvec_shape(self):
+        """The shape of the geometry (shape of the vector representation of the
+        function value)."""
+        return self.geometry.funvec_shape
+    
     def par2fun(self,p):
         funvals = self.geometry.par2fun(p)
         if isinstance(funvals, dl.function.function.Function):
@@ -127,6 +157,12 @@ class FEniCSMappedGeometry(MappedGeometry):
     
     def fun2par(self,f):
         raise NotImplementedError
+    
+    def fun2vec(self,f):
+        return self.geometry.fun2vec(f)
+
+    def vec2fun(self,funvec):
+        return self.geometry.vec2fun(funvec)
 
 
 class MaternKLExpansion(_WrappedGeometry):
@@ -201,6 +237,12 @@ class MaternKLExpansion(_WrappedGeometry):
         self._normalize = normalize
 
     @property
+    def funvec_shape(self):
+        """The shape of the geometry (shape of the vector representation of the
+        function value)."""
+        return self.geometry.funvec_shape
+    
+    @property
     def par_shape(self):
         return (self.num_terms,)
 
@@ -216,6 +258,10 @@ class MaternKLExpansion(_WrappedGeometry):
     def num_terms(self):
         return self._num_terms
 
+    @property
+    def function_space(self):
+        return self.geometry.function_space
+    
     @property
     def eig_val(self):
         return self._eig_val
@@ -242,6 +288,16 @@ class MaternKLExpansion(_WrappedGeometry):
 
     def par2fun(self,p):
         return self.geometry.par2fun(self.par2field(p))
+
+    def fun2vec(self,fun):
+        """ Maps the function value (FEniCS object) to the corresponding vector
+        representation of the function (ndarray of the function DOF values)."""
+        return self.geometry.fun2vec(fun)
+    
+    def vec2fun(self,funvec):
+        """ Maps the vector representation of the function (ndarray of the
+        function DOF values) to the function value (FEniCS object)."""
+        return self.geometry.vec2fun(funvec)
 
     def gradient(self, direction, wrt):
         direction = self.geometry.gradient(direction, wrt)
@@ -277,7 +333,7 @@ class MaternKLExpansion(_WrappedGeometry):
     def _build_basis(self):
         """Builds the basis of expansion of the Matern covariance operator"""
         # Define function space, test and trial functions
-        V = self._build_space()
+        V = self.function_space
         u = dl.TrialFunction(V)
         v = dl.TestFunction(V)
 
@@ -321,16 +377,3 @@ class MaternKLExpansion(_WrappedGeometry):
         # Normalize the eigenvectors if required
         if self.normalize:
             self._eig_vec /= np.linalg.norm( self._eig_vec )
-
-
-    def _build_space(self):
-        """Create the function space on which the Matern covariance is discretized"""
-
-        if hasattr(self.geometry, 'mesh'): 
-            mesh = self.geometry.mesh
-            V = dl.FunctionSpace(mesh, "CG", 1)
-	
-        else:
-            raise NotImplementedError
-
-        return V
