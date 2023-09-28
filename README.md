@@ -56,8 +56,7 @@ For more examples, see the [demos](demos) folder.
 ### FEniCS on Google Colaboratory
 
 If you do not wish to install FEniCS on your machine or you have difficulty 
-doing so, one option is to install FEniCS on  
-[Google Colaboratory (Colab) Jupyter Notebook service](https://colab.google). 
+doing so, one option is to install FEniCS on [Google Colaboratory (Colab) Jupyter Notebook service](https://colab.google). 
 We show below how to achieve this using 
 [FEM on Colab packages](https://fem-on-colab.github.io/index.html). 
 First open a notebook in Google Colab (an introduction to Colab can be found
