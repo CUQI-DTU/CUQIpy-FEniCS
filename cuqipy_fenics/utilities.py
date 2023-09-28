@@ -10,9 +10,9 @@ def _import_ufl():
     `ufl_legacy`.
     """
     try:
-        import ufl
-    except RuntimeError:
         import ufl_legacy as ufl
+    except (Exception, RuntimeError, ImportError):
+        import ufl
     return ufl
 
 def _compute_stats(samples: Samples):

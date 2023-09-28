@@ -8,9 +8,9 @@ import cuqi
 import matplotlib.pyplot as plt
 import time
 try:
-   import ufl
-except RuntimeError:
-    import ufl_legacy as ufl
+   import ufl_legacy as ufl
+except (Exception, RuntimeError, ImportError):
+    import ufl
 dl.set_log_level(40)
 
 
