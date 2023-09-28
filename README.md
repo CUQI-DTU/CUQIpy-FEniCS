@@ -126,28 +126,23 @@ name: env
 channels:
    - conda-forge
 dependencies:
-   - python=3.8
+   - python=3.10
    - fenics
    - pip
    - pip:
-  # works for regular pip packages
+   # works for regular pip packages
      - cuqipy-fenics
 ```
-(consider also `python=3.10` if `python=3.8` turn out to be problematic)
+(consider also `python=3.8` if `python=3.10` turn out to be problematic)
 
-Build the docker image by running the following command inside `my_dir`:
+Build the docker image, named `my_image` for example, by running the following command inside `my_dir` (this might take a little while):
 ```
-docker build .
-```
-
-To check the image id of the image you just created, run: 
-```
-docker images
+docker build -t my_image .
 ```
 
-Given the image id `<image_id>`, run the docker image:
+Run the docker image:
 ```
-docker run --entrypoint=/bin/bash -it -p 127.0.0.1:8090:8000 --name fenics_cont -v $(pwd):/app -w /app <image_id>
+docker run --entrypoint=/bin/bash -it -p 127.0.0.1:8090:8000 -v $(pwd):/app -w /app my_image
 ```
 
 Inside the Docker container, activate the conda environment and run python:
