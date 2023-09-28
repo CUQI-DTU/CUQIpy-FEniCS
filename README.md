@@ -9,7 +9,7 @@ CUQIpy-FEniCS with pip:
 pip install cuqipy-fenics
 ```
 If CUQIpy is not installed, it will be installed automatically. We provide 
-below [additional information about FEniCS installation](#fenics_install) 
+[additional information about FEniCS installation](#fenics_install), below,
 in case the above approach was problematic. 
 
 ## Quickstart
@@ -55,10 +55,14 @@ For more examples, see the [demos](demos) folder.
 
 ### FEniCS on Google Colaboratory
 
-If you do not wish to install FEniCS on your machine or you have difficulty doing so, one option is to
-install FEniCS on  
-[Google Colaboratory (Colab) Jupyter Notebook service](https://colab.google). Below is
-how to achieve that using [FEM on Colab packages](https://fem-on-colab.github.io/index.html). First open a notebook in Google Colab (an introduction to Colab can be found [here](https://colab.research.google.com/?utm_source=scs-index#scrollTo=GJBs_flRovLc)) and write in a cell:
+If you do not wish to install FEniCS on your machine or you have difficulty 
+doing so, one option is to install FEniCS on  
+[Google Colaboratory (Colab) Jupyter Notebook service](https://colab.google). 
+We show below how to achieve this using 
+[FEM on Colab packages](https://fem-on-colab.github.io/index.html). 
+First open a notebook in Google Colab (an introduction to Colab can be found
+[here](https://colab.research.google.com/?utm_source=scs-index#scrollTo=GJBs_flRovLc))
+and write in a cell:
 
 
 ```
