@@ -83,3 +83,83 @@ Test that you can import `cuqi` and  `cuqipy_fenics`
 import cuqi
 import cuqipy_fenics
 ```
+
+### Create a Docker image for FEniCS 
+Here is another approach of installing FEniCS that could be useful in
+some cases (e.g. MAC M1 machines). We create a Docker image that contains a 
+conda environment for FEniCS.
+
+Run the following command lines to create a directory named, for example,
+`my_dir`.
+
+
+```
+mkdir my_dir
+cd my_dir
+```
+
+In `my_dir`, run the following command lines to create the files needed for the 
+Docker image and to pull a base image `continuumio/miniconda3`.
+
+```
+touch Dockerfile
+touch environment.yml
+docker pull continuumio/miniconda3
+```
+
+Edit the file `Dockerfile` you just created to have the following lines: 
+```
+# Define base image
+FROM continuumio/miniconda3
+ 
+# Set working directory for the project
+WORKDIR /app
+ 
+# Create Conda environment from the YAML file
+COPY environment.yml .
+RUN conda env create -f environment.yml
+```
+
+Edit the file `environment.yml` you just created to have the following lines
+```
+name: env
+channels:
+   - conda-forge
+dependencies:
+   - python=3.8
+   - fenics
+   - pip
+   - pip:
+  # works for regular pip packages
+     - cuqipy-fenics
+```
+(consider also `python=3.10` if `python=3.8` turn out to be problematic)
+
+Build the docker image by running the following command inside `my_dir`:
+```
+docker build .
+```
+
+To check the image id of the image you just created, run: 
+```
+docker images
+```
+
+Given the image id `<image_id>`, run the docker image:
+```
+docker run --entrypoint=/bin/bash -it -p 127.0.0.1:8090:8000 --name fenics_cont -v $(pwd):/app -w /app <image_id>
+```
+
+Inside the Docker container, activate the conda environment and run python:
+```
+conda activate env
+python
+```
+
+Run the following python commands to make sure `FEniCS` and `cuqipy-fenics` are
+installed
+```
+import fenics
+import cuqi
+import cuqipy_fenics
+```
