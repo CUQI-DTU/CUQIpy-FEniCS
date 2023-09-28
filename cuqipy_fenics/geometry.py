@@ -2,8 +2,8 @@ from cuqi.geometry import Geometry, MappedGeometry, _WrappedGeometry
 import numpy as np
 import matplotlib.pyplot as plt
 import dolfin as dl
-import ufl
-import warnings
+from .utilities import _import_ufl
+ufl = _import_ufl()
 
 __all__ = [
     'FEniCSContinuous',

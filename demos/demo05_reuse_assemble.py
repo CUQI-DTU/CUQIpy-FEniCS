@@ -6,9 +6,12 @@ sys.path.append('../')
 import cuqipy_fenics
 import cuqi
 import matplotlib.pyplot as plt
-import ufl
-dl.set_log_level(40)
 import time
+try:
+   import ufl
+except ImportError:
+    import ufl_legacy as ufl
+dl.set_log_level(40)
 
 
 #%% 1. Set up FEniCS PDE

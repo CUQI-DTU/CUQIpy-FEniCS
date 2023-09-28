@@ -4,6 +4,16 @@ import warnings
 from numbers import Number
 from cuqi.samples import Samples
 
+def _import_ufl():
+    """Import ufl module. This function is used to make importing ufl compatible
+    with FEniCS versions that name `ufl` module as`ufl` or alternatively as 
+    `ufl_legacy`.
+    """
+    try:
+        import ufl
+    except ImportError:
+        import ufl_legacy as ufl
+    return ufl
 
 def _compute_stats(samples: Samples):
     """This function computes the statistics (mean and variance) of a set of 
