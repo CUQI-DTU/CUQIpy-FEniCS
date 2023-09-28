@@ -11,7 +11,7 @@ def _import_ufl():
     """
     try:
         import ufl
-    except ImportError:
+    except Exception:
         import ufl_legacy as ufl
     return ufl
 
