@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import time
 try:
    import ufl
-except ImportError:
+except Exception:
     import ufl_legacy as ufl
 dl.set_log_level(40)
 
