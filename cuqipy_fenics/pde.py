@@ -3,9 +3,10 @@ from abc import ABC, abstractmethod
 from cuqi.pde import PDE
 from cuqi.array import CUQIarray
 import dolfin as dl
-import ufl
 from copy import copy
 import warnings
+from .utilities import _import_ufl
+ufl = _import_ufl()
 
 __all__ = [
     'FEniCSPDE',

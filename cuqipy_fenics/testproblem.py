@@ -10,11 +10,11 @@ from cuqi.model import PDEModel
 from cuqi.distribution import Gaussian
 from cuqi.geometry import Geometry
 import dolfin as dl
-import ufl
 from .pde import SteadyStateLinearFEniCSPDE
 from .geometry import FEniCSContinuous, FEniCSMappedGeometry,\
       MaternKLExpansion
-from .utilities import to_dolfin_expression
+from .utilities import to_dolfin_expression, _import_ufl
+ufl = _import_ufl()
 
 
 __all__ = ['FEniCSDiffusion1D', 'FEniCSPoisson2D']
