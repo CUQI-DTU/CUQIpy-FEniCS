@@ -1,5 +1,5 @@
 # CUQIpy-FEniCS
-CUQIpy-FEniCS is a plugin for [CUQIpy](https://github.com/CUQI-DTU/CUQIpy) software package. It provides an interface between FEniCS PDE models and CUQIpy modules.
+CUQIpy-FEniCS is a plugin for [CUQIpy](https://github.com/CUQI-DTU/CUQIpy) software package. It provides an interface between FEniCS PDE models and CUQIpy modules. The documentation for CUQIpy-FEniCS can be found [here](https://cuqi-dtu.github.io/CUQIpy-FEniCS).
 
 ## Installation
 First install [FEniCS](https://fenicsproject.org/download/archive/), we 
