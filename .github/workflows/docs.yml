@@ -3,7 +3,7 @@ name: docs
 on:
   push:
     branches:
-      - add_documentation
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -57,7 +57,7 @@ jobs:
           sphinx-build docs ./public
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/add_documentation' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
