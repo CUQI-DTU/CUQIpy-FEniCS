@@ -17,7 +17,10 @@ myExactSolution= 'smooth_step'
 #%%
 observation_operator=None
 SNR = 1000
-model, data, problemInfo = cuqipy_fenics.testproblem.FEniCSDiffusion1D(dim = dim, exactSolution = myExactSolution, observation_operator=observation_operator , SNR = SNR, mapping = mapping, left_bc = 1, right_bc = 8, endpoint=L).get_components()
+model, data, problemInfo = cuqipy_fenics.testproblem.FEniCSDiffusion1D(dim=dim,
+    exactSolution=myExactSolution, observation_operator=observation_operator,
+    SNR=SNR, mapping=mapping, left_bc=1, right_bc=8, endpoint=L
+    ).get_components()
 
 model.range_geometry.plot(data)
 plt.title('Data')
