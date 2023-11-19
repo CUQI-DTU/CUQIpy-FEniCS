@@ -20,7 +20,7 @@ import cuqi
 import cuqipy_fenics
 
 # Load a fenics forward model and data from testproblem library
-model, y_data, info = cuqipy_fenics.testproblem.FEniCSDiffusion1D.get_components(
+model, y_data, info = cuqipy_fenics.testproblem.FEniCSDiffusion1D(
     dim=20,
     endpoint=1,
     exactSolution='smooth_step',
@@ -28,7 +28,7 @@ model, y_data, info = cuqipy_fenics.testproblem.FEniCSDiffusion1D.get_components
     SNR=10000,
     left_bc=0,
     right_bc=8
-)
+).get_components()
 
 # Set up Bayesian model
 x = cuqi.distribution.GMRF(np.zeros(model.domain_dim),
