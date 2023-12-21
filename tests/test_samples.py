@@ -87,3 +87,47 @@ def test_computing_samples_statistics_is_correct(samples):
     assert np.allclose(mean_funvals, mean_helper.vector().get_local())
     assert np.allclose(var_funvals, var2_helper.vector().get_local())
     assert np.allclose(var_funvals, var1_helper_V_DOF)
+
+
+@pytest.mark.parametrize("mesh", [dl.UnitSquareMesh(20, 20), dl.UnitIntervalMesh(20)])  
+@pytest.mark.parametrize("basis", ['CG', 'DG'])
+@pytest.mark.parametrize("order", [1, 2])
+def test_method_plot_envelope_works_only_for_1D_1st_order_Lagrange_space(
+        mesh, basis, order):
+    """Test that the method plot_envelope used in plot_ci works only for 
+    1D 1st order Lagrange space and raises an error otherwise"""
+
+    # define the function space
+    space = dl.FunctionSpace(mesh, basis, order)
+
+    # Set the geometry (mapped KL) 
+    G_FEM = FEniCSContinuous(space)
+    G_KL = MaternKLExpansion(G_FEM, length_scale=0.1, nu=0.75, num_terms=10)
+
+    # define some map
+    def prior_map(func):
+        dofs = func.vector().get_local()
+        updated_dofs = 15*dofs
+        func.vector().set_local(updated_dofs)
+        return func
+
+    G = FEniCSMappedGeometry(G_KL, map=prior_map)
+
+    # define distribution
+    x = Gaussian(0, cov=1, geometry=G)
+
+    # sample the distribution
+    samples = x.sample(20)
+    exact = x.sample()
+
+    # plot the envelope only if the order is 1 and the basis is CG
+    # and the physical dimension is 1. Otherwise, assert that the method
+    # plot_envelope raises an error
+    if order == 1 and basis == 'CG' and G_FEM.physical_dim == 1:
+        # plot_ci which uses _plot_envelope method
+        samples.funvals.vector.plot_ci(exact=exact)
+    else:
+        # assert that the method plot_envelope raises an error
+        with pytest.raises(NotImplementedError,
+                           match="Envelope plot is only implemented"):
+            samples.funvals.vector.plot_ci(exact=exact)

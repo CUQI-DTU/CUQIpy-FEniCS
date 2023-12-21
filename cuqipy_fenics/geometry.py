@@ -1,4 +1,4 @@
-from cuqi.geometry import Geometry, MappedGeometry, _WrappedGeometry
+from cuqi.geometry import Geometry, MappedGeometry, _WrappedGeometry, Continuous1D
 import numpy as np
 import matplotlib.pyplot as plt
 import dolfin as dl
@@ -121,6 +121,27 @@ class FEniCSContinuous(Geometry):
                 for i, axis in enumerate(plt.gcf().axes):
                     axis.set_xlabel(self.labels[0])
                     if self.physical_dim == 2: axis.set_ylabel(self.labels[1])
+
+    def _plot_envelope(self, lo_values, up_values, **kwargs):
+        """Method to plot the envelope of the lower and upper bounds of the
+        function values. This method is only implemented for Lagrange finite
+        element space of order 1 and 1D meshes."""
+
+        # Check the conditions above:
+        ufl_element = self.function_space.ufl_element()
+        lagrange_space = ufl_element.family() == 'Lagrange'
+        first_order = ufl_element.degree() == 1
+        one_dim_mesh = self.physical_dim == 1
+
+        # Raise error if the conditions above are not satisfied
+        if not (lagrange_space and first_order and one_dim_mesh):
+            raise NotImplementedError(
+                "Envelope plot is only implemented for Lagrange finite element "+"space of order 1 and 1D meshes")
+        
+        # degrees of freedom (dofs) to vertex map
+        d2v = dl.dof_to_vertex_map(self.function_space)
+
+        return Continuous1D(self.mesh.coordinates().reshape(-1))._plot_envelope(lo_values[d2v], up_values[d2v], **kwargs)
 
 
 class FEniCSMappedGeometry(MappedGeometry):

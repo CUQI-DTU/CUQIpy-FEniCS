@@ -115,7 +115,7 @@ class FEniCSDiffusion1D(BayesianProblem):
 
         # Create prior
         pr_mean = np.zeros(domain_geometry.par_dim)
-        x = cuqi.distribution.GMRF(pr_mean,25,1,'zero') 
+        x = cuqi.distribution.GMRF(pr_mean,25,'zero') 
         
         # Set up exact solution
         if exactSolution is None:
