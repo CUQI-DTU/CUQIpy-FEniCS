@@ -3,11 +3,17 @@ import dolfin as dl
 import warnings
 from numbers import Number
 from cuqi.samples import Samples
+from .config import UFL_LEGACY
 
 def _import_ufl():
-    """Import ufl module.
+    """Import ufl module. If UFL_LEGACY is True, the ufl_legacy module is
+    imported, otherwise the ufl module is imported.
     """
-    import ufl
+    if UFL_LEGACY:
+        import ufl_legacy as ufl
+    else:
+        import ufl
+
     return ufl
 
 def _compute_stats(samples: Samples):
