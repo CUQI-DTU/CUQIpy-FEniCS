@@ -5,6 +5,28 @@ from numbers import Number
 from cuqi.samples import Samples
 from .config import UFL_LEGACY
 
+# ufl lazy loading
+class _LazyUFLLoader:
+    """thin shell class to wrap modules.  load real module on first access
+    
+    Based on: https://stackoverflow.com/questions/4177735
+    """
+
+    def __init__ (self) :
+        self._mod = None
+   
+    def __getattr__ (self, attr) :
+        'import module on first attribute access'
+
+        if self._mod is None :
+            self._mod = _import_ufl()
+        
+        return getattr (self._mod, attr)
+    
+
+ufl = _LazyUFLLoader()
+
+
 def _import_ufl():
     """Import ufl module. If UFL_LEGACY is True, the ufl_legacy module is
     imported, otherwise the ufl module is imported.

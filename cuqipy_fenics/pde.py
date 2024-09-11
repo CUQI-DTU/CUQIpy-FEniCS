@@ -5,8 +5,8 @@ from cuqi.array import CUQIarray
 import dolfin as dl
 from copy import copy
 import warnings
-from .utilities import _import_ufl
-ufl = _import_ufl()
+from .utilities import _LazyUFLLoader
+ufl = _LazyUFLLoader()
 
 __all__ = [
     'FEniCSPDE',

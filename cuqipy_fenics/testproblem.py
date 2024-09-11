@@ -13,8 +13,8 @@ import dolfin as dl
 from .pde import SteadyStateLinearFEniCSPDE
 from .geometry import FEniCSContinuous, FEniCSMappedGeometry,\
       MaternKLExpansion
-from .utilities import to_dolfin_expression, _import_ufl
-ufl = _import_ufl()
+from .utilities import _LazyUFLLoader, to_dolfin_expression
+ufl = _LazyUFLLoader()
 
 
 __all__ = ['FEniCSDiffusion1D', 'FEniCSPoisson2D']
