@@ -5,14 +5,9 @@ from numbers import Number
 from cuqi.samples import Samples
 
 def _import_ufl():
-    """Import ufl module. This function is used to make importing ufl compatible
-    with FEniCS versions that name `ufl` module as`ufl` or alternatively as 
-    `ufl_legacy`.
+    """Import ufl module.
     """
-    try:
-        import ufl_legacy as ufl
-    except (Exception, RuntimeError, ImportError):
-        import ufl
+    import ufl
     return ufl
 
 def _compute_stats(samples: Samples):
