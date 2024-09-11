@@ -22,9 +22,6 @@ class _LazyUFLLoader:
             self._mod = _import_ufl()
         
         return getattr (self._mod, attr)
-    
-
-ufl = _LazyUFLLoader()
 
 
 def _import_ufl():
