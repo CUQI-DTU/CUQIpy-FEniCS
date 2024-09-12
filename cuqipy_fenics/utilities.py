@@ -4,23 +4,25 @@ import warnings
 from numbers import Number
 from cuqi.samples import Samples
 
+
 # ufl lazy loading
 class _LazyUFLLoader:
-    """thin shell class to wrap modules.  load real module on first access
-    
+    """
+    Thin shell class to wrap ufl module. Load ufl or ufl_legacy on first
+    access based on the value of UFL_LEGACY in the config module.
+
     Based on: https://stackoverflow.com/questions/4177735
     """
-
-    def __init__ (self) :
+    def __init__(self):
         self._mod = None
-   
-    def __getattr__ (self, attr) :
-        'import module on first attribute access'
 
-        if self._mod is None :
+    def __getattr__(self, attr):
+        "import module on first attribute access"
+
+        if self._mod is None:
             self._mod = _import_ufl()
-        
-        return getattr (self._mod, attr)
+
+        return getattr(self._mod, attr)
 
 
 def _import_ufl():
