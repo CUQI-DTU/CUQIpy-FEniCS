@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.SteadyStateLinearFEniCSPDE.observe
+=====================================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. automethod:: SteadyStateLinearFEniCSPDE.observe

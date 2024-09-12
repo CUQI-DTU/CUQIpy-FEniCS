@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSMappedGeometry.axis\_labels
+=========================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: FEniCSMappedGeometry.axis_labels

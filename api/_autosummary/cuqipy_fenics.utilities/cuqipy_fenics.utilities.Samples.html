@@ -1,0 +1,660 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Samples &#8212; cuqipy_fenics  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=321493ab" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-dropdown.css?v=995e94df" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-bootstrap.min.css?v=21c0b90a" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/_autosummary/cuqipy_fenics.utilities/cuqipy_fenics.utilities.Samples';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="cuqipy_fenics.utilities.Samples.__init__" href="cuqipy_fenics.utilities.Samples.__init__.html" />
+    <link rel="prev" title="cuqipy_fenics.utilities.Number.__init__" href="cuqipy_fenics.utilities.Number.__init__.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="https://github.com/CUQI-DTU/CUQIpy/raw/main/logo.png" class="logo__image only-light" alt="cuqipy_fenics  documentation - Home"/>
+    <script>document.write(`<img src="https://github.com/CUQI-DTU/CUQIpy/raw/main/logo.png" class="logo__image only-dark" alt="cuqipy_fenics  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../cuqipy_fenics.html">cuqipy_fenics</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../cuqipy_fenics.config.html">config</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../cuqipy_fenics.geometry.html">geometry</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.geometry/cuqipy_fenics.geometry.FEniCSContinuous.html">FEniCSContinuous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.geometry/cuqipy_fenics.geometry.FEniCSMappedGeometry.html">FEniCSMappedGeometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.geometry/cuqipy_fenics.geometry.MaternKLExpansion.html">MaternKLExpansion</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../cuqipy_fenics.pde.html">pde</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.pde/cuqipy_fenics.pde.FEniCSPDE.html">FEniCSPDE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.pde/cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE.html">SteadyStateLinearFEniCSPDE</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../cuqipy_fenics.testproblem.html">testproblem</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.testproblem/cuqipy_fenics.testproblem.FEniCSDiffusion1D.html">FEniCSDiffusion1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.testproblem/cuqipy_fenics.testproblem.FEniCSPoisson2D.html">FEniCSPoisson2D</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../cuqipy_fenics.utilities.html">utilities</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cuqipy_fenics.utilities.to_dolfin_expression.html">to_dolfin_expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cuqipy_fenics.utilities.ExpressionFromCallable.html">ExpressionFromCallable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cuqipy_fenics.utilities.Number.html">Number</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">Samples</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><i class="fa-solid fa-ellipsis"></i></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../cuqipy_fenics.utilities.html" class="nav-link">utilities</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Samples</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="samples">
+<h1>Samples<a class="headerlink" href="#samples" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="cuqipy_fenics.utilities.Samples">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cuqipy_fenics.utilities.</span></span><span class="sig-name descname"><span class="pre">Samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_par</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_vec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cuqipy_fenics.utilities.Samples" title="Link to this definition">#</a></dt>
+<dd><p>An object used to store samples from distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>samples</strong> (<em>ndarray</em>) – Contains the raw samples as a numpy array indexed by the last axis of the array.</p></li>
+<li><p><strong>geometry</strong> (<em>cuqi.geometry.Geometry</em><em>, </em><em>default None</em>) – Contains the geometry related of the samples</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cuqipy_fenics.utilities.Samples.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#cuqipy_fenics.utilities.Samples.shape" title="Link to this definition">#</a></dt>
+<dd><p>Returns the shape of samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cuqipy_fenics.utilities.Samples.Ns">
+<span class="sig-name descname"><span class="pre">Ns</span></span><a class="headerlink" href="#cuqipy_fenics.utilities.Samples.Ns" title="Link to this definition">#</a></dt>
+<dd><p>Returns the number of samples</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:meth:`plot`:</span> <span class="pre">Plots</span> <span class="pre">one</span> <span class="pre">or</span> <span class="pre">more</span> <span class="pre">samples.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:meth:`plot_ci`:</span> <span class="pre">Plots</span> <span class="pre">a</span> <span class="pre">credibility</span> <span class="pre">interval</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">samples.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:meth:`plot_mean`:</span> <span class="pre">Plots</span> <span class="pre">the</span> <span class="pre">mean</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">samples.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:meth:`plot_std`:</span> <span class="pre">Plots</span> <span class="pre">the</span> <span class="pre">std</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">samples.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:meth:`plot_chain`:</span> <span class="pre">Plots</span> <span class="pre">all</span> <span class="pre">samples</span> <span class="pre">of</span> <span class="pre">one</span> <span class="pre">or</span> <span class="pre">more</span> <span class="pre">variables</span> <span class="pre">(MCMC</span> <span class="pre">chain).</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:meth:`hist_chain`:</span> <span class="pre">Plots</span> <span class="pre">histogram</span> <span class="pre">of</span> <span class="pre">all</span> <span class="pre">samples</span> <span class="pre">of</span> <span class="pre">a</span> <span class="pre">single</span> <span class="pre">variable</span> <span class="pre">(MCMC</span> <span class="pre">chain).</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:meth:`burnthin`:</span> <span class="pre">Removes</span> <span class="pre">burn-in</span> <span class="pre">and</span> <span class="pre">thins</span> <span class="pre">samples.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:meth:`diagnostics`:</span> <span class="pre">Conducts</span> <span class="pre">diagnostics</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">chain.</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cuqipy_fenics.utilities.Samples.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_par</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_vec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cuqipy_fenics.utilities.Samples.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.__init__.html#cuqipy_fenics.utilities.Samples.__init__" title="cuqipy_fenics.utilities.Samples.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(samples[, geometry, is_par, is_vec])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.burnthin.html#cuqipy_fenics.utilities.Samples.burnthin" title="cuqipy_fenics.utilities.Samples.burnthin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">burnthin</span></code></a>(Nb[, Nt])</p></td>
+<td><p>Remove burn-in and thin samples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.ci_width.html#cuqipy_fenics.utilities.Samples.ci_width" title="cuqipy_fenics.utilities.Samples.ci_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ci_width</span></code></a>([percent])</p></td>
+<td><p>Compute width of the pointwise credibility intervals of the samples</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.compute_ci.html#cuqipy_fenics.utilities.Samples.compute_ci" title="cuqipy_fenics.utilities.Samples.compute_ci"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_ci</span></code></a>([percent])</p></td>
+<td><p>Compute pointwise credibility intervals of the samples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.compute_ess.html#cuqipy_fenics.utilities.Samples.compute_ess" title="cuqipy_fenics.utilities.Samples.compute_ess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_ess</span></code></a>(**kwargs)</p></td>
+<td><p>Compute effective sample size (ESS) of samples.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.compute_rhat.html#cuqipy_fenics.utilities.Samples.compute_rhat" title="cuqipy_fenics.utilities.Samples.compute_rhat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_rhat</span></code></a>(chains, **kwargs)</p></td>
+<td><p>Compute rhat value of samples given list of cuqi.samples.Samples objects (chains) to compare with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.diagnostics.html#cuqipy_fenics.utilities.Samples.diagnostics" title="cuqipy_fenics.utilities.Samples.diagnostics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diagnostics</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.hist_chain.html#cuqipy_fenics.utilities.Samples.hist_chain" title="cuqipy_fenics.utilities.Samples.hist_chain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist_chain</span></code></a>(variable_indices, *args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.mean.html#cuqipy_fenics.utilities.Samples.mean" title="cuqipy_fenics.utilities.Samples.mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code></a>()</p></td>
+<td><p>Compute mean of the samples.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.median.html#cuqipy_fenics.utilities.Samples.median" title="cuqipy_fenics.utilities.Samples.median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">median</span></code></a>()</p></td>
+<td><p>Compute pointwise median of the samples</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot.html#cuqipy_fenics.utilities.Samples.plot" title="cuqipy_fenics.utilities.Samples.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([sample_indices])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_autocorrelation.html#cuqipy_fenics.utilities.Samples.plot_autocorrelation" title="cuqipy_fenics.utilities.Samples.plot_autocorrelation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_autocorrelation</span></code></a>([variable_indices, ...])</p></td>
+<td><p>Plot the autocorrelation function of one or more variables in a single chain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_chain.html#cuqipy_fenics.utilities.Samples.plot_chain" title="cuqipy_fenics.utilities.Samples.plot_chain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_chain</span></code></a>([variable_indices])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_ci.html#cuqipy_fenics.utilities.Samples.plot_ci" title="cuqipy_fenics.utilities.Samples.plot_ci"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_ci</span></code></a>([percent, exact, plot_envelope_kwargs])</p></td>
+<td><p>Plots the credibility interval for the samples according to the geometry.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_ci_width.html#cuqipy_fenics.utilities.Samples.plot_ci_width" title="cuqipy_fenics.utilities.Samples.plot_ci_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_ci_width</span></code></a>([percent])</p></td>
+<td><p>Plot width of the pointwise credibility intervals of the samples</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_mean.html#cuqipy_fenics.utilities.Samples.plot_mean" title="cuqipy_fenics.utilities.Samples.plot_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_mean</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Plot pointwise mean of the samples</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_median.html#cuqipy_fenics.utilities.Samples.plot_median" title="cuqipy_fenics.utilities.Samples.plot_median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_median</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Plot pointwise median of the samples</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_pair.html#cuqipy_fenics.utilities.Samples.plot_pair" title="cuqipy_fenics.utilities.Samples.plot_pair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pair</span></code></a>([variable_indices, kind, marginals])</p></td>
+<td><p>Plot marginals using a scatter, kde and/or hexbin matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_std.html#cuqipy_fenics.utilities.Samples.plot_std" title="cuqipy_fenics.utilities.Samples.plot_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_std</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Plot pointwise standard deviation of the samples</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_trace.html#cuqipy_fenics.utilities.Samples.plot_trace" title="cuqipy_fenics.utilities.Samples.plot_trace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_trace</span></code></a>([variable_indices, exact, ...])</p></td>
+<td><p>Creates a traceplot of the samples consisting of 1) a histogram/density plot of the samples and 2) an MCMC chain plot.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_variance.html#cuqipy_fenics.utilities.Samples.plot_variance" title="cuqipy_fenics.utilities.Samples.plot_variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_variance</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Plot pointwise variance of the samples</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.plot_violin.html#cuqipy_fenics.utilities.Samples.plot_violin" title="cuqipy_fenics.utilities.Samples.plot_violin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_violin</span></code></a>([variable_indices])</p></td>
+<td><p>Create a violin plot of the samples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.std.html#cuqipy_fenics.utilities.Samples.std" title="cuqipy_fenics.utilities.Samples.std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code></a>()</p></td>
+<td><p>Compute pointwise standard deviation of the samples</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.to_arviz_inferencedata.html#cuqipy_fenics.utilities.Samples.to_arviz_inferencedata" title="cuqipy_fenics.utilities.Samples.to_arviz_inferencedata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_arviz_inferencedata</span></code></a>([variable_indices])</p></td>
+<td><p>Return arviz InferenceData object of samples for the given variable indices</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.variance.html#cuqipy_fenics.utilities.Samples.variance" title="cuqipy_fenics.utilities.Samples.variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">variance</span></code></a>()</p></td>
+<td><p>Compute pointwise variance of the samples</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Attributes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.Ns.html#cuqipy_fenics.utilities.Samples.Ns" title="cuqipy_fenics.utilities.Samples.Ns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Ns</span></code></a></p></td>
+<td><p>Return number of samples</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.funvals.html#cuqipy_fenics.utilities.Samples.funvals" title="cuqipy_fenics.utilities.Samples.funvals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funvals</span></code></a></p></td>
+<td><p>Returns a new Samples object of sample function values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.geometry.html#cuqipy_fenics.utilities.Samples.geometry" title="cuqipy_fenics.utilities.Samples.geometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geometry</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.is_vec.html#cuqipy_fenics.utilities.Samples.is_vec" title="cuqipy_fenics.utilities.Samples.is_vec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_vec</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.parameters.html#cuqipy_fenics.utilities.Samples.parameters" title="cuqipy_fenics.utilities.Samples.parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameters</span></code></a></p></td>
+<td><p>If <cite>self.is_par</cite> is False, returns a new Samples object of sample parameters by converting the function values to parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.shape.html#cuqipy_fenics.utilities.Samples.shape" title="cuqipy_fenics.utilities.Samples.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.utilities.Samples.vector.html#cuqipy_fenics.utilities.Samples.vector" title="cuqipy_fenics.utilities.Samples.vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector</span></code></a></p></td>
+<td><p>Returns a new Samples object of samples in vector form.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cuqipy_fenics.utilities.Samples"><code class="docutils literal notranslate"><span class="pre">Samples</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cuqipy_fenics.utilities.Samples.shape"><code class="docutils literal notranslate"><span class="pre">Samples.shape</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cuqipy_fenics.utilities.Samples.Ns"><code class="docutils literal notranslate"><span class="pre">Samples.Ns</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cuqipy_fenics.utilities.Samples.__init__"><code class="docutils literal notranslate"><span class="pre">Samples.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/api/_autosummary/cuqipy_fenics.utilities/cuqipy_fenics.utilities.Samples.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, CUQI Project, Technical University of Denmark (DTU).
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

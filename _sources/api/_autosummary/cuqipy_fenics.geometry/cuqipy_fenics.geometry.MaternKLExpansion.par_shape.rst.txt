@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.par\_shape
+====================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.par_shape

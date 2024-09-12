@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.ExpressionFromCallable.ufl\_shape
+==========================================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. autoproperty:: ExpressionFromCallable.ufl_shape

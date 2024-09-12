@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.\_\_init\_\_
+=====================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: FEniCSContinuous.__init__

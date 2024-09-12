@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.par2field
+===================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: MaternKLExpansion.par2field

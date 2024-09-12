@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.fun\_is\_array
+=======================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: FEniCSContinuous.fun_is_array

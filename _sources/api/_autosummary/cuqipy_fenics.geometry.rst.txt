@@ -1,0 +1,39 @@
+geometry
+========
+
+Module path: cuqipy_fenics.geometry
+
+.. currentmodule:: cuqipy_fenics
+
+.. automodule:: cuqipy_fenics.geometry
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+    :toctree: cuqipy_fenics.geometry
+    :nosignatures:
+    :recursive:
+
+   
+      FEniCSContinuous
+      FEniCSMappedGeometry
+      MaternKLExpansion
+   
+   
+
+   
+   
+   
+
+
+

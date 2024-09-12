@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSMappedGeometry.plot
+=================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: FEniCSMappedGeometry.plot

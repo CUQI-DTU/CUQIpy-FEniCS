@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.SteadyStateLinearFEniCSPDE.grid\_obs
+=======================================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: SteadyStateLinearFEniCSPDE.grid_obs

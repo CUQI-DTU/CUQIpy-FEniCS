@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.fun\_shape
+===================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: FEniCSContinuous.fun_shape

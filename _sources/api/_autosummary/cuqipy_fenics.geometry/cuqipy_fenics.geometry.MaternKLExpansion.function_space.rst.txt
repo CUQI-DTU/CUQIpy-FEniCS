@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.function\_space
+=========================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.function_space

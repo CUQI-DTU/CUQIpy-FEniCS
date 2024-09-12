@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.SteadyStateLinearFEniCSPDE.grids\_equal
+==========================================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: SteadyStateLinearFEniCSPDE.grids_equal

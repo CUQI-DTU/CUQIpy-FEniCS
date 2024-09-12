@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.plot\_envelope
+========================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: MaternKLExpansion.plot_envelope

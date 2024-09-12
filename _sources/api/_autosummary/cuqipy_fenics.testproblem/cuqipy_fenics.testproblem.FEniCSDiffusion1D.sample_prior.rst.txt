@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSDiffusion1D.sample\_prior
+==========================================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. automethod:: FEniCSDiffusion1D.sample_prior

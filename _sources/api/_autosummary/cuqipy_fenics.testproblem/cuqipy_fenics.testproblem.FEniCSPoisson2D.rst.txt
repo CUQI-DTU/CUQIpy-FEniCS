@@ -1,0 +1,41 @@
+FEniCSPoisson2D
+===============
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. autoclass:: FEniCSPoisson2D
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSPoisson2D.MAP
+      ~FEniCSPoisson2D.ML
+      ~FEniCSPoisson2D.UQ
+      ~FEniCSPoisson2D.__init__
+      ~FEniCSPoisson2D.get_components
+      ~FEniCSPoisson2D.sample_posterior
+      ~FEniCSPoisson2D.sample_prior
+      ~FEniCSPoisson2D.set_data
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSPoisson2D.data
+      ~FEniCSPoisson2D.likelihood
+      ~FEniCSPoisson2D.model
+      ~FEniCSPoisson2D.posterior
+      ~FEniCSPoisson2D.prior
+   
+   
