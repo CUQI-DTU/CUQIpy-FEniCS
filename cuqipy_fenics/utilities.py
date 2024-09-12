@@ -4,15 +4,37 @@ import warnings
 from numbers import Number
 from cuqi.samples import Samples
 
-def _import_ufl():
-    """Import ufl module. This function is used to make importing ufl compatible
-    with FEniCS versions that name `ufl` module as`ufl` or alternatively as 
-    `ufl_legacy`.
+
+# ufl lazy loading
+class _LazyUFLLoader:
     """
-    try:
+    Thin shell class to wrap ufl module. Load ufl or ufl_legacy on first
+    access based on the value of UFL_LEGACY in the config module.
+
+    Based on: https://stackoverflow.com/questions/4177735
+    """
+    def __init__(self):
+        self._mod = None
+
+    def __getattr__(self, attr):
+        "import module on first attribute access"
+
+        if self._mod is None:
+            self._mod = _import_ufl()
+
+        return getattr(self._mod, attr)
+
+
+def _import_ufl():
+    """Import ufl module. If UFL_LEGACY is True, the ufl_legacy module is
+    imported, otherwise the ufl module is imported.
+    """
+    from .config import UFL_LEGACY
+    if UFL_LEGACY:
         import ufl_legacy as ufl
-    except (Exception, RuntimeError, ImportError):
+    else:
         import ufl
+
     return ufl
 
 def _compute_stats(samples: Samples):

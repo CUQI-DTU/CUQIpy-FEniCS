@@ -68,7 +68,7 @@ and write in a cell:
 try:
     import dolfin
 except ImportError:
-    !wget "https://fem-on-colab.github.io/releases/fenics-install.sh" -O "/tmp/fenics-install.sh" && bash "/tmp/fenics-install.sh"
+    !wget "https://fem-on-colab.github.io/releases/fenics-install-real.sh" -O "/tmp/fenics-install.sh" && bash "/tmp/fenics-install.sh"
     import dolfin
 ```
 Then in a following cell use `pip` to install `cuqipy-fenics` as follows:
@@ -81,6 +81,14 @@ Test that you can import `cuqi` and  `cuqipy_fenics`
 ```
 import cuqi
 import cuqipy_fenics
+```
+
+Note that with this set up on Google Colab, you need to use the FEniCS package `ufl_legacy` instead of 
+`ufl`. To enable this, add the following line to your code right after importing
+`cuqipy_fenics`:
+
+```python
+cuqipy_fenics.config.UFL_LEGACY = True
 ```
 
 ### Create a Docker image for FEniCS 
