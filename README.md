@@ -87,9 +87,8 @@ Note that with this set up on Google Colab, you need to use the FEniCS package `
 `ufl`. To enable this, add the following line to your code right after importing
 `cuqipy_fenics`:
 
-```
-cuqipy_fenics.config.UFL_LEGACY=True
-```
+```python
+cuqipy_fenics.config.UFL_LEGACY = True
 
 ### Create a Docker image for FEniCS 
 Here is another approach of installing FEniCS that could be useful in
