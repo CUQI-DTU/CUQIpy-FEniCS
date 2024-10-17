@@ -106,8 +106,12 @@ class FEniCSContinuous(Geometry):
     def _process_values(self, values):
         if isinstance(values, dl.function.function.Function):
             return [values]
+        
+        # if value shape is (), convert it to (1,)
+        if values.shape == ():
+            values = values.reshape(-1)
 
-        elif len(values.shape) == 1:
+        if len(values.shape) == 1:
             values = values[..., np.newaxis]
         
         return values
@@ -218,7 +222,7 @@ class MaternKLExpansion(_WrappedGeometry):
 
         import numpy as np
         import matplotlib.pyplot as plt
-        from cuqi.fenics.geometry import MaternKLExpansion, FEniCSContinuous
+        from cuqipy_fenics.geometry import MaternKLExpansion, FEniCSContinuous
         from cuqi.distribution import Gaussian
         import dolfin as dl
         
@@ -400,28 +404,41 @@ class MaternKLExpansion(_WrappedGeometry):
             self._eig_vec /= np.linalg.norm( self._eig_vec )
 
 
-# user expresstion for 1 in the sepcified grid and 0 in the other domain
-class Expression2D(dl.UserExpression):
+# Helper user expression to define the step expansion basis
+class _Expression2D(dl.UserExpression):
     def __init__(self, degree, x_lim, y_lim):
         self.x_lim = x_lim
         self.y_lim = y_lim
         super().__init__(degree=degree)
+
     def eval(self, value, x):
-        if x[0] >self.x_lim[0] and x[0] < self.x_lim[1] and x[1] > self.y_lim[0] and x[1] < self.y_lim[1]:
+        if (
+            x[0] > self.x_lim[0] +  dl.DOLFIN_EPS
+            and x[0] < self.x_lim[1] - dl.DOLFIN_EPS
+            and x[1] > self.y_lim[0] + dl.DOLFIN_EPS
+            and x[1] < self.y_lim[1] - dl.DOLFIN_EPS
+        ):
             value[0] = 1
         else:
             value[0] = 0
 
 
-class StepExpansion2D(_WrappedGeometry):
-    """A geometry class that builds step expansion in 2D domain
+class StepExpansion(_WrappedGeometry):
+    """A geometry class that parameterizes finite element functions on a 1D or 2D domain with piecewise constant functions. In the 1D case, the domain is divided into `num_steps_x` intervals, each of length `L_x`/`num_steps_x`, where `L_x` is the length of the domain in the x direction. In the 2D case, the domain is divided into `num_steps_x` x `num_steps_y` piecewise constant functions each of a support area of `L_x`/`num_steps_x` x `L_y`/`num_steps_y`, where `L_y` is the length of the domain in the y direction. The step expansion is built on the given input geometry that specifies the computational
+    mesh.
+
     Parameters
     -----------
     geometry : cuqi.fenics.geometry.Geometry
-        An input geometry on which the step expansion is built (the geometry must have a mesh attribute)
+        An input geometry on which the step expansion is built (the 
+        geometry must have a mesh attribute)
 
-    num_steps: int
-        Number of expansion terms to represent the step expansion (the num_steps must be square of integer)
+    num_steps_x: int
+        Number of step expansion terms in the x direction
+
+    num_steps_y: int, optional
+        Number of step expansion terms in the y direction,
+        only required for 2D geometries.
 
 
     Example
@@ -429,8 +446,7 @@ class StepExpansion2D(_WrappedGeometry):
     .. code-block:: python
 
         import numpy as np
-        import matplotlib.pyplot as plt
-        from cuqi.fenics.geometry import StepExpansion2D, FEniCSContinuous
+        from cuqipy_fenics.geometry import StepExpansion, FEniCSContinuous
         from cuqi.distribution import Gaussian
         import dolfin as dl
 
@@ -439,11 +455,11 @@ class StepExpansion2D(_WrappedGeometry):
         V = dl.FunctionSpace(mesh, 'DG', 0)
 
         geometry = FEniCSContinuous(V, labels=['$\\xi_1$', '$\\xi_2$'])
-        StepExpansionGeometry = StepExpansion2D(geometry, 
-                                    num_steps=64)
+        StepExpansionGeometry = StepExpansion(geometry, 
+                                    num_steps_x=4, num_steps_y=8)
 
-        StepExpansionField = Gaussian(mean=np.zeros(StepExpansionGeometry.num_steps),
-                    cov=np.eye(StepExpansionGeometry.num_steps),
+        StepExpansionField = Gaussian(mean=np.zeros(StepExpansionGeometry.par_dim),
+                    cov=np.eye(StepExpansionGeometry.par_dim),
                     geometry=StepExpansionGeometry)
 
         samples = StepExpansionField.sample()
@@ -452,37 +468,63 @@ class StepExpansion2D(_WrappedGeometry):
 
     """
 
-    def __init__(self, geometry, num_steps = 64): 
-        super().__init__(geometry)
-        if not hasattr(geometry, 'mesh'):
-            raise NotImplementedError
+    def __init__(self, geometry, num_steps_x = 8, num_steps_y = None): 
+        self._num_steps_x = num_steps_x
+        self._num_steps_y = num_steps_y
         self.geometry = geometry
-        self._num_steps = num_steps
-        self._build_basis() 
+
+    @property
+    def geometry(self):
+        return self._geometry
+
+    # build basis when geometry is initialized
+    @geometry.setter
+    def geometry(self, value):
+        self._geometry = value
+        # Check if the geometry has a mesh attribute
+        if not hasattr(value, 'mesh'):
+            raise NotImplementedError
+        # If 1D geometry, ensure num_steps_y is None
+        if self.physical_dim == 1 and self._num_steps_y is not None:
+            raise ValueError("num_steps_y must be None for 1D geometries")
+        # If 2D geometry, ensure num_steps_y is not None
+        if self.physical_dim == 2 and self._num_steps_y is None:
+            raise ValueError("num_steps_y must be specified for 2D geometries")
+        # assert physical_dim is 2 or 1
+        if self.physical_dim > 2:
+            raise NotImplementedError("'StepExpansion' object does not support 3D meshes yet. 'mesh' needs to be a 1D or 2D mesh.")
         
+
+        
+
+        self._build_basis()
+
     @property
     def funvec_shape(self):
         """The shape of the geometry (shape of the vector representation of the
         function value)."""
         return self.geometry.funvec_shape
-    
+
     @property
     def par_shape(self):
-        return (self.num_steps,)
-
+        return (self.num_steps_x*self.num_steps_y,)
 
     @property
-    def num_steps(self):
-        return self._num_steps
+    def num_steps_x(self):
+        return self._num_steps_x
+
+    @property
+    def num_steps_y(self):
+        return self._num_steps_y
 
     @property
     def function_space(self):
         return self.geometry.function_space
-    
+
     @property
-    def step_vec(self):
-        return self._step_vec
-    
+    def step_basis(self):
+        return self._step_basis
+
     @property
     def physical_dim(self):
         """Returns the physical dimension of the geometry, e.g. 1, 2 or 3"""
@@ -498,7 +540,7 @@ class StepExpansion2D(_WrappedGeometry):
         """ Maps the function value (FEniCS object) to the corresponding vector
         representation of the function (ndarray of the function DOF values)."""
         return self.geometry.fun2vec(fun)
-    
+
     def vec2fun(self,funvec):
         """ Maps the vector representation of the function (ndarray of the
         function DOF values) to the function value (FEniCS object)."""
@@ -506,21 +548,18 @@ class StepExpansion2D(_WrappedGeometry):
 
     def gradient(self, direction, wrt):
         direction = self.geometry.gradient(direction, wrt)
-        return self._step_vec.T@direction
-        
+        return self._step_basis.T@direction
+
     def par2field(self, p):
         """Applies linear transformation of the parameters a to
         generate a realization of the step expansion """
 
-        if self._step_vec is None:
-            self._build_basis() 
-	   
         p = self._process_values(p)
         Ns = p.shape[-1]
-        field_list = np.empty((self.geometry.par_dim,Ns))
+        field_list = np.empty((self.geometry.par_dim, Ns))
 
         for idx in range(Ns):
-            field_list[:,idx] = self.step_vec@(p[...,idx] )
+            field_list[:,idx] = self.step_basis@(p[...,idx] )
 
         if len(field_list) == 1:
             return field_list[0]
@@ -529,11 +568,9 @@ class StepExpansion2D(_WrappedGeometry):
 
     def _build_basis(self):
         """Builds the basis of step expansion"""
-        u = dl.Function(self.geometry.function_space)
-        self._step_vec = np.zeros( [ u.vector().get_local().shape[0], self.num_steps ] )
-        
-        # the number of grid for each dimension
-        val = int(np.sqrt(self.num_steps))
+        u = dl.Function(self.function_space)
+        self._step_basis = np.zeros([u.vector().get_local().shape[0],
+                                     self.par_dim])
 
         coordinates = self.geometry.mesh.coordinates()
         x_min, y_min = coordinates.min(axis=0)
@@ -541,6 +578,27 @@ class StepExpansion2D(_WrappedGeometry):
         length_x = x_max - x_min
         length_y = y_max - y_min
 
-        for i in range( self.num_steps ):   
-            u.interpolate(Expression2D(degree=0, x_lim=[(i%val) /val * length_x + x_min, (i%val + 1) / val * length_x + x_min], y_lim=[(i//val) /val * length_y + y_min , (i//val + 1) / val * length_y + y_min]))
-            self._step_vec[:,i] = u.vector().get_local()
+        for i in range( self.par_dim ):
+            print( [
+                        (i // self.num_steps_x) / self.num_steps_y * length_y + y_min,
+                        (i // self.num_steps_x + 1) / self.num_steps_y * length_y + y_min,
+                    ]  )
+            print( [
+                        (i % self.num_steps_x) / self.num_steps_x * length_x + x_min,
+                        (i % self.num_steps_x + 1) / self.num_steps_x * length_x + x_min,
+                    ]  )  
+            u.interpolate(
+                _Expression2D(
+                    degree=0,
+                    x_lim=[
+                        (i % self.num_steps_x) / self.num_steps_x * length_x + x_min,
+                        (i % self.num_steps_x + 1) / self.num_steps_x * length_x + x_min,
+                    ],
+                    y_lim=[
+                        (i // self.num_steps_x) / self.num_steps_y * length_y + y_min,
+                        (i // self.num_steps_x + 1) / self.num_steps_y * length_y + y_min,
+                    ],
+                )
+            )
+
+            self._step_basis[:,i] = u.vector().get_local()
