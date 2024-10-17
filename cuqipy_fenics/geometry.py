@@ -8,7 +8,8 @@ ufl = _LazyUFLLoader()
 __all__ = [
     'FEniCSContinuous',
     'FEniCSMappedGeometry',
-    'MaternKLExpansion'
+    'MaternKLExpansion',
+    'StepExpansion'
 ]
 
 class FEniCSContinuous(Geometry):
@@ -197,7 +198,7 @@ class MaternKLExpansion(_WrappedGeometry):
 
     Parameters
     -----------
-    geometry : cuqi.fenics.geometry.Geometry
+    geometry : cuqipy_fenics.geometry.Geometry
         An input geometry on which the Matern field representation is built (the geometry must have a mesh attribute)
 
     length_scale : float
@@ -424,18 +425,19 @@ class _StepExpression(dl.UserExpression):
 
 
 class StepExpansion(_WrappedGeometry):
-    """A geometry class that parameterizes finite element functions on a 1D or 
-    2D domain with piecewise constant functions. In the 1D case, the domain is 
-    divided into `num_steps_x` intervals, each of length `L_x`/`num_steps_x`, 
-    where `L_x` is the length of the domain in the x direction. In the 2D case, 
-    the domain is divided into `num_steps_x` x `num_steps_y` piecewise constant 
-    functions each of a support area of `L_x`/`num_steps_x` x `L_y`/`num_steps_y`, 
-    where `L_y` is the length of the domain in the y direction. The step expansion 
-    is built on the given input geometry that specifies the computational mesh.
+    """A geometry class that parameterizes finite element functions on a 1D or
+    2D domain with piecewise constant functions. In the 1D case, the domain is
+    divided into `num_steps_x` constant functions, each function support is of
+    length `L_x`/`num_steps_x`, where `L_x` is the length of the domain in the
+    x direction. In the 2D case, the domain is divided into `num_steps_x`
+    :math:`\\times` `num_steps_y` constant functions each has a support area of
+    `L_x`/`num_steps_x` x `L_y`/`num_steps_y`, where `L_y` is the length of the
+    domain in the y direction. The step expansion is built on the given input
+    geometry that specifies the computational mesh.
 
     Parameters
     -----------
-    geometry : cuqi.fenics.geometry.Geometry
+    geometry : cuqipy_fenics.geometry.Geometry
         An input geometry on which the step expansion is built (the
         geometry must have a mesh attribute)
 
@@ -444,7 +446,7 @@ class StepExpansion(_WrappedGeometry):
 
     num_steps_y: int, optional
         Number of step expansion terms in the y direction,
-        only required for 2D geometries.
+        only required for geometries with physical dimension 2
 
 
     Example
@@ -483,19 +485,28 @@ class StepExpansion(_WrappedGeometry):
     def geometry(self):
         return self._geometry
 
-    # build basis when geometry is initialized
     @geometry.setter
     def geometry(self, value):
         self._geometry = value
+
         # Check if the geometry has a mesh attribute
         if not hasattr(value, "mesh"):
-            raise NotImplementedError
+            raise NotImplementedError(
+                "'StepExpansion' object requires a geometry with a mesh attribute"
+            )
+
         # If 1D geometry, ensure num_steps_y is None
         if self.physical_dim == 1 and self._num_steps_y is not None:
-            raise ValueError("num_steps_y must be None for 1D geometries")
+            raise ValueError(
+                "num_steps_y must be None for geometries with physical dimension 1"
+                )
+
         # If 2D geometry, ensure num_steps_y is not None
         if self.physical_dim == 2 and self._num_steps_y is None:
-            raise ValueError("num_steps_y must be specified for 2D geometries")
+            raise ValueError(
+                "num_steps_y must be specified for geometries with physical dimension 2"
+                )
+
         # assert physical_dim is 2 or 1
         if self.physical_dim > 2:
             raise NotImplementedError(
@@ -560,7 +571,7 @@ class StepExpansion(_WrappedGeometry):
         return self._step_basis.T @ direction
 
     def par2field(self, p):
-        """Applies linear transformation of the parameters a to
+        """Applies linear transformation of the parameters p to
         generate a realization of the step expansion"""
 
         p = self._process_values(p)
