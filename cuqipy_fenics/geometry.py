@@ -406,7 +406,7 @@ class MaternKLExpansion(_WrappedGeometry):
 
 # Helper user expression to define the step expansion basis
 class _Expression2D(dl.UserExpression):
-    def __init__(self, degree, x_lim, y_lim):
+    def __init__(self, degree, x_lim, y_lim=None):
         self.x_lim = x_lim
         self.y_lim = y_lim
         super().__init__(degree=degree)
@@ -415,8 +415,8 @@ class _Expression2D(dl.UserExpression):
         if (
             x[0] > self.x_lim[0] +  dl.DOLFIN_EPS
             and x[0] < self.x_lim[1] - dl.DOLFIN_EPS
-            and x[1] > self.y_lim[0] + dl.DOLFIN_EPS
-            and x[1] < self.y_lim[1] - dl.DOLFIN_EPS
+            and (self.y_lim is None or x[1] > self.y_lim[0] + dl.DOLFIN_EPS)
+            and (self.y_lim is None or x[1] < self.y_lim[1] - dl.DOLFIN_EPS)
         ):
             value[0] = 1
         else:
@@ -507,7 +507,10 @@ class StepExpansion(_WrappedGeometry):
 
     @property
     def par_shape(self):
-        return (self.num_steps_x*self.num_steps_y,)
+        if self.num_steps_y is None:
+            return (self.num_steps_x,)
+        else:
+            return (self.num_steps_x*self.num_steps_y,)  
 
     @property
     def num_steps_x(self):
@@ -573,31 +576,30 @@ class StepExpansion(_WrappedGeometry):
                                      self.par_dim])
 
         coordinates = self.geometry.mesh.coordinates()
-        x_min, y_min = coordinates.min(axis=0)
-        x_max, y_max = coordinates.max(axis=0)
+        x_min = coordinates[:,0].min()
+        x_max = coordinates[:,0].max()
         length_x = x_max - x_min
-        length_y = y_max - y_min
+
+        if self.num_steps_y is not None:
+            y_min = coordinates[:,1].min()
+            y_max = coordinates[:,1].max()
+            length_y = y_max - y_min
 
         for i in range( self.par_dim ):
-            print( [
-                        (i // self.num_steps_x) / self.num_steps_y * length_y + y_min,
-                        (i // self.num_steps_x + 1) / self.num_steps_y * length_y + y_min,
-                    ]  )
-            print( [
+            x_lim = [
                         (i % self.num_steps_x) / self.num_steps_x * length_x + x_min,
                         (i % self.num_steps_x + 1) / self.num_steps_x * length_x + x_min,
-                    ]  )  
+                    ] 
+            y_lim = None if self._num_steps_y is None else [
+                        (i // self.num_steps_x) / self.num_steps_y * length_y + y_min,
+                        (i // self.num_steps_x + 1) / self.num_steps_y * length_y + y_min,
+                    ]
+ 
             u.interpolate(
                 _Expression2D(
                     degree=0,
-                    x_lim=[
-                        (i % self.num_steps_x) / self.num_steps_x * length_x + x_min,
-                        (i % self.num_steps_x + 1) / self.num_steps_x * length_x + x_min,
-                    ],
-                    y_lim=[
-                        (i // self.num_steps_x) / self.num_steps_y * length_y + y_min,
-                        (i // self.num_steps_x + 1) / self.num_steps_y * length_y + y_min,
-                    ],
+                    x_lim=x_lim,
+                    y_lim=y_lim
                 )
             )
 
