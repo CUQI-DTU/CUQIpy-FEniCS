@@ -462,17 +462,16 @@ class StepExpansion(_WrappedGeometry):
         mesh = dl.UnitSquareMesh(32,32)
         V = dl.FunctionSpace(mesh, 'DG', 0)
 
-        geometry = FEniCSContinuous(V, labels=['$\\xi_1$', '$\\xi_2$'])
-        StepExpansionGeometry = StepExpansion(geometry,
+        G_FEM = FEniCSContinuous(V, labels=['$\\xi_1$', '$\\xi_2$'])
+        G_step = StepExpansion(G_FEM,
                                     num_steps_x=4, num_steps_y=8)
 
-        StepExpansionField = Gaussian(mean=np.zeros(StepExpansionGeometry.par_dim),
-                    cov=np.eye(StepExpansionGeometry.par_dim),
-                    geometry=StepExpansionGeometry)
+        x = Gaussian(mean=np.zeros(G_step.par_dim),
+                     cov=np.eye(G_step.par_dim),
+                     geometry=G_step)
 
-        samples = StepExpansionField.sample()
+        samples = x.sample()
         samples.plot()
-
 
     """
 
