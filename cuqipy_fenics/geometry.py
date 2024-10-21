@@ -435,6 +435,11 @@ class StepExpansion(_WrappedGeometry):
     domain in the y direction. The step expansion is built on the given input
     geometry that specifies the computational mesh.
 
+    Note: for accurate results, the underlying mesh should be structured in
+    which the number of nodes in in the x and y directions are multiples of
+    `num_steps_x` and `num_steps_y` respectively.
+
+
     Parameters
     -----------
     geometry : cuqipy_fenics.geometry.Geometry
