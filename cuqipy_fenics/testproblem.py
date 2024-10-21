@@ -75,15 +75,14 @@ class FEniCSDiffusion1D(BayesianProblem):
         NB: Requires prior to be defined.
 
     """
-    
-    def __init__(self, dim = 100, endpoint = 1, exactSolution = None, SNR = 100, observation_operator = None, mapping = None, left_bc=0, right_bc=1):
+    def __init__(self, dim = 100, endpoint = 1, exactSolution = None, SNR = 100, observation_operator = None, mapping = None, left_bc=0, right_bc=1, f=dl.Constant(1)):
 
         # Create FEniCSPDE        
         def u_boundary(x, on_boundary):
             return on_boundary
 
         def form(m,u,p):
-            return m*ufl.inner(ufl.grad(u), ufl.grad(p))*ufl.dx
+            return ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(p))*ufl.dx -f*p*ufl.dx
         
         mesh = dl.IntervalMesh(dim, 0,endpoint)
 
