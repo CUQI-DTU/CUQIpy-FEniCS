@@ -432,8 +432,11 @@ class StepExpansion(_WrappedGeometry):
     x direction. In the 2D case, the domain is divided into `num_steps_x`
     :math:`\\times` `num_steps_y` constant functions each has a support area of
     `L_x`/`num_steps_x` x `L_y`/`num_steps_y`, where `L_y` is the length of the
-    domain in the y direction. The step expansion is built on the given input
-    geometry that specifies the computational mesh.
+    domain in the y direction. The constant functions are arranged in a row-wise
+    order, from the bottom to top of the domain. That is, the first `num_steps_x`
+    functions are in the bottom row, the next `num_steps_x` functions are in the
+    next row, and so on. The step expansion is built on the given input geometry
+    that specifies the computational mesh.
 
     Note: for accurate results, the underlying mesh should be structured in
     which the number of nodes in in the x and y directions are multiples of
