@@ -484,8 +484,18 @@ class StepExpansion(_WrappedGeometry):
     """
 
     def __init__(self, geometry, num_steps_x=8, num_steps_y=None):
+        # ensure num_steps_x is a positive integer
+        if not isinstance(num_steps_x, int) or num_steps_x < 1:
+            raise ValueError("num_steps_x must be a positive integer")
         self._num_steps_x = num_steps_x
+
+        # ensure num_steps_y is a positive integer or None
+        if num_steps_y is not None and (
+            not isinstance(num_steps_y, int) or num_steps_y < 1
+        ):
+            raise ValueError("num_steps_y must be a positive integer or None")
         self._num_steps_y = num_steps_y
+
         self.geometry = geometry
 
     @property
