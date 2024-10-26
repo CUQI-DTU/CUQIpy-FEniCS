@@ -414,10 +414,10 @@ class _StepExpression(dl.UserExpression):
 
     def eval(self, value, x):
         if (
-            x[0] > self.x_lim[0] + dl.DOLFIN_EPS
-            and x[0] < self.x_lim[1] - dl.DOLFIN_EPS
-            and (self.y_lim is None or x[1] > self.y_lim[0] + dl.DOLFIN_EPS)
-            and (self.y_lim is None or x[1] < self.y_lim[1] - dl.DOLFIN_EPS)
+            x[0] >= self.x_lim[0]
+            and x[0] < self.x_lim[1]
+            and (self.y_lim is None or x[1] >= self.y_lim[0])
+            and (self.y_lim is None or x[1] < self.y_lim[1])
         ):
             value[0] = 1
         else:
