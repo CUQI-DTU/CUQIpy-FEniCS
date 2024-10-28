@@ -632,6 +632,14 @@ class StepExpansion(_WrappedGeometry):
                 ]
             )
 
+            # If x_lim[1] is close to x_max add a small tolerance to x_lim[1]
+            if np.isclose(x_lim[1], x_max):
+                x_lim[1] += dl.DOLFIN_EPS
+
+            # If y_lim[1] is close to y_max add a small tolerance to y_lim[1]
+            if y_lim is not None and np.isclose(y_lim[1], y_max):
+                y_lim[1] += dl.DOLFIN_EPS
+
             u.interpolate(_StepExpression(degree=0, x_lim=x_lim, y_lim=y_lim))
 
             self._step_basis[:, i] = u.vector().get_local()
