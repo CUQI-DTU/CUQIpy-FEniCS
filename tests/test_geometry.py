@@ -1,8 +1,10 @@
 import dolfin as dl
-from cuqipy_fenics.geometry import FEniCSContinuous, MaternKLExpansion
+from cuqipy_fenics.geometry import (FEniCSContinuous,
+                                    MaternKLExpansion,
+                                    FEniCSStepExpansion)
 import numpy as np
 import pytest
-
+from scipy.optimize import check_grad
 
 def test_MaternKLExpansion():
     """Test creating a MaternKLExpansion geometry"""
@@ -69,3 +71,84 @@ def test_MaternKLExpansion_nu(nu, valid):
                                              length_scale=0.2,
                                              nu=nu,
                                              num_terms=128)
+
+def create_step_expansion_geometry(num_steps_x, num_steps_y):
+    """Create a step expansion geometry"""
+    mesh = (
+        dl.UnitSquareMesh(32, 32)
+        if num_steps_y is not None
+        else dl.UnitIntervalMesh(32)
+    )
+    V = dl.FunctionSpace(mesh, "DG", 0)
+    G_FEM = FEniCSContinuous(V, labels=["$\\xi_1$", "$\\xi_2$"])
+    G_step = FEniCSStepExpansion(G_FEM, num_steps_x=num_steps_x, num_steps_y=num_steps_y)
+    return G_step
+
+@pytest.mark.parametrize(
+    "num_steps_x, num_steps_y, expected_vals",
+    [
+        (8, 8, [0.0, 27.0, 63.0, 59.0, 31.0, 3.0, 24.0, 7.0, 56.0]),
+        (1, 8, [0.0, 3.0, 7.0, 7.0, 3.0, 0.0, 3.0, 0.0, 7.0]),
+        (4, 8, [0.0, 13.0, 31.0, 29.0, 15.0, 1.0, 12.0, 3.0, 28.0]),
+        (1, 1, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
+        (9, None, [0.0, 4.0, 8.0, 4.0, 8.0, 4.0, 0.0, 8.0, 0.0]),
+    ],
+)
+def test_step_expansion_geometry_par2fun_gives_correct_values(
+    num_steps_x, num_steps_y, expected_vals
+):
+    """Test the step expansion geometry par2fun method"""
+    G_step = create_step_expansion_geometry(num_steps_x, num_steps_y)
+
+    # create a parameter vector x
+    x = (
+        np.arange(num_steps_x * num_steps_y)
+        if num_steps_y is not None
+        else np.arange(num_steps_x)
+    )
+
+    # get the function values corresponding to the parameter vector x
+    funvals = G_step.par2fun(x)
+
+    # test the function values at some locations and compare with the expected values
+    test_locations = [
+        (0, 0),
+        (0.49, 0.49),
+        (1, 1),
+        (0.49, 1),
+        (1, 0.49),
+        (0.49, 0),
+        (0, 0.49),
+        (1, 0),
+        (0, 1),
+    ]
+    for i, loc in enumerate(test_locations):
+        loc = loc if num_steps_y is not None else loc[0]
+        assert np.allclose(funvals(loc), expected_vals[i])
+
+def test_step_expansion_gradient_is_correct():
+    """Test the gradient of the step expansion geometry"""
+    G_step = create_step_expansion_geometry(4, 8)
+    V = G_step.function_space
+    
+    np.random.seed(0)
+    # random direction y
+    y0 = np.random.randn(G_step.funvec_dim)
+    
+    # corresponding fenics function
+    y0_fun = dl.Function(V)
+    y0_fun.vector()[:] = y0
+
+    # objective function
+    def f(x):
+        return G_step.par2fun(x).vector().get_local().T@ y0.reshape(-1,1)
+    
+    # objective function gradient
+    def fprime(x):
+        return G_step.gradient(y0_fun, x)
+    
+    # random input x (the point which gradient is calculated with respect to)
+    x0 = np.random.randn(G_step.par_dim)
+
+    # assert that the gradient is correct
+    assert np.allclose(check_grad(f, fprime, x0), 0, atol=1e-5)
