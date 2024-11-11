@@ -9,7 +9,7 @@ __all__ = [
     'FEniCSContinuous',
     'FEniCSMappedGeometry',
     'MaternKLExpansion',
-    'StepExpansion'
+    'FEniCSStepExpansion'
 ]
 
 class FEniCSContinuous(Geometry):
@@ -407,10 +407,10 @@ class MaternKLExpansion(_WrappedGeometry):
 
 # Helper user expression to define the step expansion basis
 class _StepExpression(dl.UserExpression):
-    def __init__(self, degree, x_lim, y_lim=None):
+    def __init__(self, x_lim, y_lim=None, **kwargs):
         self.x_lim = x_lim
         self.y_lim = y_lim
-        super().__init__(degree=degree)
+        super().__init__(**kwargs)
 
     def eval(self, value, x):
         if (
@@ -424,7 +424,7 @@ class _StepExpression(dl.UserExpression):
             value[0] = 0
 
 
-class StepExpansion(_WrappedGeometry):
+class FEniCSStepExpansion(_WrappedGeometry):
     """A geometry class that parameterizes finite element functions on a 1D or
     2D domain with piecewise constant functions. This parameterization, which we
     refer to as step expansion parameterization, is built on the given input
@@ -466,7 +466,7 @@ class StepExpansion(_WrappedGeometry):
     .. code-block:: python
 
         import numpy as np
-        from cuqipy_fenics.geometry import StepExpansion, FEniCSContinuous
+        from cuqipy_fenics.geometry import FEniCSStepExpansion, FEniCSContinuous
         from cuqi.distribution import Gaussian
         import dolfin as dl
 
@@ -475,8 +475,8 @@ class StepExpansion(_WrappedGeometry):
         V = dl.FunctionSpace(mesh, 'DG', 0)
 
         G_FEM = FEniCSContinuous(V, labels=['$\\xi_1$', '$\\xi_2$'])
-        G_step = StepExpansion(G_FEM,
-                                    num_steps_x=4, num_steps_y=8)
+        G_step = FEniCSStepExpansion(G_FEM,
+                                     num_steps_x=4, num_steps_y=8)
 
         x = Gaussian(mean=np.zeros(G_step.par_dim),
                      cov=np.eye(G_step.par_dim),
@@ -513,7 +513,7 @@ class StepExpansion(_WrappedGeometry):
         # Check if the geometry has a mesh attribute
         if not hasattr(value, "mesh"):
             raise NotImplementedError(
-                "'StepExpansion' object requires a geometry with a mesh attribute"
+                f"{self.__class__.__name__} object requires a geometry with a mesh attribute"
             )
 
         # If 1D geometry, ensure num_steps_y is None
@@ -531,7 +531,7 @@ class StepExpansion(_WrappedGeometry):
         # assert physical_dim is 2 or 1
         if self.physical_dim > 2:
             raise NotImplementedError(
-                "'StepExpansion' object does not support 3D meshes yet. "+ 
+                f"{self.__class__.__name__} object does not support 3D meshes yet. "+ 
                 "'mesh' needs to be a 1D or 2D mesh."
             )
 
@@ -644,6 +644,7 @@ class StepExpansion(_WrappedGeometry):
             if y_lim is not None and np.isclose(y_lim[1], y_max):
                 y_lim[1] += dl.DOLFIN_EPS
 
-            u.interpolate(_StepExpression(degree=0, x_lim=x_lim, y_lim=y_lim))
+            u.interpolate(_StepExpression(
+                x_lim=x_lim, y_lim=y_lim, element=u.ufl_element()))
 
             self._step_basis[:, i] = u.vector().get_local()
