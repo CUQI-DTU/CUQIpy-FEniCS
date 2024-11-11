@@ -1,7 +1,7 @@
 import dolfin as dl
 from cuqipy_fenics.geometry import (FEniCSContinuous,
                                     MaternKLExpansion,
-                                    StepExpansion)
+                                    FEniCSStepExpansion)
 import numpy as np
 import pytest
 from scipy.optimize import check_grad
@@ -81,7 +81,7 @@ def create_step_expansion_geometry(num_steps_x, num_steps_y):
     )
     V = dl.FunctionSpace(mesh, "DG", 0)
     G_FEM = FEniCSContinuous(V, labels=["$\\xi_1$", "$\\xi_2$"])
-    G_step = StepExpansion(G_FEM, num_steps_x=num_steps_x, num_steps_y=num_steps_y)
+    G_step = FEniCSStepExpansion(G_FEM, num_steps_x=num_steps_x, num_steps_y=num_steps_y)
     return G_step
 
 @pytest.mark.parametrize(
