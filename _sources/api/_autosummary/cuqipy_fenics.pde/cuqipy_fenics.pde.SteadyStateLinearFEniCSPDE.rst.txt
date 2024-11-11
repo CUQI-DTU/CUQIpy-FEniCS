@@ -1,0 +1,44 @@
+SteadyStateLinearFEniCSPDE
+==========================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoclass:: SteadyStateLinearFEniCSPDE
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~SteadyStateLinearFEniCSPDE.__init__
+      ~SteadyStateLinearFEniCSPDE.assemble
+      ~SteadyStateLinearFEniCSPDE.gradient_wrt_parameter
+      ~SteadyStateLinearFEniCSPDE.observe
+      ~SteadyStateLinearFEniCSPDE.solve
+      ~SteadyStateLinearFEniCSPDE.with_updated_rhs
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~SteadyStateLinearFEniCSPDE.PDE_form
+      ~SteadyStateLinearFEniCSPDE.forward_solution
+      ~SteadyStateLinearFEniCSPDE.grid_obs
+      ~SteadyStateLinearFEniCSPDE.grid_sol
+      ~SteadyStateLinearFEniCSPDE.grids_equal
+      ~SteadyStateLinearFEniCSPDE.lhs_form
+      ~SteadyStateLinearFEniCSPDE.observation_operator
+      ~SteadyStateLinearFEniCSPDE.parameter
+      ~SteadyStateLinearFEniCSPDE.reuse_assembled
+      ~SteadyStateLinearFEniCSPDE.rhs_form
+   
+   

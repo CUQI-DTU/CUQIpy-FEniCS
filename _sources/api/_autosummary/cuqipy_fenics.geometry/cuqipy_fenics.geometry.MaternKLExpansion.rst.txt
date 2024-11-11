@@ -1,0 +1,57 @@
+MaternKLExpansion
+=================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoclass:: MaternKLExpansion
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~MaternKLExpansion.__init__
+      ~MaternKLExpansion.fun2par
+      ~MaternKLExpansion.fun2vec
+      ~MaternKLExpansion.gradient
+      ~MaternKLExpansion.par2field
+      ~MaternKLExpansion.par2fun
+      ~MaternKLExpansion.plot
+      ~MaternKLExpansion.plot_envelope
+      ~MaternKLExpansion.vec2fun
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~MaternKLExpansion.axis_labels
+      ~MaternKLExpansion.boundary_conditions
+      ~MaternKLExpansion.eig_val
+      ~MaternKLExpansion.eig_vec
+      ~MaternKLExpansion.fun_dim
+      ~MaternKLExpansion.fun_is_array
+      ~MaternKLExpansion.fun_shape
+      ~MaternKLExpansion.function_space
+      ~MaternKLExpansion.funvec_dim
+      ~MaternKLExpansion.funvec_shape
+      ~MaternKLExpansion.grid
+      ~MaternKLExpansion.length_scale
+      ~MaternKLExpansion.mesh
+      ~MaternKLExpansion.normalize
+      ~MaternKLExpansion.nu
+      ~MaternKLExpansion.num_terms
+      ~MaternKLExpansion.par_dim
+      ~MaternKLExpansion.par_shape
+      ~MaternKLExpansion.physical_dim
+      ~MaternKLExpansion.variables
+   
+   

@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.\_\_init\_\_
+======================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: MaternKLExpansion.__init__

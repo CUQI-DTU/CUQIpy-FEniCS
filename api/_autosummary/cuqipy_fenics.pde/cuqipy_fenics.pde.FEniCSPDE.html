@@ -1,0 +1,582 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>FEniCSPDE &#8212; cuqipy_fenics  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=321493ab" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-dropdown.css?v=995e94df" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-bootstrap.min.css?v=21c0b90a" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/_autosummary/cuqipy_fenics.pde/cuqipy_fenics.pde.FEniCSPDE';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="cuqipy_fenics.pde.FEniCSPDE.__init__" href="cuqipy_fenics.pde.FEniCSPDE.__init__.html" />
+    <link rel="prev" title="pde" href="../cuqipy_fenics.pde.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="https://github.com/CUQI-DTU/CUQIpy/raw/main/logo.png" class="logo__image only-light" alt="cuqipy_fenics  documentation - Home"/>
+    <img src="https://github.com/CUQI-DTU/CUQIpy/raw/main/logo.png" class="logo__image only-dark pst-js-only" alt="cuqipy_fenics  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../cuqipy_fenics.html">cuqipy_fenics</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../cuqipy_fenics.config.html">config</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../cuqipy_fenics.geometry.html">geometry</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.geometry/cuqipy_fenics.geometry.FEniCSContinuous.html">FEniCSContinuous</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.geometry/cuqipy_fenics.geometry.FEniCSMappedGeometry.html">FEniCSMappedGeometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.geometry/cuqipy_fenics.geometry.MaternKLExpansion.html">MaternKLExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.geometry/cuqipy_fenics.geometry.FEniCSStepExpansion.html">FEniCSStepExpansion</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../cuqipy_fenics.pde.html">pde</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">FEniCSPDE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE.html">SteadyStateLinearFEniCSPDE</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../cuqipy_fenics.testproblem.html">testproblem</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.testproblem/cuqipy_fenics.testproblem.FEniCSDiffusion1D.html">FEniCSDiffusion1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.testproblem/cuqipy_fenics.testproblem.FEniCSPoisson2D.html">FEniCSPoisson2D</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../cuqipy_fenics.utilities.html">utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.utilities/cuqipy_fenics.utilities.to_dolfin_expression.html">to_dolfin_expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.utilities/cuqipy_fenics.utilities.ExpressionFromCallable.html">ExpressionFromCallable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.utilities/cuqipy_fenics.utilities.Number.html">Number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cuqipy_fenics.utilities/cuqipy_fenics.utilities.Samples.html">Samples</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../cuqipy_fenics.html" class="nav-link">cuqipy_fenics</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../cuqipy_fenics.pde.html" class="nav-link">pde</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">FEniCSPDE</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="fenicspde">
+<h1>FEniCSPDE<a class="headerlink" href="#fenicspde" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="cuqipy_fenics.pde.FEniCSPDE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cuqipy_fenics.pde.</span></span><span class="sig-name descname"><span class="pre">FEniCSPDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PDE_form</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_function_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_function_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirichlet_bcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjoint_dirichlet_bcs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observation_operator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_assembled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linalg_solve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linalg_solve_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cuqipy_fenics.pde.FEniCSPDE" title="Link to this definition">#</a></dt>
+<dd><p>Base class that represents PDEs problem defined in FEniCS. This class is not meant to be used directly,
+but rather it defines the API that should be implemented by subclasses for specific types of PDEs.</p>
+<p>This class along with the <cite>cuqipy_fenics.geometry</cite>, interfaces FEniCS PDE models with CUQIpy library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>PDE_form</strong> (<em>callable</em><em> or </em><em>tuple</em><em> of </em><em>two callables</em>) – <p>If passed as a callable: the callable returns the weak form of the PDE.
+The callable should take three arguments, the first argument is the
+parameter (input of the forward model), the second argument is the state
+variable (solution variable), and the third argument is the adjoint
+variable (the test variable in the weak formulation).</p>
+<p>If passed as a tuple of two callables: the first callable returns the
+weak form of the PDE left hand side, and the second callable returns the
+weak form of the PDE right hand side. The left hand side callable takes
+the same three arguments as described above. The right hand side
+callable takes only the parameter and the adjoint variable as arguments.
+See the example below.</p>
+</p></li>
+<li><p><strong>mesh</strong> (<em>FEniCS mesh</em>) – FEniCS mesh object that defines the discretization of the domain.</p></li>
+<li><p><strong>solution_function_space</strong> (<em>FEniCS function space</em>) – FEniCS function space object that defines the function space of the state variable (solution variable).</p></li>
+<li><p><strong>parameter_function_space</strong> (<em>FEniCS function space</em>) – FEniCS function space object that defines the function space of the Bayesian parameter (input of the forward model).</p></li>
+<li><p><strong>dirichlet_bcs</strong> (<em>FEniCS Dirichlet boundary condition object</em><em> or </em><em>a list</em><em> of </em><em>them</em>) – FEniCS Dirichlet boundary condition object(s) that define the Dirichlet boundary conditions of the PDE.</p></li>
+<li><p><strong>adjoint_dirichlet_bcs</strong> (<em>FEniCS Dirichlet boundary condition object</em><em> or </em><em>a list</em><em> of </em><em>them</em><em>, </em><em>required if the gradient is to be computed</em>) – FEniCS Dirichlet boundary condition object(s) that define the Dirichlet boundary conditions of the adjoint PDE.</p></li>
+<li><p><strong>observation_operator</strong> (<em>python function handle</em><em>, </em><em>optional</em>) – <p>Function handle of a python function that returns the observed quantity from the PDE solution. If not provided, the identity operator is assumed (i.e. the entire solution is observed).
+This python function takes as input the Bayesian parameter (input of the forward model) and the state variable (solution variable) as first and second inputs, respectively.</p>
+<p>The returned observed quantity can be a ufl.algebra.Operator, FEniCS Function, np.ndarray, int, or float.</p>
+<p>Examples of <cite>observation_operator</cite> are <cite>lambda m, u: m*u</cite> and <cite>lambda m, u: m*dl.sqrt(dl.inner(dl.grad(u),dl.grad(u)))</cite></p>
+</p></li>
+<li><p><strong>reuse_assembled</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag to indicate whether the assembled (and possibly factored)
+differential operator should be reused when the parameter is not
+changed.
+If True, the assembled matrices are reused. If False, the assembled
+matrices are not reused. Default is False.</p></li>
+<li><p><strong>linalg_solve</strong> (<em>FEniCS linear solver object</em><em>, </em><em>optional</em>)</p></li>
+<li><p><strong>linalg_solve_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary of keyword arguments to be passed to the linear solver object.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define mesh</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">UnitSquareMesh</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+<span class="c1"># Set up function spaces</span>
+<span class="n">solution_function_space</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;Lagrange&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">parameter_function_space</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;Lagrange&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Set up Dirichlet boundaries</span>
+<span class="k">def</span> <span class="nf">u_boundary</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">on_boundary</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">on_boundary</span>
+
+<span class="n">dirichlet_bc_expr</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">Expression</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">dirichlet_bcs</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">solution_function_space</span><span class="p">,</span>
+                              <span class="n">dirichlet_bc_expr</span><span class="p">,</span>
+                              <span class="n">u_boundary</span><span class="p">)</span>
+
+<span class="c1"># Set up PDE variational form</span>
+<span class="k">def</span> <span class="nf">lhs_form</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">ufl</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">ufl</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">ufl</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">ufl</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">p</span><span class="p">))</span><span class="o">*</span><span class="n">ufl</span><span class="o">.</span><span class="n">dx</span>
+
+<span class="k">def</span> <span class="nf">rhs_form</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+    <span class="k">return</span> <span class="o">-</span> <span class="n">dl</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">ufl</span><span class="o">.</span><span class="n">dx</span>
+
+<span class="c1"># Create the PDE object</span>
+<span class="n">PDE</span> <span class="o">=</span> <span class="n">cuqipy_fenics</span><span class="o">.</span><span class="n">pde</span><span class="o">.</span><span class="n">SteadyStateLinearFEniCSPDE</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">lhs_form</span><span class="p">,</span> <span class="n">rhs_form</span><span class="p">),</span>
+        <span class="n">mesh</span><span class="p">,</span>
+        <span class="n">parameter_function_space</span><span class="o">=</span><span class="n">parameter_function_space</span><span class="p">,</span>
+        <span class="n">solution_function_space</span><span class="o">=</span><span class="n">solution_function_space</span><span class="p">,</span>
+        <span class="n">dirichlet_bcs</span><span class="o">=</span><span class="n">dirichlet_bcs</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="cuqipy_fenics.pde.FEniCSPDE.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PDE_form</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solution_function_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_function_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirichlet_bcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjoint_dirichlet_bcs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observation_operator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_assembled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linalg_solve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linalg_solve_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cuqipy_fenics.pde.FEniCSPDE.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.__init__.html#cuqipy_fenics.pde.FEniCSPDE.__init__" title="cuqipy_fenics.pde.FEniCSPDE.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(PDE_form, mesh, ...[, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.assemble.html#cuqipy_fenics.pde.FEniCSPDE.assemble" title="cuqipy_fenics.pde.FEniCSPDE.assemble"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assemble</span></code></a>(parameter)</p></td>
+<td><p>Assemble the PDE weak form</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.gradient_wrt_parameter.html#cuqipy_fenics.pde.FEniCSPDE.gradient_wrt_parameter" title="cuqipy_fenics.pde.FEniCSPDE.gradient_wrt_parameter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient_wrt_parameter</span></code></a>()</p></td>
+<td><p>Compute gradient of the PDE weak form w.r.t.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.observe.html#cuqipy_fenics.pde.FEniCSPDE.observe" title="cuqipy_fenics.pde.FEniCSPDE.observe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">observe</span></code></a>(PDE_solution)</p></td>
+<td><p>Apply observation operator on the PDE solution</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.solve.html#cuqipy_fenics.pde.FEniCSPDE.solve" title="cuqipy_fenics.pde.FEniCSPDE.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a>()</p></td>
+<td><p>Solve the PDE</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Attributes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.PDE_form.html#cuqipy_fenics.pde.FEniCSPDE.PDE_form" title="cuqipy_fenics.pde.FEniCSPDE.PDE_form"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PDE_form</span></code></a></p></td>
+<td><p>Get the PDE form</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.forward_solution.html#cuqipy_fenics.pde.FEniCSPDE.forward_solution" title="cuqipy_fenics.pde.FEniCSPDE.forward_solution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">forward_solution</span></code></a></p></td>
+<td><p>Get the forward solution of the PDE</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.grid_obs.html#cuqipy_fenics.pde.FEniCSPDE.grid_obs" title="cuqipy_fenics.pde.FEniCSPDE.grid_obs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid_obs</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.grid_sol.html#cuqipy_fenics.pde.FEniCSPDE.grid_sol" title="cuqipy_fenics.pde.FEniCSPDE.grid_sol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid_sol</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.grids_equal.html#cuqipy_fenics.pde.FEniCSPDE.grids_equal" title="cuqipy_fenics.pde.FEniCSPDE.grids_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grids_equal</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.lhs_form.html#cuqipy_fenics.pde.FEniCSPDE.lhs_form" title="cuqipy_fenics.pde.FEniCSPDE.lhs_form"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lhs_form</span></code></a></p></td>
+<td><p>Get the lhs form</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.observation_operator.html#cuqipy_fenics.pde.FEniCSPDE.observation_operator" title="cuqipy_fenics.pde.FEniCSPDE.observation_operator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">observation_operator</span></code></a></p></td>
+<td><p>Get the observation operator</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.parameter.html#cuqipy_fenics.pde.FEniCSPDE.parameter" title="cuqipy_fenics.pde.FEniCSPDE.parameter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameter</span></code></a></p></td>
+<td><p>Get the parameter of the PDE</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.reuse_assembled.html#cuqipy_fenics.pde.FEniCSPDE.reuse_assembled" title="cuqipy_fenics.pde.FEniCSPDE.reuse_assembled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reuse_assembled</span></code></a></p></td>
+<td><p>Get the reuse_assembled flag</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cuqipy_fenics.pde.FEniCSPDE.rhs_form.html#cuqipy_fenics.pde.FEniCSPDE.rhs_form" title="cuqipy_fenics.pde.FEniCSPDE.rhs_form"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rhs_form</span></code></a></p></td>
+<td><p>Get the rhs form</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cuqipy_fenics.pde.FEniCSPDE"><code class="docutils literal notranslate"><span class="pre">FEniCSPDE</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cuqipy_fenics.pde.FEniCSPDE.__init__"><code class="docutils literal notranslate"><span class="pre">FEniCSPDE.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/api/_autosummary/cuqipy_fenics.pde/cuqipy_fenics.pde.FEniCSPDE.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, CUQI Project, Technical University of Denmark (DTU).
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

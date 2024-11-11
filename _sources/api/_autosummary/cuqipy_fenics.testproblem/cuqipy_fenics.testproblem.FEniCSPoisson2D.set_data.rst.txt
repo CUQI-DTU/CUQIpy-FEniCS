@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSPoisson2D.set\_data
+====================================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. automethod:: FEniCSPoisson2D.set_data

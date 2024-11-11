@@ -1,0 +1,39 @@
+﻿cuqipy\_fenics
+==============
+
+Module path: cuqipy_fenics
+
+.. currentmodule:: cuqipy_fenics
+
+.. automodule:: cuqipy_fenics
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   config
+   geometry
+   pde
+   testproblem
+   utilities
+

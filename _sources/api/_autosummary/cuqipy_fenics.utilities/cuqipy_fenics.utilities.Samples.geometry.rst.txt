@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.Samples.geometry
+=========================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. autoproperty:: Samples.geometry

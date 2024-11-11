@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.lhs\_form
+======================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: FEniCSPDE.lhs_form

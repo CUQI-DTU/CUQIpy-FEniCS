@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSPoisson2D.MAP
+==============================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. automethod:: FEniCSPoisson2D.MAP

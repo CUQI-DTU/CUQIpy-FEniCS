@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.boundary\_conditions
+==============================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.boundary_conditions

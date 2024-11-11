@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSDiffusion1D.prior
+==================================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. autoproperty:: FEniCSDiffusion1D.prior

@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.mesh
+=============================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: FEniCSContinuous.mesh

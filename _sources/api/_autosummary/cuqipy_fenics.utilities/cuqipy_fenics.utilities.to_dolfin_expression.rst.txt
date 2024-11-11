@@ -1,0 +1,6 @@
+to\_dolfin\_expression
+======================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. autofunction:: to_dolfin_expression

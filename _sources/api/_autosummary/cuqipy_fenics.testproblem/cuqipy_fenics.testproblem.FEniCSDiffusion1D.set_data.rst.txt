@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSDiffusion1D.set\_data
+======================================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. automethod:: FEniCSDiffusion1D.set_data

@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSPoisson2D.prior
+================================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. autoproperty:: FEniCSPoisson2D.prior

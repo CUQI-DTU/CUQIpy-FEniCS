@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.ExpressionFromCallable.ufl\_function\_space
+====================================================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. automethod:: ExpressionFromCallable.ufl_function_space

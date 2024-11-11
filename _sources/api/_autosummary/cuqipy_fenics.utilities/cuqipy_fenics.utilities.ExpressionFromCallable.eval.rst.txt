@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.ExpressionFromCallable.eval
+====================================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. automethod:: ExpressionFromCallable.eval

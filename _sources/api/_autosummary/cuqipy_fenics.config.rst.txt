@@ -1,0 +1,33 @@
+config
+======
+
+Module path: cuqipy_fenics.config
+
+.. currentmodule:: cuqipy_fenics
+
+.. automodule:: cuqipy_fenics.config
+
+   
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      UFL_LEGACY
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
