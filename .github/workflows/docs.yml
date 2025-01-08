@@ -46,7 +46,7 @@ jobs:
         run: |
           conda activate fenicsproject
           python -m pip install --upgrade pip
-          pip install --upgrade pip setuptools==65.7.0
+          pip install --upgrade pip setuptools
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
