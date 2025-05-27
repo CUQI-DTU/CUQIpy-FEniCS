@@ -404,3 +404,92 @@ def test_observation_operator_setter():
     # Check that the solutions are the same
     assert np.allclose(u1_obs, u2_obs) and np.allclose(u2_obs, u3_obs)
     assert len(u1_obs) == 5
+
+class PoissonMultipleInputs:
+    """Define the variational PDE problem for the Poisson equation with multiple
+     unknowns in two ways: as a full form, and as lhs and rhs forms"""
+
+    def __init__(self):
+
+        # Create the mesh and define function spaces for the solution and the
+        # parameter
+        self.mesh = dl.UnitIntervalMesh(10)
+
+        # Define the boundary condition
+        self.bc_value = dl.Constant(0.0)
+
+    @property
+    def form(self):
+        return lambda m, source_term, u, v:\
+            ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(v))*ufl.dx\
+            + source_term*v*ufl.dx
+
+    @property
+    def lhs_form(self):
+        return lambda m, source_term, u, v:\
+            ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(v))*ufl.dx
+
+    @property
+    def rhs_form(self):
+        return lambda m, source_term, v: -source_term*v*ufl.dx
+
+    @property
+    def solution_function_space(self):
+        return dl.FunctionSpace(self.mesh, "Lagrange", 2)
+
+    @property
+    def parameter_function_space(self):
+        return [dl.FunctionSpace(self.mesh, "Lagrange", 1), dl.FunctionSpace(self.mesh, "Lagrange", 1)]
+
+    @property
+    def bcs(self):
+        if not hasattr(self, "_bcs") or self._bcs is None:
+            self._bcs = dl.DirichletBC(self.solution_function_space,
+                                      self.bc_value, "on_boundary")
+        return self._bcs
+
+    @bcs.setter
+    def bcs(self, bcs):
+        self._bcs = bcs
+
+def test_form_multiple_inputs():
+    """Test creating PDEModel with full form, and with lhs and rhs forms with multiple inputs"""
+    # Create the variational problem
+    poisson = PoissonMultipleInputs()
+
+    # Set up model parameters
+    m = dl.Function(poisson.parameter_function_space[0])
+    m.vector()[:] = 1.0
+    source_term = dl.Function(poisson.parameter_function_space[1])
+    source_term.interpolate(dl.Expression('x[0]', degree=1))
+
+    # Create a PDE object with full form
+    PDE_with_full_form = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        poisson.form,
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bcs)
+
+    # Solve the PDE
+    PDE_with_full_form.assemble(m, source_term)
+    PDE_with_full_form.assemble(m=m, source_term=source_term)    
+    u1, info = PDE_with_full_form.solve()
+
+    # Create a PDE object with lhs and rhs forms
+    PDE_with_lhs_rhs_forms = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        (poisson.lhs_form, poisson.rhs_form),
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bcs)
+    # Solve the PDE
+    PDE_with_lhs_rhs_forms.assemble(m, source_term)
+    u2, info = PDE_with_lhs_rhs_forms.solve()
+
+    # Check that the solutions are the same
+    assert np.allclose(u1.vector().get_local(), u2.vector().get_local())
+
+    # Check passing wrong parameter_function_space raises an error
+    with pytest.raises(ValueError, match= r"assemble input is specified by keywords arguments \['m2', 'source_term'\] that does not match the non_default_args of assemble \['m', 'source_term'\]"):
+        PDE_with_full_form.assemble(m2=m, source_term=source_term)
