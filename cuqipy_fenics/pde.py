@@ -6,6 +6,7 @@ from cuqi.utilities import get_non_default_args
 import dolfin as dl
 from copy import copy
 import warnings
+from functools import partial
 from .utilities import _LazyUFLLoader
 ufl = _LazyUFLLoader()
 
@@ -151,6 +152,8 @@ class FEniCSPDE(PDE,ABC):
         # If only one parameter is passed, it is converted to a list
         if not isinstance(self.parameter_function_space, (list, tuple)):
             parameter_function_space_list = [self.parameter_function_space]
+        else:
+            parameter_function_space_list = self.parameter_function_space
         self.parameter= {}
         for i, k in enumerate(self._non_default_args):
             self.parameter[k] = dl.Function(parameter_function_space_list[i])
@@ -193,7 +196,11 @@ class FEniCSPDE(PDE,ABC):
 
     @property
     def _non_default_args(self):
-        return get_non_default_args(self.PDE_form)[:-2] # Exclude the last two arguments (u and p) from the list of non-default args
+        form = self._form
+        if isinstance(self._form, tuple):
+            # extract non-default args from the lhs first form
+            form = self._form[0]
+        return get_non_default_args(form)[:-2] # Exclude the last two arguments (u and p) from the list of non-default args
 
     @property
     def forward_solution(self):
@@ -204,7 +211,24 @@ class FEniCSPDE(PDE,ABC):
     def PDE_form(self):
         """ Get the PDE form """
         if isinstance(self._form, tuple):
-            return lambda m, u, p: self._form[0](m, u, p) - self._form[1](m, p)
+            # Create a string for the lambda function that represents the PDE form
+            form_str = (
+                "lambda form_lhs, form_rhs, "
+                + ", ".join(self._non_default_args)
+                + ", u, p: form_lhs("
+                + ", ".join(self._non_default_args)
+                + ", u, p) - form_rhs("
+                + ", ".join(self._non_default_args)
+                + ", p)"
+            )
+            # Create a lambda function that represents the PDE form
+            form = eval(form_str)
+
+            # partial evaluation of the form 
+            form_partial = partial(form, form_lhs=self._form[0],
+                                      form_rhs=self._form[1])
+
+            return form_partial
         else:
             return self._form
 
