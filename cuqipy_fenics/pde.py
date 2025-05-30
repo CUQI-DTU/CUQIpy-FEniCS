@@ -453,7 +453,6 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         self.forward_solution, _ = self.solve()
 
         # Compute adjoint solution
-        test_parameter = dl.TestFunction(self.parameter_function_space)
         test_solution = dl.TestFunction(self.solution_function_space)
 
         # note: temp_form is a weak form used for building the adjoint operator
@@ -478,10 +477,24 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
         # Compute gradient
         # note: temp_form is a weak form used for building the gradient
         temp_form = self.PDE_form(*self.parameter_args, self.forward_solution, adjoint)
-        gradient_form = dl.derivative(temp_form, *self.parameter_args, test_parameter)
-        gradient = dl.Function(self.parameter_function_space)
-        dl.assemble(gradient_form, tensor=gradient.vector())
-        return gradient
+        parameter_function_space = self.parameter_function_space
+        gradient_list = []
+        if not isinstance(self.parameter_function_space, (list, tuple)):
+            parameter_function_space = [self.parameter_function_space]
+
+        for i, k in enumerate(self._non_default_args):
+            test_parameter = dl.TestFunction(parameter_function_space[i])
+            gradient_form = dl.derivative(temp_form, self.parameter_args[i], test_parameter)
+            gradient = dl.Function(parameter_function_space[i])
+            dl.assemble(gradient_form, tensor=gradient.vector())
+            gradient_list.append(gradient)
+
+        # If only one parameter is passed, return a single gradient
+        if len(gradient_list) == 1:
+            gradient_list = gradient_list[0]
+        else:
+            gradient_list = tuple(gradient_list)
+        return gradient_list
 
 
     def _apply_obs_op(self, PDE_parameter_fun, PDE_solution_fun,):
