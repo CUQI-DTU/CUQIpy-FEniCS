@@ -1,4 +1,3 @@
-#%%
 import dolfin as dl
 import cuqi
 import cuqipy_fenics
@@ -310,23 +309,32 @@ class Poisson:
     """Define the variational PDE problem for the Poisson equation in two
     ways: as a full form, and as lhs and rhs forms"""
 
-    def __init__(self):
+    def __init__(self, mesh):
 
-        # Create the mesh and define function spaces for the solution and the
-        # parameter
-        self.mesh = dl.UnitIntervalMesh(10)
+        # Set the mesh
+        self._mesh =mesh
 
         # Define the boundary condition
         self.bc_value = dl.Constant(0.0)
 
-        # the source term
-        self.source_term = dl.Expression('x[0]', degree=1)
+        # The source term
+        self._source_term = dl.Expression('x[0]', degree=1)
+
+        # Solution function space
+        self._solution_function_space = dl.FunctionSpace(self.mesh, "Lagrange", 2)
+
+        # Parameter function space
+        self._parameter_function_space = dl.FunctionSpace(self.mesh, "Lagrange", 1)
+
+    @property
+    def mesh(self):
+        return self._mesh
 
     @property
     def form(self):
         return lambda m, u, v:\
             ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(v))*ufl.dx\
-            + self.source_term*v*ufl.dx
+            + self._source_term*v*ufl.dx
 
     @property
     def lhs_form(self):
@@ -339,22 +347,17 @@ class Poisson:
 
     @property
     def solution_function_space(self):
-        return dl.FunctionSpace(self.mesh, "Lagrange", 2)
+        return self._solution_function_space
 
     @property
     def parameter_function_space(self):
-        return dl.FunctionSpace(self.mesh, "Lagrange", 1)
+        return self._parameter_function_space
 
     @property
     def bcs(self):
-        if not hasattr(self, "_bcs") or self._bcs is None:
-            self._bcs = dl.DirichletBC(self.solution_function_space,
-                                      self.bc_value, "on_boundary")
-        return self._bcs
-
-    @bcs.setter
-    def bcs(self, bcs):
-        self._bcs = bcs
+        return dl.DirichletBC(
+            self.solution_function_space, self.bc_value, "on_boundary"
+        )
 
 
 def test_observation_operator_setter():
