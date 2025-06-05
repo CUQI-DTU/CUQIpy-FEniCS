@@ -1,3 +1,4 @@
+#%%
 import dolfin as dl
 import cuqi
 import cuqipy_fenics
