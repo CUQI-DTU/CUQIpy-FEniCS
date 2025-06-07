@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 import time
 import sys
+from scipy import optimize
 ufl = cuqipy_fenics.utilities._import_ufl()
 
 def test_model_input():
@@ -408,6 +409,62 @@ def test_observation_operator_setter():
     # Check that the solutions are the same
     assert np.allclose(u1_obs, u2_obs) and np.allclose(u2_obs, u3_obs)
     assert len(u1_obs) == 5
+
+def test_gradient_poisson():
+    """Test the gradient of the Poisson PDEModel is computed correctly"""
+    # Set random seed
+    np.random.seed(0)
+
+    # Create the variational problem
+    poisson = Poisson(dl.UnitIntervalMesh(40))
+
+    # Set up model parameters
+    m = dl.Function(poisson.parameter_function_space)
+    m.vector()[:] = 1.0
+
+    # Create a PDE object
+    PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        poisson.form,
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bcs,
+        poisson.bcs)
+
+    # Create a PDE model
+    PDE_model = cuqi.model.PDEModel(
+        PDE,
+        domain_geometry=cuqipy_fenics.geometry.FEniCSContinuous(
+            poisson.parameter_function_space
+        ),
+        range_geometry=cuqipy_fenics.geometry.FEniCSContinuous(
+            poisson.solution_function_space
+        ),
+    )
+
+    # Create a prior distribution
+    m_prior = cuqi.distribution.Gaussian(
+        mean=np.zeros(PDE_model.domain_dim), cov=1, geometry=PDE_model.domain_geometry
+    )
+
+    # Create a likelihood
+    y = cuqi.distribution.Gaussian(
+        mean=PDE_model(m_prior), cov=np.ones(PDE_model.range_dim)*.1**2, geometry=PDE_model.range_geometry)
+    y = y(y=PDE_model(m.vector().get_local()))
+
+    # Evaluate the adjoint based gradient at value m2
+    m2 = dl.Function(poisson.parameter_function_space)
+    m2.vector()[:] = np.random.randn(PDE_model.domain_dim)
+    adjoint_grad = y.gradient(m_prior=m2.vector().get_local())
+
+    # Compute the FD gradient
+    step = 1e-7   # finite diff step
+    FD_grad = optimize.approx_fprime(m2.vector().get_local(), y.logd, step)
+
+    # Check that the adjoint gradient and FD gradient are close
+    assert np.allclose(adjoint_grad, FD_grad, rtol=1e-1),\
+        f"Adjoint gradient: {adjoint_grad}, FD gradient: {FD_grad}"
+    assert np.linalg.norm(adjoint_grad-FD_grad)/ np.linalg.norm(FD_grad) < 1e-2
 
 class PoissonMultipleInputs:
     """Define the variational PDE problem for the Poisson equation with multiple
