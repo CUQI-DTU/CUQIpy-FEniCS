@@ -479,6 +479,14 @@ class PoissonMultipleInputs:
         # Define the boundary condition
         self.bc_value = dl.Constant(0.0)
 
+        # Set the solution function space
+        self._solution_function_space =  dl.FunctionSpace(self.mesh, "Lagrange", 2)
+
+        # Set the parameter function space
+        self._parameter_function_space = [
+            dl.FunctionSpace(self.mesh, "Lagrange", 1),
+            dl.FunctionSpace(self.mesh, "Lagrange", 1)]
+
     @property
     def form(self):
         return lambda m, source_term, u, v:\
@@ -496,11 +504,11 @@ class PoissonMultipleInputs:
 
     @property
     def solution_function_space(self):
-        return dl.FunctionSpace(self.mesh, "Lagrange", 2)
+        return self._solution_function_space
 
     @property
     def parameter_function_space(self):
-        return [dl.FunctionSpace(self.mesh, "Lagrange", 1), dl.FunctionSpace(self.mesh, "Lagrange", 1)]
+        return self._parameter_function_space
 
     @property
     def bcs(self):
@@ -554,3 +562,60 @@ def test_form_multiple_inputs():
     # Check passing wrong parameter_function_space raises an error
     with pytest.raises(ValueError, match= r"assemble input is specified by keywords arguments \['m2', 'source_term'\] that does not match the non_default_args of assemble \['m', 'source_term'\]"):
         PDE_with_full_form.assemble(m2=m, source_term=source_term)
+
+def test_gradient_poisson_multiple_inputs():
+    """Test the gradient of the Poisson PDEModel with multiple inputs is computed correctly"""
+    # Set random seed
+    np.random.seed(0)
+
+    # Create the variational problem
+    poisson = PoissonMultipleInputs()
+
+    # Set up model parameters
+    m = dl.Function(poisson.parameter_function_space[0])
+    m.vector()[:] = 1.0
+    source_term = dl.Function(poisson.parameter_function_space[1])
+    source_term.interpolate(dl.Expression('x[0]', degree=1))
+
+    # Create a PDE object
+    PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        poisson.form,
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bcs)
+
+    # Create a PDE model
+    PDE_model = cuqi.model.PDEModel(
+        PDE,
+        domain_geometry=cuqipy_fenics.geometry.FEniCSContinuous(
+            poisson.parameter_function_space[0]
+        ),
+        range_geometry=cuqipy_fenics.geometry.FEniCSContinuous(
+            poisson.solution_function_space
+        ),
+    )
+
+    # Create a prior distribution
+    m_prior = cuqi.distribution.Gaussian(
+        mean=np.zeros(PDE_model.domain_dim), cov=1, geometry=PDE_model.domain_geometry
+    )
+
+    # Create a likelihood
+    y = cuqi.distribution.Gaussian(
+        mean=PDE_model(m_prior, source_term), cov=np.ones(PDE_model.range_dim)*.1**2, geometry=PDE_model.range_geometry)
+    y = y(y=PDE_model(m.vector().get_local(), source_term))
+
+    # Evaluate the adjoint based gradient at value m2
+    m2 = dl.Function(poisson.parameter_function_space[0])
+    m2.vector()[:] = np.random.randn(PDE_model.domain_dim)
+    adjoint_grad = y.gradient(m_prior=m2.vector().get_local())
+
+    # Compute the FD gradient
+    step = 1e-7   # finite diff step
+    FD_grad = optimize.approx_fprime(m2.vector().get_local(), y.logd, step)
+
+    # Check that the adjoint gradient and FD gradient are close
+    assert np.allclose(adjoint_grad, FD_grad, rtol=1e-1),\
+        f"Adjoint gradient: {adjoint_grad}, FD gradient: {FD_grad}"
+    assert np.linalg.norm(adjoint_grad-FD_grad)/ np.linalg.norm(FD_grad) < 1e-2
