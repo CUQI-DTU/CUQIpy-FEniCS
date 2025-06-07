@@ -43,7 +43,7 @@ def test_model_input():
 def test_solver_choice():
     """Test passing different solvers to PDEModel"""
     # Create the variational problem
-    poisson = Poisson()
+    poisson = Poisson(dl.UnitIntervalMesh(10))
 
     # Set up model parameters
     m = dl.Function(poisson.parameter_function_space)
@@ -83,8 +83,7 @@ def test_reuse_assembled():
     """Test that reusing the assembled and factored lhs gives the same solution
      and a better performance"""
     # Create the variational problem
-    poisson = Poisson()
-    poisson.mesh = dl.UnitSquareMesh(50, 50)
+    poisson = Poisson(dl.UnitSquareMesh(50, 50))
 
     # Set up model parameters
     m = dl.Function(poisson.parameter_function_space)
@@ -140,7 +139,7 @@ def test_reuse_assembled():
 def test_form():
     """Test creating PDEModel with full form, and with lhs and rhs forms"""
     # Create the variational problem
-    poisson = Poisson()
+    poisson = Poisson(dl.UnitIntervalMesh(10))
 
     # Set up model parameters
     m = dl.Function(poisson.parameter_function_space)
@@ -185,23 +184,12 @@ def test_with_updated_rhs(copy_reference, case):
         pytest.skip("Test on MAC OS only")
 
     # Set up first poisson problem
-    poisson1 = Poisson()
-    poisson1.mesh = dl.UnitSquareMesh(40, 40)
+    poisson1 = Poisson(dl.UnitSquareMesh(40, 40))
     poisson1.source_term = dl.Constant(1.0)
 
     # Set up second poisson problem
-    poisson2 = Poisson()
-    poisson2.mesh = poisson1.mesh
+    poisson2 = Poisson(poisson1.mesh)
     poisson2.source_term = dl.Expression("sin(2*x[0]*pi)*sin(2*x[1]*pi)", degree=1)
-
-    # Set up boundary function (where the Dirichlet boundary conditions are applied)
-    def u_boundary(x, on_boundary):
-        return on_boundary and\
-            (x[0] < dl.DOLFIN_EPS or x[0] > 1.0 - dl.DOLFIN_EPS)
-
-    poisson1.bcs = dl.DirichletBC(poisson1.solution_function_space,
-                                 dl.Constant(0.0), u_boundary)
-    poisson2.bcs = poisson1.bcs
 
     # Create two PDE objects with different rhs terms
     PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
@@ -335,7 +323,7 @@ class Poisson:
     def form(self):
         return lambda m, u, v:\
             ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(v))*ufl.dx\
-            + self._source_term*v*ufl.dx
+            + self.source_term*v*ufl.dx
 
     @property
     def lhs_form(self):
@@ -359,13 +347,22 @@ class Poisson:
         return dl.DirichletBC(
             self.solution_function_space, self.bc_value, "on_boundary"
         )
+    
+    @property
+    def source_term(self):
+        """Return the source term"""
+        return self._source_term
+    
+    @source_term.setter
+    def source_term(self, value):
+        """Set the source term"""
+        self._source_term = value
 
 
 def test_observation_operator_setter():
     """Test that the observation setter works as expected"""
     # Create the variational problem
-    poisson = Poisson()
-    poisson.mesh = dl.UnitSquareMesh(50, 50)
+    poisson = Poisson(dl.UnitSquareMesh(50, 50))
 
     # Set up model parameters
     m = dl.Function(poisson.parameter_function_space)
@@ -474,7 +471,7 @@ class PoissonMultipleInputs:
 
         # Create the mesh and define function spaces for the solution and the
         # parameter
-        self.mesh = dl.UnitIntervalMesh(10)
+        self._mesh = dl.UnitIntervalMesh(10)
 
         # Define the boundary condition
         self.bc_value = dl.Constant(0.0)
@@ -486,6 +483,10 @@ class PoissonMultipleInputs:
         self._parameter_function_space = [
             dl.FunctionSpace(self.mesh, "Lagrange", 1),
             dl.FunctionSpace(self.mesh, "Lagrange", 1)]
+
+    @property
+    def mesh(self):
+        return self._mesh
 
     @property
     def form(self):
