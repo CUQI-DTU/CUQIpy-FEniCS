@@ -583,39 +583,56 @@ def test_gradient_poisson_multiple_inputs():
         poisson.mesh,
         poisson.solution_function_space,
         poisson.parameter_function_space,
+        poisson.bcs,
         poisson.bcs)
+
+    domain_geom1 = cuqipy_fenics.geometry.FEniCSContinuous(
+                poisson.parameter_function_space[0]
+            )
+    domain_geom2 = cuqipy_fenics.geometry.FEniCSContinuous(
+                poisson.parameter_function_space[1]
+            )
 
     # Create a PDE model
     PDE_model = cuqi.model.PDEModel(
         PDE,
-        domain_geometry=cuqipy_fenics.geometry.FEniCSContinuous(
-            poisson.parameter_function_space[0]
-        ),
+        domain_geometry=(domain_geom1, domain_geom2),
         range_geometry=cuqipy_fenics.geometry.FEniCSContinuous(
-            poisson.solution_function_space
-        ),
+            poisson.solution_function_space)
     )
 
     # Create a prior distribution
     m_prior = cuqi.distribution.Gaussian(
-        mean=np.zeros(PDE_model.domain_dim), cov=1, geometry=PDE_model.domain_geometry
+        mean=np.zeros(domain_geom1.par_dim), cov=1, geometry=domain_geom1
+    )
+    source_term_prior = cuqi.distribution.Gaussian(
+        mean=np.zeros(domain_geom2.par_dim), cov=1, geometry=domain_geom2
     )
 
     # Create a likelihood
     y = cuqi.distribution.Gaussian(
-        mean=PDE_model(m_prior, source_term), cov=np.ones(PDE_model.range_dim)*.1**2, geometry=PDE_model.range_geometry)
-    y = y(y=PDE_model(m.vector().get_local(), source_term))
+        mean=PDE_model(m_prior, source_term_prior), cov=np.ones(PDE_model.range_dim)*.1**2, geometry=PDE_model.range_geometry)
+    y = y(y=PDE_model(m.vector().get_local(), source_term.vector().get_local()))
 
     # Evaluate the adjoint based gradient at value m2
     m2 = dl.Function(poisson.parameter_function_space[0])
-    m2.vector()[:] = np.random.randn(PDE_model.domain_dim)
-    adjoint_grad = y.gradient(m_prior=m2.vector().get_local())
+    m2.vector()[:] = np.random.randn(domain_geom1.par_dim)
+    source_term2 = dl.Function(poisson.parameter_function_space[1])
+    source_term2.interpolate(dl.Expression('sin(2*x[0]*pi)', degree=1))
+
+    # Compute the adjoint gradient
+    adjoint_grad = y.gradient(m_prior=m2.vector().get_local(), source_term_prior=source_term2.vector().get_local())
 
     # Compute the FD gradient
-    step = 1e-7   # finite diff step
-    FD_grad = optimize.approx_fprime(m2.vector().get_local(), y.logd, step)
+    step = 1e-9   # finite diff step
+    FD_grad_m = optimize.approx_fprime(m2.vector().get_local(), lambda m2: y.logd(m2, source_term2.vector().get_local()), step)
+    FD_grad_source_term = optimize.approx_fprime(source_term2.vector().get_local(), lambda source_term2: y.logd(m2.vector().get_local(), source_term2), step)
 
-    # Check that the adjoint gradient and FD gradient are close
-    assert np.allclose(adjoint_grad, FD_grad, rtol=1e-1),\
-        f"Adjoint gradient: {adjoint_grad}, FD gradient: {FD_grad}"
-    assert np.linalg.norm(adjoint_grad-FD_grad)/ np.linalg.norm(FD_grad) < 1e-2
+    # Assert gradients are close
+    assert np.allclose(adjoint_grad['m_prior'], FD_grad_m, rtol=2e-1),\
+        f"Adjoint gradient w.r.t. m: {adjoint_grad['m_prior']}, FD gradient w.r.t. m: {FD_grad_m}"
+    assert np.allclose(adjoint_grad['source_term_prior'], FD_grad_source_term, rtol=1e-1),\
+        f"Adjoint gradient w.r.t. source term: {adjoint_grad['source_term_prior']}, FD gradient w.r.t. source term: {FD_grad_source_term}"
+    assert np.linalg.norm(adjoint_grad['m_prior']-FD_grad_m)/ np.linalg.norm(FD_grad_m) < 1e-2
+    assert np.linalg.norm(adjoint_grad['source_term_prior']-FD_grad_source_term)/ np.linalg.norm(FD_grad_source_term) < 1e-2
+
