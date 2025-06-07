@@ -301,7 +301,7 @@ class Poisson:
     def __init__(self, mesh):
 
         # Set the mesh
-        self._mesh =mesh
+        self._mesh = mesh
 
         # Define the boundary condition
         self.bc_value = dl.Constant(0.0)
@@ -543,6 +543,7 @@ def test_form_multiple_inputs():
 
     # Solve the PDE
     PDE_with_full_form.assemble(m, source_term)
+    # test also assembling with keyword arguments
     PDE_with_full_form.assemble(m=m, source_term=source_term)    
     u1, info = PDE_with_full_form.solve()
 
@@ -553,6 +554,7 @@ def test_form_multiple_inputs():
         poisson.solution_function_space,
         poisson.parameter_function_space,
         poisson.bcs)
+
     # Solve the PDE
     PDE_with_lhs_rhs_forms.assemble(m, source_term)
     u2, info = PDE_with_lhs_rhs_forms.solve()
@@ -602,7 +604,7 @@ def test_gradient_poisson_multiple_inputs():
             poisson.solution_function_space)
     )
 
-    # Create a prior distribution
+    # Create prior distributions
     m_prior = cuqi.distribution.Gaussian(
         mean=np.zeros(domain_geom1.par_dim), cov=1, geometry=domain_geom1
     )
@@ -615,7 +617,7 @@ def test_gradient_poisson_multiple_inputs():
         mean=PDE_model(m_prior, source_term_prior), cov=np.ones(PDE_model.range_dim)*.1**2, geometry=PDE_model.range_geometry)
     y = y(y=PDE_model(m.vector().get_local(), source_term.vector().get_local()))
 
-    # Evaluate the adjoint based gradient at value m2
+    # Evaluate the adjoint based gradient at value m2 and source_term2
     m2 = dl.Function(poisson.parameter_function_space[0])
     m2.vector()[:] = np.random.randn(domain_geom1.par_dim)
     source_term2 = dl.Function(poisson.parameter_function_space[1])
