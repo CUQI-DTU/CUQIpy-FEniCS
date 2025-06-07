@@ -21,7 +21,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: 3.8
-          miniforge-variant: Mambaforge
+          miniforge-variant: Miniforge
           miniforge-version: latest
 
       - name: Conda info
