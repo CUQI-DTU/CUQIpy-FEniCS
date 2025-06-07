@@ -21,7 +21,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: 3.8
-          miniforge-variant: Miniforge
+          miniforge-variant: Miniforge3
           miniforge-version: latest
 
       - name: Conda info
@@ -30,7 +30,7 @@ jobs:
           conda info
           which python
 
-      - name: Mamba install FEniCS
+      - name: conda install FEniCS
         shell: bash -l {0}
         run: |
           conda config --set always_yes yes
