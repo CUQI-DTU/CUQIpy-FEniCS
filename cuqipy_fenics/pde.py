@@ -25,16 +25,18 @@ class FEniCSPDE(PDE,ABC):
     ----------
     PDE_form : callable or tuple of two callables
         If passed as a callable: the callable returns the weak form of the PDE.
-        The callable should take three arguments, the first argument is the 
-        parameter (input of the forward model), the second argument is the state
-        variable (solution variable), and the third argument is the adjoint
+        The callable should take three or more arguments, the first arguments
+        are the unknown parameters (inputs of the forward model, e.g.
+        `parameter1`, `parameter2`), the second to last argument is the state
+        variable (solution variable), and the last argument is the adjoint
         variable (the test variable in the weak formulation).
 
         If passed as a tuple of two callables: the first callable returns the 
         weak form of the PDE left hand side, and the second callable returns the
         weak form of the PDE right hand side. The left hand side callable takes
-        the same three arguments as described above. The right hand side 
-        callable takes only the parameter and the adjoint variable as arguments.
+        the same arguments as described above. The right hand side callable
+        takes only the unknown parameters and the adjoint variable (the latter 
+        being the last argument) as arguments.
         See the example below.
 
     mesh : FEniCS mesh
@@ -43,8 +45,9 @@ class FEniCSPDE(PDE,ABC):
     solution_function_space : FEniCS function space
         FEniCS function space object that defines the function space of the state variable (solution variable).
 
-    parameter_function_space : FEniCS function space
-        FEniCS function space object that defines the function space of the Bayesian parameter (input of the forward model).
+    parameter_function_space : FEniCS function space or a list of them
+        FEniCS function space object or a list of them that defines the function space of the unknown parameters (inputs of the forward model).
+        If multiple parameters are passed, the function space should be a list of FEniCS function spaces, one for each parameter.
 
     dirichlet_bcs: FEniCS Dirichlet boundary condition object or a list of them
         FEniCS Dirichlet boundary condition object(s) that define the Dirichlet boundary conditions of the PDE.
@@ -54,7 +57,7 @@ class FEniCSPDE(PDE,ABC):
 
     observation_operator : python function handle, optional
         Function handle of a python function that returns the observed quantity from the PDE solution. If not provided, the identity operator is assumed (i.e. the entire solution is observed).
-        This python function takes as input the Bayesian parameter (input of the forward model) and the state variable (solution variable) as first and second inputs, respectively.
+        This python function takes as input the unknown parameters, e.g. `parameter1`, `parameter2`, and the state variable (solution variable) in that order.
 
         The returned observed quantity can be a ufl.algebra.Operator, FEniCS Function, np.ndarray, int, or float.
 
@@ -165,8 +168,8 @@ class FEniCSPDE(PDE,ABC):
     
     @parameter.setter
     def parameter(self, value):
-        """ Set the parameter of the PDE. Since the PDE solution depends on the 
-        parameter, this will set the PDE solution to None. """
+        """ Set the parameters of the PDE. Since the PDE solution depends on the 
+        parameters, this will set the PDE solution to None. """
         if value is None:
             raise ValueError('Parameter cannot be None.')
 
@@ -426,7 +429,7 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
             return self._apply_obs_op(*self.parameter_args, PDE_solution_fun)
 
     def gradient_wrt_parameter(self, direction, *args, **kwargs):
-        """ Compute the gradient of the PDE with respect to the parameter
+        """ Compute the gradient of the PDE with respect to the parameters
 
         Note: This implementation is largely based on the code:
         https://github.com/hippylib/hippylib/blob/master/hippylib/modeling/PDEProblem.py
