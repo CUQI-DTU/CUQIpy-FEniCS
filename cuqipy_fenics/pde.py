@@ -201,12 +201,14 @@ class FEniCSPDE(PDE,ABC):
     def _non_default_args(self):
         form = self._form
         if isinstance(self._form, tuple):
-            # extract non-default args from the lhs form and exclude the last
-            # two arguments (u and p) from the list of non-default args since
-            # they are provided automatically within the PDE-type class and are
-            # not arguments to be inferred in Bayesian inference setting.
+            # Use the lhs form only to determine the non-default args
             form = self._form[0]
-            non_default_args = get_non_default_args(form)[:-2]
+
+        # Extract the non_default_args and exclude the last
+        # two arguments (u and p) from the list of non-default args since
+        # they are provided automatically within the PDE-type class and are
+        # not arguments to be inferred in Bayesian inference setting.
+        non_default_args = get_non_default_args(form)[:-2]
         return non_default_args
 
     @property
