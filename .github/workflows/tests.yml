@@ -19,11 +19,11 @@ jobs:
           fetch-depth: 1
 
       - name: Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: 3.8
-          miniforge-variant: Mambaforge
+          miniforge-variant: Miniforge3
           miniforge-version: latest
 
       - name: Conda info
@@ -32,12 +32,12 @@ jobs:
           conda info
           which python
 
-      - name: Mamba install FEniCS
+      - name: Conda install FEniCS
         shell: bash -l {0}
         run: |
           conda config --set always_yes yes
           conda config --add channels conda-forge
-          mamba create -n fenicsproject -c conda-forge fenics 
+          conda create -n fenicsproject -c conda-forge fenics 
           conda activate fenicsproject
           which python
           python -c "from dolfin import *"

@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 import time
 import sys
+from scipy import optimize
 ufl = cuqipy_fenics.utilities._import_ufl()
 
 def test_model_input():
@@ -42,7 +43,7 @@ def test_model_input():
 def test_solver_choice():
     """Test passing different solvers to PDEModel"""
     # Create the variational problem
-    poisson = Poisson()
+    poisson = Poisson(dl.UnitIntervalMesh(10))
 
     # Set up model parameters
     m = dl.Function(poisson.parameter_function_space)
@@ -82,8 +83,7 @@ def test_reuse_assembled():
     """Test that reusing the assembled and factored lhs gives the same solution
      and a better performance"""
     # Create the variational problem
-    poisson = Poisson()
-    poisson.mesh = dl.UnitSquareMesh(50, 50)
+    poisson = Poisson(dl.UnitSquareMesh(50, 50))
 
     # Set up model parameters
     m = dl.Function(poisson.parameter_function_space)
@@ -139,7 +139,7 @@ def test_reuse_assembled():
 def test_form():
     """Test creating PDEModel with full form, and with lhs and rhs forms"""
     # Create the variational problem
-    poisson = Poisson()
+    poisson = Poisson(dl.UnitIntervalMesh(10))
 
     # Set up model parameters
     m = dl.Function(poisson.parameter_function_space)
@@ -184,23 +184,12 @@ def test_with_updated_rhs(copy_reference, case):
         pytest.skip("Test on MAC OS only")
 
     # Set up first poisson problem
-    poisson1 = Poisson()
-    poisson1.mesh = dl.UnitSquareMesh(40, 40)
+    poisson1 = Poisson(dl.UnitSquareMesh(40, 40))
     poisson1.source_term = dl.Constant(1.0)
 
     # Set up second poisson problem
-    poisson2 = Poisson()
-    poisson2.mesh = poisson1.mesh
+    poisson2 = Poisson(poisson1.mesh)
     poisson2.source_term = dl.Expression("sin(2*x[0]*pi)*sin(2*x[1]*pi)", degree=1)
-
-    # Set up boundary function (where the Dirichlet boundary conditions are applied)
-    def u_boundary(x, on_boundary):
-        return on_boundary and\
-            (x[0] < dl.DOLFIN_EPS or x[0] > 1.0 - dl.DOLFIN_EPS)
-
-    poisson1.bcs = dl.DirichletBC(poisson1.solution_function_space,
-                                 dl.Constant(0.0), u_boundary)
-    poisson2.bcs = poisson1.bcs
 
     # Create two PDE objects with different rhs terms
     PDE1 = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
@@ -309,17 +298,26 @@ class Poisson:
     """Define the variational PDE problem for the Poisson equation in two
     ways: as a full form, and as lhs and rhs forms"""
 
-    def __init__(self):
+    def __init__(self, mesh):
 
-        # Create the mesh and define function spaces for the solution and the
-        # parameter
-        self.mesh = dl.UnitIntervalMesh(10)
+        # Set the mesh
+        self._mesh = mesh
 
         # Define the boundary condition
         self.bc_value = dl.Constant(0.0)
 
-        # the source term
-        self.source_term = dl.Expression('x[0]', degree=1)
+        # The source term
+        self._source_term = dl.Expression('x[0]', degree=1)
+
+        # Solution function space
+        self._solution_function_space = dl.FunctionSpace(self.mesh, "Lagrange", 2)
+
+        # Parameter function space
+        self._parameter_function_space = dl.FunctionSpace(self.mesh, "Lagrange", 1)
+
+    @property
+    def mesh(self):
+        return self._mesh
 
     @property
     def form(self):
@@ -338,29 +336,33 @@ class Poisson:
 
     @property
     def solution_function_space(self):
-        return dl.FunctionSpace(self.mesh, "Lagrange", 2)
+        return self._solution_function_space
 
     @property
     def parameter_function_space(self):
-        return dl.FunctionSpace(self.mesh, "Lagrange", 1)
+        return self._parameter_function_space
 
     @property
     def bcs(self):
-        if not hasattr(self, "_bcs") or self._bcs is None:
-            self._bcs = dl.DirichletBC(self.solution_function_space,
-                                      self.bc_value, "on_boundary")
-        return self._bcs
-
-    @bcs.setter
-    def bcs(self, bcs):
-        self._bcs = bcs
+        return dl.DirichletBC(
+            self.solution_function_space, self.bc_value, "on_boundary"
+        )
+    
+    @property
+    def source_term(self):
+        """Return the source term"""
+        return self._source_term
+    
+    @source_term.setter
+    def source_term(self, value):
+        """Set the source term"""
+        self._source_term = value
 
 
 def test_observation_operator_setter():
     """Test that the observation setter works as expected"""
     # Create the variational problem
-    poisson = Poisson()
-    poisson.mesh = dl.UnitSquareMesh(50, 50)
+    poisson = Poisson(dl.UnitSquareMesh(50, 50))
 
     # Set up model parameters
     m = dl.Function(poisson.parameter_function_space)
@@ -404,3 +406,236 @@ def test_observation_operator_setter():
     # Check that the solutions are the same
     assert np.allclose(u1_obs, u2_obs) and np.allclose(u2_obs, u3_obs)
     assert len(u1_obs) == 5
+
+def test_gradient_poisson():
+    """Test the gradient of the Poisson PDEModel is computed correctly"""
+    # Set random seed
+    np.random.seed(0)
+
+    # Create the variational problem
+    poisson = Poisson(dl.UnitIntervalMesh(40))
+
+    # Set up model parameters
+    m = dl.Function(poisson.parameter_function_space)
+    m.vector()[:] = 1.0
+
+    # Create a PDE object
+    PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        poisson.form,
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bcs,
+        poisson.bcs)
+
+    # Create a PDE model
+    PDE_model = cuqi.model.PDEModel(
+        PDE,
+        domain_geometry=cuqipy_fenics.geometry.FEniCSContinuous(
+            poisson.parameter_function_space
+        ),
+        range_geometry=cuqipy_fenics.geometry.FEniCSContinuous(
+            poisson.solution_function_space
+        ),
+    )
+
+    # Create a prior distribution
+    m_prior = cuqi.distribution.Gaussian(
+        mean=np.zeros(PDE_model.domain_dim), cov=1, geometry=PDE_model.domain_geometry
+    )
+
+    # Create a likelihood
+    y = cuqi.distribution.Gaussian(
+        mean=PDE_model(m_prior), cov=np.ones(PDE_model.range_dim)*.1**2, geometry=PDE_model.range_geometry)
+    y = y(y=PDE_model(m.vector().get_local()))
+
+    # Evaluate the adjoint based gradient at value m2
+    m2 = dl.Function(poisson.parameter_function_space)
+    m2.vector()[:] = np.random.randn(PDE_model.domain_dim)
+    adjoint_grad = y.gradient(m_prior=m2.vector().get_local())
+
+    # Compute the FD gradient
+    step = 1e-7   # finite diff step
+    FD_grad = optimize.approx_fprime(m2.vector().get_local(), y.logd, step)
+
+    # Check that the adjoint gradient and FD gradient are close
+    assert np.allclose(adjoint_grad, FD_grad, rtol=1e-1),\
+        f"Adjoint gradient: {adjoint_grad}, FD gradient: {FD_grad}"
+    assert np.linalg.norm(adjoint_grad-FD_grad)/ np.linalg.norm(FD_grad) < 1e-2
+
+class PoissonMultipleInputs:
+    """Define the variational PDE problem for the Poisson equation with multiple
+     unknowns in two ways: as a full form, and as lhs and rhs forms"""
+
+    def __init__(self):
+
+        # Create the mesh and define function spaces for the solution and the
+        # parameter
+        self._mesh = dl.UnitIntervalMesh(10)
+
+        # Define the boundary condition
+        self.bc_value = dl.Constant(0.0)
+
+        # Set the solution function space
+        self._solution_function_space =  dl.FunctionSpace(self.mesh, "Lagrange", 2)
+
+        # Set the parameter function space
+        self._parameter_function_space = [
+            dl.FunctionSpace(self.mesh, "Lagrange", 1),
+            dl.FunctionSpace(self.mesh, "Lagrange", 1)]
+
+    @property
+    def mesh(self):
+        return self._mesh
+
+    @property
+    def form(self):
+        return lambda m, source_term, u, v:\
+            ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(v))*ufl.dx\
+            + source_term*v*ufl.dx
+
+    @property
+    def lhs_form(self):
+        return lambda m, source_term, u, v:\
+            ufl.exp(m)*ufl.inner(ufl.grad(u), ufl.grad(v))*ufl.dx
+
+    @property
+    def rhs_form(self):
+        return lambda m, source_term, v: -source_term*v*ufl.dx
+
+    @property
+    def solution_function_space(self):
+        return self._solution_function_space
+
+    @property
+    def parameter_function_space(self):
+        return self._parameter_function_space
+
+    @property
+    def bcs(self):
+        if not hasattr(self, "_bcs") or self._bcs is None:
+            self._bcs = dl.DirichletBC(self.solution_function_space,
+                                      self.bc_value, "on_boundary")
+        return self._bcs
+
+    @bcs.setter
+    def bcs(self, bcs):
+        self._bcs = bcs
+
+def test_form_multiple_inputs():
+    """Test creating PDEModel with full form, and with lhs and rhs forms with multiple inputs"""
+    # Create the variational problem
+    poisson = PoissonMultipleInputs()
+
+    # Set up model parameters
+    m = dl.Function(poisson.parameter_function_space[0])
+    m.vector()[:] = 1.0
+    source_term = dl.Function(poisson.parameter_function_space[1])
+    source_term.interpolate(dl.Expression('x[0]', degree=1))
+
+    # Create a PDE object with full form
+    PDE_with_full_form = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        poisson.form,
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bcs)
+
+    # Solve the PDE
+    PDE_with_full_form.assemble(m, source_term)
+    # test also assembling with keyword arguments
+    PDE_with_full_form.assemble(m=m, source_term=source_term)    
+    u1, info = PDE_with_full_form.solve()
+
+    # Create a PDE object with lhs and rhs forms
+    PDE_with_lhs_rhs_forms = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        (poisson.lhs_form, poisson.rhs_form),
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bcs)
+
+    # Solve the PDE
+    PDE_with_lhs_rhs_forms.assemble(m, source_term)
+    u2, info = PDE_with_lhs_rhs_forms.solve()
+
+    # Check that the solutions are the same
+    assert np.allclose(u1.vector().get_local(), u2.vector().get_local())
+
+    # Check passing wrong parameter_function_space raises an error
+    with pytest.raises(ValueError, match= r"assemble input is specified by keywords arguments \['m2', 'source_term'\] that does not match the non_default_args of assemble \['m', 'source_term'\]"):
+        PDE_with_full_form.assemble(m2=m, source_term=source_term)
+
+def test_gradient_poisson_multiple_inputs():
+    """Test the gradient of the Poisson PDEModel with multiple inputs is computed correctly"""
+    # Set random seed
+    np.random.seed(0)
+
+    # Create the variational problem
+    poisson = PoissonMultipleInputs()
+
+    # Set up model parameters
+    m = dl.Function(poisson.parameter_function_space[0])
+    m.vector()[:] = 1.0
+    source_term = dl.Function(poisson.parameter_function_space[1])
+    source_term.interpolate(dl.Expression('x[0]', degree=1))
+
+    # Create a PDE object
+    PDE = cuqipy_fenics.pde.SteadyStateLinearFEniCSPDE(
+        poisson.form,
+        poisson.mesh,
+        poisson.solution_function_space,
+        poisson.parameter_function_space,
+        poisson.bcs,
+        poisson.bcs)
+
+    domain_geom1 = cuqipy_fenics.geometry.FEniCSContinuous(
+                poisson.parameter_function_space[0]
+            )
+    domain_geom2 = cuqipy_fenics.geometry.FEniCSContinuous(
+                poisson.parameter_function_space[1]
+            )
+
+    # Create a PDE model
+    PDE_model = cuqi.model.PDEModel(
+        PDE,
+        domain_geometry=(domain_geom1, domain_geom2),
+        range_geometry=cuqipy_fenics.geometry.FEniCSContinuous(
+            poisson.solution_function_space)
+    )
+
+    # Create prior distributions
+    m_prior = cuqi.distribution.Gaussian(
+        mean=np.zeros(domain_geom1.par_dim), cov=1, geometry=domain_geom1
+    )
+    source_term_prior = cuqi.distribution.Gaussian(
+        mean=np.zeros(domain_geom2.par_dim), cov=1, geometry=domain_geom2
+    )
+
+    # Create a likelihood
+    y = cuqi.distribution.Gaussian(
+        mean=PDE_model(m_prior, source_term_prior), cov=np.ones(PDE_model.range_dim)*.1**2, geometry=PDE_model.range_geometry)
+    y = y(y=PDE_model(m.vector().get_local(), source_term.vector().get_local()))
+
+    # Evaluate the adjoint based gradient at value m2 and source_term2
+    m2 = dl.Function(poisson.parameter_function_space[0])
+    m2.vector()[:] = np.random.randn(domain_geom1.par_dim)
+    source_term2 = dl.Function(poisson.parameter_function_space[1])
+    source_term2.interpolate(dl.Expression('sin(2*x[0]*pi)', degree=1))
+
+    # Compute the adjoint gradient
+    adjoint_grad = y.gradient(m_prior=m2.vector().get_local(), source_term_prior=source_term2.vector().get_local())
+
+    # Compute the FD gradient
+    step = 1e-9   # finite diff step
+    FD_grad_m = optimize.approx_fprime(m2.vector().get_local(), lambda m2: y.logd(m2, source_term2.vector().get_local()), step)
+    FD_grad_source_term = optimize.approx_fprime(source_term2.vector().get_local(), lambda source_term2: y.logd(m2.vector().get_local(), source_term2), step)
+
+    # Assert gradients are close
+    assert np.allclose(adjoint_grad['m_prior'], FD_grad_m, rtol=2e-1),\
+        f"Adjoint gradient w.r.t. m: {adjoint_grad['m_prior']}, FD gradient w.r.t. m: {FD_grad_m}"
+    assert np.allclose(adjoint_grad['source_term_prior'], FD_grad_source_term, rtol=1e-1),\
+        f"Adjoint gradient w.r.t. source term: {adjoint_grad['source_term_prior']}, FD gradient w.r.t. source term: {FD_grad_source_term}"
+    assert np.linalg.norm(adjoint_grad['m_prior']-FD_grad_m)/ np.linalg.norm(FD_grad_m) < 1e-2
+    assert np.linalg.norm(adjoint_grad['source_term_prior']-FD_grad_source_term)/ np.linalg.norm(FD_grad_source_term) < 1e-2
+
