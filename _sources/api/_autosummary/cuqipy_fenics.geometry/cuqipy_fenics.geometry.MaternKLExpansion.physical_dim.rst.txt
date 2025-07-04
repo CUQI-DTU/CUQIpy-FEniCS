@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.physical\_dim
+=======================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.physical_dim

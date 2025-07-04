@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.parameter\_args
+============================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: FEniCSPDE.parameter_args

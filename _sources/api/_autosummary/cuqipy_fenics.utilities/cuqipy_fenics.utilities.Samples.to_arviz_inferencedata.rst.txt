@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.Samples.to\_arviz\_inferencedata
+=========================================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. automethod:: Samples.to_arviz_inferencedata

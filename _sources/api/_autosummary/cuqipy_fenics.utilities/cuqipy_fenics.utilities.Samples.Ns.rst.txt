@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.Samples.Ns
+===================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. autoproperty:: Samples.Ns

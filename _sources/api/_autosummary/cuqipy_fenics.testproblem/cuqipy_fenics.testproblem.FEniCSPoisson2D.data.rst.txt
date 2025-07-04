@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSPoisson2D.data
+===============================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. autoproperty:: FEniCSPoisson2D.data

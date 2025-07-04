@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSPoisson2D.likelihood
+=====================================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. autoproperty:: FEniCSPoisson2D.likelihood

@@ -1,0 +1,54 @@
+FEniCSStepExpansion
+===================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoclass:: FEniCSStepExpansion
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSStepExpansion.__init__
+      ~FEniCSStepExpansion.fun2par
+      ~FEniCSStepExpansion.fun2vec
+      ~FEniCSStepExpansion.gradient
+      ~FEniCSStepExpansion.par2field
+      ~FEniCSStepExpansion.par2fun
+      ~FEniCSStepExpansion.plot
+      ~FEniCSStepExpansion.plot_envelope
+      ~FEniCSStepExpansion.vec2fun
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSStepExpansion.axis_labels
+      ~FEniCSStepExpansion.fun_dim
+      ~FEniCSStepExpansion.fun_is_array
+      ~FEniCSStepExpansion.fun_shape
+      ~FEniCSStepExpansion.function_space
+      ~FEniCSStepExpansion.funvec_dim
+      ~FEniCSStepExpansion.funvec_shape
+      ~FEniCSStepExpansion.geometry
+      ~FEniCSStepExpansion.grid
+      ~FEniCSStepExpansion.mesh
+      ~FEniCSStepExpansion.num_steps_x
+      ~FEniCSStepExpansion.num_steps_y
+      ~FEniCSStepExpansion.par_dim
+      ~FEniCSStepExpansion.par_shape
+      ~FEniCSStepExpansion.physical_dim
+      ~FEniCSStepExpansion.step_basis
+      ~FEniCSStepExpansion.variables
+   
+   

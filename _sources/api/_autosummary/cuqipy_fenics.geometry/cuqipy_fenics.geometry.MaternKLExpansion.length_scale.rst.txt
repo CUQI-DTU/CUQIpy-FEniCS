@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.length\_scale
+=======================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.length_scale

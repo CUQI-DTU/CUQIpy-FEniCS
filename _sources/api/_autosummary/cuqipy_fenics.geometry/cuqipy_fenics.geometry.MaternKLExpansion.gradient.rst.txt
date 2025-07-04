@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.gradient
+==================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: MaternKLExpansion.gradient

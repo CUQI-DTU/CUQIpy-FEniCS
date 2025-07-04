@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.axis\_labels
+======================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.axis_labels

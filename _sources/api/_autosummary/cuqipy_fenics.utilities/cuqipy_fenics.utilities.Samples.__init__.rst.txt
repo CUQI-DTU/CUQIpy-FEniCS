@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.Samples.\_\_init\_\_
+=============================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. automethod:: Samples.__init__

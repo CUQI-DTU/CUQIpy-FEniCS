@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.solve
+==================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. automethod:: FEniCSPDE.solve
