@@ -22,7 +22,7 @@ observation_operator=None
 SNR = 1000
 model, data, problemInfo = cuqipy_fenics.testproblem.FEniCSDiffusion1D(dim=dim,
     exactSolution=myExactSolution, observation_operator=observation_operator,
-    SNR=SNR, mapping=mapping, left_bc=1, right_bc=20, endpoint=L
+    SNR=SNR, mapping=mapping, left_bc=1, right_bc=50, endpoint=L
     ).get_components()
 
 #%% Plot data
