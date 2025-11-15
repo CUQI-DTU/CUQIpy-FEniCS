@@ -7,6 +7,7 @@ import cuqipy_fenics
 import cuqi
 import mshr
 import matplotlib.pyplot as plt
+np.random.seed(0)
 
 #%% 1. First, we create a Poisson PDE using FEniCS. We specify the domain,
 # the PDE form, the boundary conditions and the source term (the following
@@ -14,7 +15,7 @@ import matplotlib.pyplot as plt
 
 #%% 1.1 Define domain and mesh
 domain = mshr.Circle(dl.Point(0,0),1)
-mesh = mshr.generate_mesh(domain, 20)
+mesh = mshr.generate_mesh(domain, 15)
 
 #%% 1.2 Define function spaces 
 V = dl.FiniteElement("CG", mesh.ufl_cell(), 1)
@@ -63,7 +64,7 @@ fenics_continuous_geo = cuqipy_fenics.geometry.FEniCSContinuous(parameter_space)
 
 # 2.1.2 The Matern fieled (maps i.i.d normal random vector of dimension `num_terms`
 # to Matern field realization on `fenics_continuous_geo`)
-matern_geo = cuqipy_fenics.geometry.MaternKLExpansion(fenics_continuous_geo, length_scale = .8, num_terms=128)
+matern_geo = cuqipy_fenics.geometry.MaternKLExpansion(fenics_continuous_geo, length_scale = .8, num_terms=12)
 
 # 2.1.3 We create a map `heavy_map` to map the Matern field realization to two levels
 # c_minus and c_plus 
@@ -102,15 +103,15 @@ exactSolution = prior.sample()
 b_exact = model(exactSolution)
 
 #%% 2.8 Create the data distribution
-SNR = 100
+SNR = 1000
 sigma = np.linalg.norm(b_exact)/SNR
 sigma2 = sigma*sigma # variance of the observation Gaussian noise
-data_distribution = cuqi.distribution.Gaussian(mean=model,
+data_distribution = cuqi.distribution.Gaussian(mean=model(prior),
                                                cov=sigma2*np.ones(range_geometry.par_dim),
                                                geometry=range_geometry)
 
 #%% 2.9 Generate noisy data
-data = data_distribution(x=exactSolution).sample()
+data = data_distribution(prior=exactSolution).sample()
 
 #%% 2.10 Create the data distribution and the likelihood
 likelihood = data_distribution.to_likelihood(data)
@@ -131,17 +132,18 @@ plt.colorbar(ims[-1])
 
 
 #%% 3.3 Create pCN Sampler 
-pCNSampler = cuqi.sampler.pCN(
+pCNSampler = cuqi.sampler.PCN(
     posterior,
-    scale=None,
-    x0=None,
+    initial_point=np.zeros(model.domain_dim),
+    scale=0.04
 )
 
 #%% 3.4 Sample using the pCN sampler
-samplespCN = pCNSampler.sample_adapt(10000)
+pCNSampler.sample(50000)
+samplespCN = pCNSampler.get_samples()
 
-#%% 3.5 Plot posterior pCN samples 
-ims = samplespCN.plot([0, 1000, 3000, 6000, 8000, 9000],title="posterior")
+#%% 3.5 Plot posterior pCN samples
+ims = samplespCN.plot([0, 1000, 3000, 6000, 8000, 9000], title="posterior")
 plt.colorbar(ims[-1])
 
 # %% 3.6 Plot trace and autocorrelation (pCN)
@@ -151,6 +153,4 @@ samplespCN.plot_autocorrelation(max_lag=300)
 #%% 3.7 Plot credible interval (pCN)
 plt.figure()
 samplespCN.plot_ci(plot_par = True, exact=exactSolution)
-plt.xticks(range(128)[::20], range(128)[::20])
 plt.title("Credible interval")
-# %%
