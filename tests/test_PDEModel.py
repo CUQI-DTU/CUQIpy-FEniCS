@@ -257,10 +257,13 @@ def test_with_updated_rhs(copy_reference, case):
     # Solve the Bayesian problem
     # Sample the posterior (Case 1: no reuse of assembled operators)
     Ns = 20
+    Nb = 10
     np.random.seed(0)
     sampler = cuqi.sampler.MH(cuqi_posterior)
     t0 = time.time()
-    samples1 = sampler.sample_adapt(Ns, Nb=10)
+    sampler.warmup(Nb)
+    sampler.sample(Ns)
+    samples1 = sampler.get_samples().burnthin(Nb)
     t1 = time.time()
     t_no_reuse = t1-t0
     samples1.geometry = domain_geometry
@@ -275,7 +278,9 @@ def test_with_updated_rhs(copy_reference, case):
         np.random.seed(0)
         sampler = cuqi.sampler.MH(cuqi_posterior)
         t0 = time.time()
-        samples2 = sampler.sample_adapt(Ns, Nb=10)
+        sampler.warmup(Nb)
+        sampler.sample(Ns)
+        samples2 = sampler.get_samples().burnthin(Nb)
         t1 = time.time()
         t_reuse = t1-t0
 
