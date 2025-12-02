@@ -122,10 +122,13 @@ cuqi_posterior = cuqi.distribution.JointDistribution( y1, y2, x)._as_stacked()
 #%% 3 Solve the Bayesian problem
 #%% 3.1. Sample the posterior (Case 1: no reuse of assembled operators)
 Ns = 100
+Nb = 10
 np.random.seed(0) # fix seed for reproducibility 
 sampler = cuqi.sampler.MH(cuqi_posterior)
 t0 = time.time()
-samples1 = sampler.sample_adapt(Ns,Nb=10)
+sampler.warmup(Nb)
+sampler.sample(Ns)
+samples1 = sampler.get_samples().burnthin(Nb)
 t1 = time.time()
 print('Time elapsed: (Case 1: no reuse of assembled operators)', t1-t0, 's')
 samples1.geometry = domain_geometry
@@ -139,7 +142,9 @@ cuqi_model2.pde = PDE2
 np.random.seed(0)
 sampler = cuqi.sampler.MH(cuqi_posterior)
 t0 = time.time()
-samples2 = sampler.sample_adapt(Ns,Nb=10)
+sampler.warmup(Nb)
+sampler.sample(Ns)
+samples2 = sampler.get_samples().burnthin(Nb)
 t1 = time.time()
 print('Time elapsed (Case 2: reuse of assembled operators): ', t1-t0, 's')
 samples2.geometry = domain_geometry

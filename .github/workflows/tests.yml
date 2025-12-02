@@ -47,14 +47,9 @@ jobs:
         run: |
           conda activate fenicsproject
           python -m pip install --upgrade pip
+          python -m pip install cuqipy --pre
           python -m pip install -r requirements.txt
           python -m pip install -r requirements-dev.txt
-
-      - name: Install pre-release of CUQIpy # We install latest pre-release version of CUQIpy to catch upstream bugs early
-        shell: bash -l {0}
-        run: |
-          conda activate fenicsproject
-          python -m pip install cuqipy --pre --upgrade
           
       - name: Lint with flake8
         shell: bash -l {0}
