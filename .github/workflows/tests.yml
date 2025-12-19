@@ -37,7 +37,7 @@ jobs:
         run: |
           conda config --set always_yes yes
           conda config --add channels conda-forge
-          conda create -n fenicsproject -c conda-forge python=3.11 fenics fenics-dolfin fenics-libdolfin
+          conda create -n fenicsproject -c conda-forge fenics openmpi=4.1.2
           conda activate fenicsproject
           which python
           python -c "from dolfin import *"
