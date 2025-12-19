@@ -8,6 +8,7 @@ import pytest
 import time
 import sys
 from scipy import optimize
+ufl = cuqipy_fenics.utilities._import_ufl()
 
 def test_model_input():
     """Test passing different data structures for PDEModel input"""
