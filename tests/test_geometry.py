@@ -1,3 +1,6 @@
+
+from cuqipy_fenics import config
+config.UFL_LEGACY = True
 import dolfin as dl
 from cuqipy_fenics.geometry import (FEniCSContinuous,
                                     MaternKLExpansion,

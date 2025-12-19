@@ -1,3 +1,5 @@
+from cuqipy_fenics import config
+config.UFL_LEGACY = True
 import dolfin as dl
 import cuqi
 import cuqipy_fenics
@@ -6,7 +8,6 @@ import pytest
 import time
 import sys
 from scipy import optimize
-ufl = cuqipy_fenics.utilities._import_ufl()
 
 def test_model_input():
     """Test passing different data structures for PDEModel input"""

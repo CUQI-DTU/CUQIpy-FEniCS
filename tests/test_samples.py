@@ -1,3 +1,5 @@
+from cuqipy_fenics import config
+config.UFL_LEGACY = True
 import pytest
 from cuqipy_fenics.geometry import FEniCSContinuous, FEniCSMappedGeometry, MaternKLExpansion
 from cuqi.distribution import Gaussian
