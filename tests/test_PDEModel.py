@@ -1,3 +1,5 @@
+from cuqipy_fenics import config
+config.UFL_LEGACY = True
 import dolfin as dl
 import cuqi
 import cuqipy_fenics
