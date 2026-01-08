@@ -1,2 +1,3 @@
 # Install FEniCS through conda: https://fenicsproject.org/download/archive/, then
+numpy <= 1.26.4
 cuqipy
