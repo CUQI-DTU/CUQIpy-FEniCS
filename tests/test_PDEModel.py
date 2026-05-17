@@ -452,18 +452,17 @@ def test_gradient_poisson():
     )
 
     # Create a likelihood
-    y = cuqi.distribution.Gaussian(
-        mean=PDE_model(m_prior), cov=np.ones(PDE_model.range_dim)*.1**2, geometry=PDE_model.range_geometry)
-    y = y(y=PDE_model(m.vector().get_local()))
+    datadist = cuqi.distribution.Gaussian(
+        mean=PDE_model(m_prior), cov=np.ones(PDE_model.range_dim)*.02**2, geometry=PDE_model.range_geometry)
+    data = datadist(m_prior = m.vector().get_local()).sample()
+    y = datadist(datadist=data)
 
-    # Evaluate the adjoint based gradient at value m2
-    m2 = dl.Function(poisson.parameter_function_space)
-    m2.vector()[:] = np.random.randn(PDE_model.domain_dim)
-    adjoint_grad = y.gradient(m_prior=m2.vector().get_local())
+    # Evaluate the adjoint based gradient at value m
+    adjoint_grad = y.gradient(m_prior=m.vector().get_local())
 
     # Compute the FD gradient
     step = 1e-7   # finite diff step
-    FD_grad = optimize.approx_fprime(m2.vector().get_local(), y.logd, step)
+    FD_grad = optimize.approx_fprime(m.vector().get_local(), y.logd, step)
 
     # Check that the adjoint gradient and FD gradient are close
     assert np.allclose(adjoint_grad, FD_grad, rtol=1e-1),\
