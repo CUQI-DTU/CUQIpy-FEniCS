@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.variables
+==================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: FEniCSContinuous.variables

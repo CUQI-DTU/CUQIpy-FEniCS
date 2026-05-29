@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.reuse\_assembled
+=============================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: FEniCSPDE.reuse_assembled

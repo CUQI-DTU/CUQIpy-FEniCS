@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.grid\_obs
+======================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: FEniCSPDE.grid_obs

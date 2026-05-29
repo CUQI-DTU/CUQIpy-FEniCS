@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.SteadyStateLinearFEniCSPDE.reuse\_assembled
+==============================================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: SteadyStateLinearFEniCSPDE.reuse_assembled

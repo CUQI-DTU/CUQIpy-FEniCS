@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.SteadyStateLinearFEniCSPDE.rhs\_form
+=======================================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: SteadyStateLinearFEniCSPDE.rhs_form

@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.ExpressionFromCallable.geometric\_dimension
+====================================================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. automethod:: ExpressionFromCallable.geometric_dimension

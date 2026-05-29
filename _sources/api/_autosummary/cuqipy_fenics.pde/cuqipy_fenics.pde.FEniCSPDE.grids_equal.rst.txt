@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.grids\_equal
+=========================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: FEniCSPDE.grids_equal

@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.gradient
+=================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: FEniCSContinuous.gradient

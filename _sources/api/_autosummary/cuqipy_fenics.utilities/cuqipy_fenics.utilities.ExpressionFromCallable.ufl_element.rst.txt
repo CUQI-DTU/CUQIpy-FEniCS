@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.ExpressionFromCallable.ufl\_element
+============================================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. automethod:: ExpressionFromCallable.ufl_element

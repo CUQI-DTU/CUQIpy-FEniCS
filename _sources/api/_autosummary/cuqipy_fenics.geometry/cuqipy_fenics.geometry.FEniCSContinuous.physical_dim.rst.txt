@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.physical\_dim
+======================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: FEniCSContinuous.physical_dim

@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.ExpressionFromCallable.ufl\_disable\_profiling
+=======================================================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. automethod:: ExpressionFromCallable.ufl_disable_profiling

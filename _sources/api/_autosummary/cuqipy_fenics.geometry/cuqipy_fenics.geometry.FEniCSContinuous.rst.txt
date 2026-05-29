@@ -1,0 +1,46 @@
+FEniCSContinuous
+================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoclass:: FEniCSContinuous
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSContinuous.__init__
+      ~FEniCSContinuous.fun2par
+      ~FEniCSContinuous.fun2vec
+      ~FEniCSContinuous.gradient
+      ~FEniCSContinuous.par2fun
+      ~FEniCSContinuous.plot
+      ~FEniCSContinuous.plot_envelope
+      ~FEniCSContinuous.vec2fun
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSContinuous.fun_dim
+      ~FEniCSContinuous.fun_is_array
+      ~FEniCSContinuous.fun_shape
+      ~FEniCSContinuous.funvec_dim
+      ~FEniCSContinuous.funvec_shape
+      ~FEniCSContinuous.mesh
+      ~FEniCSContinuous.par_dim
+      ~FEniCSContinuous.par_shape
+      ~FEniCSContinuous.physical_dim
+      ~FEniCSContinuous.variables
+   
+   

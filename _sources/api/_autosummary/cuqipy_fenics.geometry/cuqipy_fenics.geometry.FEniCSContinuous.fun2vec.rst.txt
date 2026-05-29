@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.fun2vec
+================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: FEniCSContinuous.fun2vec

@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.Samples.funvals
+========================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. autoproperty:: Samples.funvals

@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.forward\_solution
+==============================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: FEniCSPDE.forward_solution

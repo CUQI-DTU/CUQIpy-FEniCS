@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSStepExpansion.axis\_labels
+========================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: FEniCSStepExpansion.axis_labels

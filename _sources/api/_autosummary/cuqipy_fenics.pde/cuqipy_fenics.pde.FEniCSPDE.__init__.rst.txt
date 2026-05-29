@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.\_\_init\_\_
+=========================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. automethod:: FEniCSPDE.__init__

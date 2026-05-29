@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.Samples.median
+=======================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. automethod:: Samples.median

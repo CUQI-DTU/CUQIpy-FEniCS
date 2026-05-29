@@ -1,0 +1,38 @@
+testproblem
+===========
+
+Module path: cuqipy_fenics.testproblem
+
+.. currentmodule:: cuqipy_fenics
+
+.. automodule:: cuqipy_fenics.testproblem
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+    :toctree: cuqipy_fenics.testproblem
+    :nosignatures:
+    :recursive:
+
+   
+      FEniCSDiffusion1D
+      FEniCSPoisson2D
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSDiffusion1D.data
+=================================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. autoproperty:: FEniCSDiffusion1D.data

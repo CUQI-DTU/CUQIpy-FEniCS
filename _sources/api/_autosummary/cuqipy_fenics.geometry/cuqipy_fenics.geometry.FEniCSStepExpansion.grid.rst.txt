@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSStepExpansion.grid
+================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: FEniCSStepExpansion.grid

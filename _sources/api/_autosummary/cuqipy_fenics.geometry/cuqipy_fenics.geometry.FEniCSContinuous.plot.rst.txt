@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.plot
+=============================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: FEniCSContinuous.plot

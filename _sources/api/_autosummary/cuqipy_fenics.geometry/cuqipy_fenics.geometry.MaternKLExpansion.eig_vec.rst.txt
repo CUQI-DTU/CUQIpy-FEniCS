@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.eig\_vec
+==================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.eig_vec

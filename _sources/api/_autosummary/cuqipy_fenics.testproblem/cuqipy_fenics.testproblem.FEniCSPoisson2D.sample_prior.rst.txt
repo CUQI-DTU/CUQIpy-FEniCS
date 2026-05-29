@@ -1,0 +1,6 @@
+cuqipy\_fenics.testproblem.FEniCSPoisson2D.sample\_prior
+========================================================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. automethod:: FEniCSPoisson2D.sample_prior

@@ -1,0 +1,49 @@
+utilities
+=========
+
+Module path: cuqipy_fenics.utilities
+
+.. currentmodule:: cuqipy_fenics
+
+.. automodule:: cuqipy_fenics.utilities
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree: cuqipy_fenics.utilities
+      :nosignatures:
+      :recursive:
+
+   
+      to_dolfin_expression
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+    :toctree: cuqipy_fenics.utilities
+    :nosignatures:
+    :recursive:
+
+   
+      ExpressionFromCallable
+      Number
+      Samples
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSMappedGeometry.function\_space
+============================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: FEniCSMappedGeometry.function_space

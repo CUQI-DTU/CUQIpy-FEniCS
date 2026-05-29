@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSMappedGeometry.\_\_init\_\_
+=========================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: FEniCSMappedGeometry.__init__

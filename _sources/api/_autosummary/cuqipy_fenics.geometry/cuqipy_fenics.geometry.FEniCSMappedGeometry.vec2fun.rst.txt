@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSMappedGeometry.vec2fun
+====================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: FEniCSMappedGeometry.vec2fun

@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.fun\_is\_array
+========================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.fun_is_array

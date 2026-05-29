@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.mesh
+==============================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.mesh

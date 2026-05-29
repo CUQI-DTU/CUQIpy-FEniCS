@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.rhs\_form
+======================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: FEniCSPDE.rhs_form

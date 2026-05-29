@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.FEniCSPDE.observation\_operator
+==================================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoproperty:: FEniCSPDE.observation_operator

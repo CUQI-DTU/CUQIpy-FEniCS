@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.Samples.parameters
+===========================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. autoproperty:: Samples.parameters

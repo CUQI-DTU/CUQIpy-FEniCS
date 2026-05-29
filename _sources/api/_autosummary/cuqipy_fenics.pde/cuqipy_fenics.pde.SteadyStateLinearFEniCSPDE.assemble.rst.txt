@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.SteadyStateLinearFEniCSPDE.assemble
+======================================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. automethod:: SteadyStateLinearFEniCSPDE.assemble

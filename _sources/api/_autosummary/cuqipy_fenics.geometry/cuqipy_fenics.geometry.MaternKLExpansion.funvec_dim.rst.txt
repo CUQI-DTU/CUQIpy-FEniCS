@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.funvec\_dim
+=====================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.funvec_dim

@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.FEniCSContinuous.plot\_envelope
+=======================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. automethod:: FEniCSContinuous.plot_envelope

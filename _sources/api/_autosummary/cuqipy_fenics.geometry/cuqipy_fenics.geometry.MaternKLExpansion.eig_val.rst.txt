@@ -1,0 +1,6 @@
+cuqipy\_fenics.geometry.MaternKLExpansion.eig\_val
+==================================================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoproperty:: MaternKLExpansion.eig_val

@@ -1,0 +1,23 @@
+Number
+======
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. autoclass:: Number
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Number.__init__
+   
+   
+
+   
+   
+   

@@ -1,0 +1,44 @@
+FEniCSPDE
+=========
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. autoclass:: FEniCSPDE
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSPDE.__init__
+      ~FEniCSPDE.assemble
+      ~FEniCSPDE.gradient_wrt_parameter
+      ~FEniCSPDE.observe
+      ~FEniCSPDE.solve
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSPDE.PDE_form
+      ~FEniCSPDE.forward_solution
+      ~FEniCSPDE.grid_obs
+      ~FEniCSPDE.grid_sol
+      ~FEniCSPDE.grids_equal
+      ~FEniCSPDE.lhs_form
+      ~FEniCSPDE.observation_operator
+      ~FEniCSPDE.parameter
+      ~FEniCSPDE.parameter_args
+      ~FEniCSPDE.reuse_assembled
+      ~FEniCSPDE.rhs_form
+   
+   

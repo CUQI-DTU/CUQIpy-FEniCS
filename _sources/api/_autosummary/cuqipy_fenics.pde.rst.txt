@@ -1,0 +1,38 @@
+pde
+===
+
+Module path: cuqipy_fenics.pde
+
+.. currentmodule:: cuqipy_fenics
+
+.. automodule:: cuqipy_fenics.pde
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+    :toctree: cuqipy_fenics.pde
+    :nosignatures:
+    :recursive:
+
+   
+      FEniCSPDE
+      SteadyStateLinearFEniCSPDE
+   
+   
+
+   
+   
+   
+
+
+

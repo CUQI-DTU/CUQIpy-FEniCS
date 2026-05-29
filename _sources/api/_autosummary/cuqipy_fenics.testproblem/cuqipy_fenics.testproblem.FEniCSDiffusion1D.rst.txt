@@ -1,0 +1,41 @@
+FEniCSDiffusion1D
+=================
+
+.. currentmodule:: cuqipy_fenics.testproblem
+
+.. autoclass:: FEniCSDiffusion1D
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSDiffusion1D.MAP
+      ~FEniCSDiffusion1D.ML
+      ~FEniCSDiffusion1D.UQ
+      ~FEniCSDiffusion1D.__init__
+      ~FEniCSDiffusion1D.get_components
+      ~FEniCSDiffusion1D.sample_posterior
+      ~FEniCSDiffusion1D.sample_prior
+      ~FEniCSDiffusion1D.set_data
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSDiffusion1D.data
+      ~FEniCSDiffusion1D.likelihood
+      ~FEniCSDiffusion1D.model
+      ~FEniCSDiffusion1D.posterior
+      ~FEniCSDiffusion1D.prior
+   
+   

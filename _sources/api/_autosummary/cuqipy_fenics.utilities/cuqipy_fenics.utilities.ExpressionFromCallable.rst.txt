@@ -1,0 +1,56 @@
+ExpressionFromCallable
+======================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. autoclass:: ExpressionFromCallable
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~ExpressionFromCallable.__init__
+      ~ExpressionFromCallable.compute_vertex_values
+      ~ExpressionFromCallable.count
+      ~ExpressionFromCallable.cpp_object
+      ~ExpressionFromCallable.dx
+      ~ExpressionFromCallable.eval
+      ~ExpressionFromCallable.evaluate
+      ~ExpressionFromCallable.geometric_dimension
+      ~ExpressionFromCallable.id
+      ~ExpressionFromCallable.is_cellwise_constant
+      ~ExpressionFromCallable.label
+      ~ExpressionFromCallable.name
+      ~ExpressionFromCallable.rename
+      ~ExpressionFromCallable.restrict
+      ~ExpressionFromCallable.ufl_disable_profiling
+      ~ExpressionFromCallable.ufl_domain
+      ~ExpressionFromCallable.ufl_domains
+      ~ExpressionFromCallable.ufl_element
+      ~ExpressionFromCallable.ufl_enable_profiling
+      ~ExpressionFromCallable.ufl_evaluate
+      ~ExpressionFromCallable.ufl_function_space
+      ~ExpressionFromCallable.value_dimension
+      ~ExpressionFromCallable.value_rank
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~ExpressionFromCallable.T
+      ~ExpressionFromCallable.ufl_free_indices
+      ~ExpressionFromCallable.ufl_index_dimensions
+      ~ExpressionFromCallable.ufl_operands
+      ~ExpressionFromCallable.ufl_shape
+   
+   

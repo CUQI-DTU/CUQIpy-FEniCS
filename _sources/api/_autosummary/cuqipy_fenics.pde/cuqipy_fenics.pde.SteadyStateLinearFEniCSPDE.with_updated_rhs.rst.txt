@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.SteadyStateLinearFEniCSPDE.with\_updated\_rhs
+================================================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. automethod:: SteadyStateLinearFEniCSPDE.with_updated_rhs

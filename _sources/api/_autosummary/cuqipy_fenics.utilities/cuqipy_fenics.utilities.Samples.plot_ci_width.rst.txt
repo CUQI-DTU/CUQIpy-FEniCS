@@ -1,0 +1,6 @@
+cuqipy\_fenics.utilities.Samples.plot\_ci\_width
+================================================
+
+.. currentmodule:: cuqipy_fenics.utilities
+
+.. automethod:: Samples.plot_ci_width

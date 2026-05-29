@@ -1,0 +1,47 @@
+FEniCSMappedGeometry
+====================
+
+.. currentmodule:: cuqipy_fenics.geometry
+
+.. autoclass:: FEniCSMappedGeometry
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSMappedGeometry.__init__
+      ~FEniCSMappedGeometry.fun2par
+      ~FEniCSMappedGeometry.fun2vec
+      ~FEniCSMappedGeometry.par2fun
+      ~FEniCSMappedGeometry.plot
+      ~FEniCSMappedGeometry.plot_envelope
+      ~FEniCSMappedGeometry.vec2fun
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~FEniCSMappedGeometry.axis_labels
+      ~FEniCSMappedGeometry.fun_dim
+      ~FEniCSMappedGeometry.fun_is_array
+      ~FEniCSMappedGeometry.fun_shape
+      ~FEniCSMappedGeometry.function_space
+      ~FEniCSMappedGeometry.funvec_dim
+      ~FEniCSMappedGeometry.funvec_shape
+      ~FEniCSMappedGeometry.grid
+      ~FEniCSMappedGeometry.mesh
+      ~FEniCSMappedGeometry.par_dim
+      ~FEniCSMappedGeometry.par_shape
+      ~FEniCSMappedGeometry.variables
+   
+   

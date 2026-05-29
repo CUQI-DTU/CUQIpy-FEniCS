@@ -1,0 +1,6 @@
+cuqipy\_fenics.pde.SteadyStateLinearFEniCSPDE.gradient\_wrt\_parameter
+======================================================================
+
+.. currentmodule:: cuqipy_fenics.pde
+
+.. automethod:: SteadyStateLinearFEniCSPDE.gradient_wrt_parameter
