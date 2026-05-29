@@ -481,6 +481,9 @@ class SteadyStateLinearFEniCSPDE(FEniCSPDE):
                 "Gradient wrt parameter for PDE with observation operator not implemented")
 
         adjoint_rhs = -direction.vector()
+        # Apply the adjoint boundary conditions to the adjoint rhs
+        for bc in self._adjoint_dirichlet_bcs:
+            bc.apply(adjoint_rhs)
         dl.solve(adjoint_matrix, adjoint.vector(), adjoint_rhs)
 
         # Compute gradient
